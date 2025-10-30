@@ -12,6 +12,7 @@ import java.util.List;
 
 import static org.springframework.util.Assert.*;
 
+@Table(name = "p_store")
 @Entity
 @Getter
 @ToString
@@ -79,6 +80,7 @@ public class Store extends AbstractEntity {
 
     public void rejectRegisterRequest() {
         state(this.status == StoreStatus.PENDING, "등록 대기 상태가 아닙니다.");
+
         this.status = StoreStatus.REJECTED;
     }
 
@@ -89,13 +91,17 @@ public class Store extends AbstractEntity {
     }
 
     public void open() {
-        state(this.status == StoreStatus.READY, "준비중인 상태가 아닙니다.");
+        if (this.status != StoreStatus.READY) {
+            throw new StoreException(StoreMessageCode.STATUS_IS_NOT_READY);
+        }
 
         this.status = StoreStatus.OPEN;
     }
 
     public void close() {
-        state(this.status == StoreStatus.OPEN, "영업중인 상태가 아닙니다.");
+        if (this.status != StoreStatus.OPEN) {
+            throw new StoreException(StoreMessageCode.STATUS_IS_NOT_OPEN);
+        }
 
         this.status = StoreStatus.READY;
     }

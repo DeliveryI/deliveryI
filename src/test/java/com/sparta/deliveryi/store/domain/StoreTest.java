@@ -1,5 +1,6 @@
 package com.sparta.deliveryi.store.domain;
 
+import com.sparta.deliveryi.TestMessageResolverInitializer;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -15,6 +16,7 @@ class StoreTest {
     @BeforeEach
     void setUp() {
         store = createStoreRegisterRequest();
+        TestMessageResolverInitializer.initializeFromResourceBundle();
     }
 
     @Test
@@ -74,7 +76,7 @@ class StoreTest {
         store.open();
 
         assertThatThrownBy(() -> store.open())
-        .isInstanceOf(IllegalStateException.class);
+        .isInstanceOf(StoreException.class);
     }
 
     @Test
@@ -92,7 +94,7 @@ class StoreTest {
         store.acceptRegisterRequest();
 
         assertThatThrownBy(() -> store.close())
-                .isInstanceOf(IllegalStateException.class);
+                .isInstanceOf(StoreException.class);
     }
 
     private static Store createStoreRegisterRequest() {
