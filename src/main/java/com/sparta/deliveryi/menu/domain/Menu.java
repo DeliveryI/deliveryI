@@ -32,8 +32,8 @@ public class Menu extends AbstractEntity {
     @Column(name = "menu_price", nullable = false)
     private Integer menuPrice;
 
-    @Column(name = "menu_info", nullable = false, length = 255)
-    private String menuInfo;
+    @Column(name = "menu_description", nullable = false, length = 255)
+    private String menuDescription;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "menu_status", nullable = false)
@@ -41,7 +41,7 @@ public class Menu extends AbstractEntity {
 
     // 생성 메서드
     public static Menu create(UUID storeId, String menuName, Integer menuPrice,
-                              String menuInfo, MenuStatus menuStatus, String createdBy) {
+                              String menuDescription, MenuStatus menuStatus, String createdBy) {
 
         validatePrice(menuPrice);
         validateCreatedBy(createdBy);
@@ -50,7 +50,7 @@ public class Menu extends AbstractEntity {
         menu.storeId = storeId;
         menu.menuName = menuName;
         menu.menuPrice = menuPrice;
-        menu.menuInfo = menuInfo;
+        menu.menuDescription = menuDescription;
         menu.menuStatus = (menuStatus != null) ? menuStatus : MenuStatus.FORSALE;
 
         menu.createBy(createdBy);
@@ -59,7 +59,7 @@ public class Menu extends AbstractEntity {
     }
 
     // 수정 메서드
-    public void update(String menuName, Integer menuPrice, String menuInfo,
+    public void update(String menuName, Integer menuPrice, String menuDescription,
                        MenuStatus menuStatus, String updatedBy) {
 
         validatePrice(menuPrice);
@@ -67,7 +67,7 @@ public class Menu extends AbstractEntity {
 
         this.menuName = menuName;
         this.menuPrice = menuPrice;
-        this.menuInfo = menuInfo;
+        this.menuDescription = menuDescription;
         this.menuStatus = menuStatus;
 
         updateBy(updatedBy);
