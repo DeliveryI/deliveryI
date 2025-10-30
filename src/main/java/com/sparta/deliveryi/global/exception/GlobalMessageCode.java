@@ -1,4 +1,4 @@
-package com.sparta.deliveryi.global;
+package com.sparta.deliveryi.global.exception;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;

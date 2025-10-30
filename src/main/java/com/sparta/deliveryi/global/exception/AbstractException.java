@@ -1,5 +1,6 @@
-package com.sparta.deliveryi.global;
+package com.sparta.deliveryi.global.exception;
 
+import com.sparta.deliveryi.global.infrastructure.MessageResolver;
 import lombok.Getter;
 
 import java.io.Serial;

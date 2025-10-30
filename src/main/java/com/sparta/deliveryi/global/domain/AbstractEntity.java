@@ -1,4 +1,4 @@
-package com.sparta.deliveryi.global;
+package com.sparta.deliveryi.global.domain;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.EntityListeners;

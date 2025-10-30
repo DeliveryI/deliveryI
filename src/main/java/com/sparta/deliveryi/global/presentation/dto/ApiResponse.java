@@ -1,5 +1,6 @@
-package com.sparta.deliveryi.global;
+package com.sparta.deliveryi.global.presentation.dto;
 
+import com.sparta.deliveryi.global.infrastructure.MessageResolver;
 import io.micrometer.common.util.StringUtils;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;

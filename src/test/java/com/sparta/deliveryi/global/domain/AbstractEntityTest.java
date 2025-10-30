@@ -1,4 +1,4 @@
-package com.sparta.deliveryi.global;
+package com.sparta.deliveryi.global.domain;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

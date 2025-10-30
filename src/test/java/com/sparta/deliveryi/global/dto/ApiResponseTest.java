@@ -1,5 +1,7 @@
-package com.sparta.deliveryi.global;
+package com.sparta.deliveryi.global.dto;
 
+import com.sparta.deliveryi.global.infrastructure.MessageResolver;
+import com.sparta.deliveryi.global.presentation.dto.ApiResponse;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.MockedStatic;

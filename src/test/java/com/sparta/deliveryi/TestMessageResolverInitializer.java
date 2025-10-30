@@ -1,5 +1,6 @@
-package com.sparta.deliveryi.global;
+package com.sparta.deliveryi;
 
+import com.sparta.deliveryi.global.infrastructure.MessageResolver;
 import org.springframework.context.support.ReloadableResourceBundleMessageSource;
 import org.springframework.test.util.ReflectionTestUtils;
 
