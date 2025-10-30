@@ -24,6 +24,8 @@ repositories {
     mavenCentral()
 }
 
+val mockitoAgent: Configuration = configurations.create("mockitoAgent")
+
 dependencies {
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
     implementation("org.springframework.boot:spring-boot-starter-security")
@@ -37,11 +39,17 @@ dependencies {
 
     annotationProcessor("org.projectlombok:lombok")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
-    testImplementation("org.mockito:mockito-core:5.18.0")
+    // mockito - 모킹 시 사용
+    testImplementation("org.mockito:mockito-core")
+    // archunit - 아키텍처 검증 테스트에 사용
+    testImplementation("com.tngtech.archunit:archunit-junit5:1.4.1")
     testImplementation("org.springframework.security:spring-security-test")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+    // mockito 관련 경고 해결을 위해 java agent를 명시적으로 추가
+    mockitoAgent("org.mockito:mockito-core") { isTransitive = false }
 }
 
 tasks.withType<Test> {
     useJUnitPlatform()
+    jvmArgs("-javaagent:${mockitoAgent.asPath}")
 }
