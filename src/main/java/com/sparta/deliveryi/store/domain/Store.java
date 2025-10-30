@@ -1,11 +1,16 @@
 package com.sparta.deliveryi.store.domain;
 
 import com.sparta.deliveryi.global.domain.AbstractEntity;
+import com.sparta.deliveryi.store.infrastructure.AvailableAddressConverter;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
+
+import java.util.List;
+
+import static org.springframework.util.Assert.*;
 
 @Entity
 @Getter
@@ -45,7 +50,8 @@ public class Store extends AbstractEntity {
     @Column(nullable = false)
     private Rating rating;
 
-    private String availableAddress;
+    @Convert(converter = AvailableAddressConverter.class)
+    private List<String> availableAddress;
 
     private String operationHours;
 
@@ -69,5 +75,28 @@ public class Store extends AbstractEntity {
         store.status = StoreStatus.PENDING;
 
         return store;
+    }
+
+    public void rejectRegisterRequest() {
+        state(this.status == StoreStatus.PENDING, "등록 대기 상태가 아닙니다.");
+        this.status = StoreStatus.REJECTED;
+    }
+
+    public void acceptRegisterRequest() {
+        state(this.status == StoreStatus.PENDING, "등록 대기 상태가 아닙니다.");
+
+        this.status = StoreStatus.READY;
+    }
+
+    public void open() {
+        state(this.status == StoreStatus.READY, "준비중인 상태가 아닙니다.");
+
+        this.status = StoreStatus.OPEN;
+    }
+
+    public void close() {
+        state(this.status == StoreStatus.OPEN, "영업중인 상태가 아닙니다.");
+
+        this.status = StoreStatus.READY;
     }
 }
