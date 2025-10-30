@@ -4,7 +4,7 @@ import com.sparta.deliveryi.global.infrastructure.MessageResolver;
 import org.springframework.context.support.ReloadableResourceBundleMessageSource;
 import org.springframework.test.util.ReflectionTestUtils;
 
-class TestMessageResolverInitializer {
+public class TestMessageResolverInitializer {
     public static void initializeFromResourceBundle() {
         ReloadableResourceBundleMessageSource messageSource = new ReloadableResourceBundleMessageSource();
 

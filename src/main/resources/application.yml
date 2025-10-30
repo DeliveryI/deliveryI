@@ -1,0 +1,5 @@
+spring:
+  application:
+    name: "deliveryI"
+  messages:
+    encoding: "UTF-8"
