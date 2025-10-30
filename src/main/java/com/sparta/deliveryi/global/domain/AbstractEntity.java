@@ -31,7 +31,7 @@ import java.util.Objects;
 @EntityListeners(AuditingEntityListener.class)
 public abstract class AbstractEntity {
     /**
-     * 등록자 ID
+     * 등록자 계정
      */
     @Column(name = "created_by")
     @CreatedBy
@@ -45,7 +45,7 @@ public abstract class AbstractEntity {
     private LocalDateTime createdAt;
 
     /**
-     * 수정자 ID
+     * 수정자 계정
      */
     @Column(name = "updated_by")
     @LastModifiedBy
@@ -59,7 +59,7 @@ public abstract class AbstractEntity {
     private LocalDateTime updatedAt;
 
     /**
-     * 삭제자 ID
+     * 삭제자 계정
      */
     @Column(name = "deleted_by")
     private String deletedBy;
@@ -102,7 +102,7 @@ public abstract class AbstractEntity {
      * <ul>
      *     <li>isDeleted를 true로 설정</li>
      *     <li>deleteDateTime을 현재 시각으로 설정</li>
-     *     <li>deleteId를 현재 인증된 사용자 이름 또는 "anonymousUser"로 설정</li>
+     *     <li>deleteId를 현재 인증된 회원 이름 또는 "anonymousUser"로 설정</li>
      * </ul>
      */
     public void delete() {
