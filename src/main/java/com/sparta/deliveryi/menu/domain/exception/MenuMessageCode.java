@@ -1,0 +1,28 @@
+package com.sparta.deliveryi.menu.domain.exception;
+
+import com.sparta.deliveryi.global.exception.MessageCode;
+import org.springframework.http.HttpStatus;
+
+public enum MenuMessageCode implements MessageCode {
+    MENU_PRICE_INVALID("MENU_PRICE_INVALID", HttpStatus.BAD_REQUEST),
+    MENU_CREATED_BY_EMPTY("MENU_CREATED_BY_EMPTY", HttpStatus.BAD_REQUEST),
+    MENU_UPDATED_BY_EMPTY("MENU_UPDATED_BY_EMPTY", HttpStatus.BAD_REQUEST);
+
+    private final String code;
+    private final HttpStatus status;
+
+    MenuMessageCode(String code, HttpStatus status) {
+        this.code = code;
+        this.status = status;
+    }
+
+    @Override
+    public String getCode() {
+        return code;
+    }
+
+    @Override
+    public HttpStatus getStatus() {
+        return status;
+    }
+}
