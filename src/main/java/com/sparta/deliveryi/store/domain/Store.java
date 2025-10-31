@@ -9,8 +9,10 @@ import lombok.NoArgsConstructor;
 import lombok.ToString;
 
 import java.util.List;
+import java.util.Objects;
+import java.util.UUID;
 
-import static org.springframework.util.Assert.*;
+import static org.springframework.util.Assert.state;
 
 @Table(name = "p_store")
 @Entity
@@ -20,16 +22,12 @@ import static org.springframework.util.Assert.*;
 public class Store extends AbstractEntity {
 
     @EmbeddedId
-    @GeneratedValue(strategy = GenerationType.UUID)
-    @Column(name = "store_id")
     private StoreId id;
 
     @Embedded
-    @Column(name = "user_id", nullable = false)
     private Owner owner;
 
     @Embedded
-    @Column(name = "store_category", nullable = false)
     private Category category;
 
     @Column(name = "store_name", nullable = false)
@@ -48,7 +46,6 @@ public class Store extends AbstractEntity {
     private String notice;
 
     @Embedded
-    @Column(nullable = false)
     private Rating rating;
 
     @Convert(converter = AvailableAddressConverter.class)
@@ -65,8 +62,9 @@ public class Store extends AbstractEntity {
     public static Store registerRequest(StoreRegisterRequest registerRequest) {
         Store store = new Store();
 
-        store.owner = new Owner(registerRequest.ownerId());
-        store.category = new Category(registerRequest.category());
+        store.id = StoreId.generateId();
+        store.owner = Owner.of(registerRequest.ownerId());
+        store.category = Category.of(registerRequest.category());
         store.name = registerRequest.name();
         store.description = registerRequest.description();
         store.address = registerRequest.address();
@@ -104,5 +102,31 @@ public class Store extends AbstractEntity {
         }
 
         this.status = StoreStatus.READY;
+    }
+
+    public void updateInfo(StoreInfoUpdateRequest updateRequest) {
+        state(this.status != StoreStatus.PENDING, "등록 대기 상태에서는 가게 정보를 수정할 수 없습니다.");
+
+        this.name = Objects.requireNonNull(updateRequest.name());
+        this.category = Category.of(Objects.requireNonNull(updateRequest.category()));
+        this.description = Objects.requireNonNull(updateRequest.description());
+        this.address = Objects.requireNonNull(updateRequest.address());
+        this.phone = Objects.requireNonNull(updateRequest.phone());
+        this.notice = updateRequest.notice();
+        this.availableAddress = updateRequest.availableAddress();
+        this.operationHours = updateRequest.operationHours();
+        this.closedDays = updateRequest.closedDays();
+    }
+
+    public void transferOwnership(UUID ownerId) {
+        state(this.status != StoreStatus.PENDING, "등록 대기 상태에서는 인수인계할 수 없습니다.");
+
+        owner = Owner.of(Objects.requireNonNull(ownerId));
+    }
+
+    public void updateRating(Rating rating) {
+        state(this.status != StoreStatus.PENDING, "등록 대기 상태에서는 평점을 갱신할 수 없습니다.");
+
+        this.rating = Objects.requireNonNull(rating);
     }
 }
