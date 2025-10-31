@@ -3,3 +3,7 @@ spring:
     name: "deliveryI"
   messages:
     encoding: "UTF-8"
+
+google:
+  ai:
+    api-key: ${GEMINI_API_KEY}
