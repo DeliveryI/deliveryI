@@ -7,10 +7,10 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
-import org.springframework.util.Assert;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
 
 import static org.springframework.util.Assert.*;
 
@@ -116,5 +116,11 @@ public class Store extends AbstractEntity {
         this.availableAddress = updateRequest.availableAddress();
         this.operationHours = updateRequest.operationHours();
         this.closedDays = updateRequest.closedDays();
+    }
+
+    public void transferOwnership(UUID ownerId) {
+        state(this.status != StoreStatus.PENDING, "등록 대기 상태에서는 인수인계할 수 없습니다.");
+
+        owner = Owner.of(Objects.requireNonNull(ownerId));
     }
 }

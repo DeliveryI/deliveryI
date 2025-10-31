@@ -11,6 +11,7 @@ import static org.assertj.core.api.Assertions.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class StoreTest {
 
@@ -142,6 +143,30 @@ class StoreTest {
 
         assertThatThrownBy(() -> store.updateInfo(updateRequest))
                 .isInstanceOf(NullPointerException.class);
+    }
+
+    @Test
+    void transferOwnership() {
+        store.acceptRegisterRequest();
+        UUID ownerId = UUID.randomUUID();
+
+        store.transferOwnership(ownerId);
+
+        assertThat(store.getOwner()).isEqualTo(Owner.of(ownerId));
+    }
+
+    @Test
+    void transferOwnerShipIfPendingStatus() {
+        assertThatThrownBy(() -> store.transferOwnership(null))
+                .isInstanceOf(IllegalStateException.class);
+    }
+
+    @Test
+    void transferOwnerShipIfNullId() {
+        store.acceptRegisterRequest();
+
+        assertThatThrownBy(() -> store.transferOwnership(null))
+            .isInstanceOf(NullPointerException.class);
     }
 
     private static StoreInfoUpdateRequest createStoreInfoUpdateRequest() {
