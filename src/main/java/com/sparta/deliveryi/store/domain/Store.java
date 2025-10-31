@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
-import static org.springframework.util.Assert.*;
+import static org.springframework.util.Assert.state;
 
 @Table(name = "p_store")
 @Entity
@@ -22,7 +22,6 @@ import static org.springframework.util.Assert.*;
 public class Store extends AbstractEntity {
 
     @EmbeddedId
-    @GeneratedValue(strategy = GenerationType.UUID)
     private StoreId id;
 
     @Embedded
@@ -63,6 +62,7 @@ public class Store extends AbstractEntity {
     public static Store registerRequest(StoreRegisterRequest registerRequest) {
         Store store = new Store();
 
+        store.id = StoreId.generateId();
         store.owner = Owner.of(registerRequest.ownerId());
         store.category = Category.of(registerRequest.category());
         store.name = registerRequest.name();

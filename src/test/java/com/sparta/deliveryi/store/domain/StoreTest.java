@@ -7,10 +7,9 @@ import org.junit.jupiter.api.Test;
 import java.util.List;
 import java.util.UUID;
 
-import static org.assertj.core.api.Assertions.*;
+import static com.sparta.deliveryi.store.StoreFixture.createStore;
+import static com.sparta.deliveryi.store.StoreFixture.createStoreInfoUpdateRequest;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class StoreTest {
@@ -19,7 +18,7 @@ class StoreTest {
 
     @BeforeEach
     void setUp() {
-        store = createStoreRegisterRequest();
+        store = createStore();
         TestMessageResolverInitializer.initializeFromResourceBundle();
     }
 
@@ -190,33 +189,5 @@ class StoreTest {
 
         assertThatThrownBy(() -> store.updateRating(null))
                 .isInstanceOf(NullPointerException.class);
-    }
-
-    private static StoreInfoUpdateRequest createStoreInfoUpdateRequest() {
-        StoreInfoUpdateRequest updateRequest = new StoreInfoUpdateRequest(
-                "홍길동 분식",
-                "SNACK_FOOD",
-                "분식 가게입니다.",
-                "서울시 강남구 테스트로 13",
-                "02-1234-5678",
-                "매주 일요일 휴무입니다.",
-                List.of("강남구", "관악구", "강동구"),
-                "06:00 ~ 22:00",
-                "매주 일요일"
-        );
-        return updateRequest;
-    }
-
-    private static Store createStoreRegisterRequest() {
-        StoreRegisterRequest registerRequest = new StoreRegisterRequest(
-                UUID.randomUUID(),
-                "KOREAN",
-                "홍길동",
-                "한식 가게입니다.",
-                "서울시 강남구 테스트로 12",
-                "02-1234-1234"
-        );
-
-        return Store.registerRequest(registerRequest);
     }
 }
