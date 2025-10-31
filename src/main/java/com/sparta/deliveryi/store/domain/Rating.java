@@ -1,10 +1,11 @@
 package com.sparta.deliveryi.store.domain;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 
 @Embeddable
 public class Rating {
-
+    @Column(name = "rating", nullable = false)
     private final Float score;
 
     public Rating() {

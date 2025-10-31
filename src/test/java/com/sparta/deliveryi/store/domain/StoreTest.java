@@ -21,7 +21,7 @@ class StoreTest {
 
     @Test
     void registerRequest() {
-        assertThat(store.getCategory()).isEqualTo(new Category("KOREAN"));
+        assertThat(store.getCategory()).isEqualTo(Category.of("KOREAN"));
         assertThat(store.getName()).isEqualTo("홍길동");
         assertThat(store.getDescription()).isEqualTo("한식 가게입니다.");
         assertThat(store.getAddress()).isEqualTo("서울시 강남구 테스트로 12");

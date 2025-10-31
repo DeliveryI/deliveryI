@@ -21,15 +21,12 @@ public class Store extends AbstractEntity {
 
     @EmbeddedId
     @GeneratedValue(strategy = GenerationType.UUID)
-    @Column(name = "store_id")
     private StoreId id;
 
     @Embedded
-    @Column(name = "user_id", nullable = false)
     private Owner owner;
 
     @Embedded
-    @Column(name = "store_category", nullable = false)
     private Category category;
 
     @Column(name = "store_name", nullable = false)
@@ -48,7 +45,6 @@ public class Store extends AbstractEntity {
     private String notice;
 
     @Embedded
-    @Column(nullable = false)
     private Rating rating;
 
     @Convert(converter = AvailableAddressConverter.class)
@@ -65,8 +61,8 @@ public class Store extends AbstractEntity {
     public static Store registerRequest(StoreRegisterRequest registerRequest) {
         Store store = new Store();
 
-        store.owner = new Owner(registerRequest.ownerId());
-        store.category = new Category(registerRequest.category());
+        store.owner = Owner.of(registerRequest.ownerId());
+        store.category = Category.of(registerRequest.category());
         store.name = registerRequest.name();
         store.description = registerRequest.description();
         store.address = registerRequest.address();
