@@ -2,7 +2,13 @@ package com.sparta.deliveryi.store.domain;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.ToString;
 
+@Getter
+@ToString
+@EqualsAndHashCode(callSuper = false)
 @Embeddable
 public class Rating {
     @Column(name = "rating", nullable = false)
@@ -12,8 +18,12 @@ public class Rating {
         this.score = 0.0f;
     }
 
-    public Rating(Float score) {
+    private Rating(Float score) {
         this.score = score;
+    }
+
+    public static Rating of(Float score) {
+        return new Rating(score);
     }
 
     public String score() {

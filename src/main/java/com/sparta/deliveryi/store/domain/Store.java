@@ -123,4 +123,10 @@ public class Store extends AbstractEntity {
 
         owner = Owner.of(Objects.requireNonNull(ownerId));
     }
+
+    public void updateRating(Rating rating) {
+        state(this.status != StoreStatus.PENDING, "등록 대기 상태에서는 평점을 갱신할 수 없습니다.");
+
+        this.rating = Objects.requireNonNull(rating);
+    }
 }

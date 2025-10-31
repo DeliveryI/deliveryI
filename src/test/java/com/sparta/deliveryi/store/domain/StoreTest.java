@@ -169,6 +169,29 @@ class StoreTest {
             .isInstanceOf(NullPointerException.class);
     }
 
+    @Test
+    void updateRating() {
+        store.acceptRegisterRequest();
+
+        store.updateRating(Rating.of(5.0f));
+
+        assertThat(store.getRating().score()).isEqualTo("5.0");
+    }
+
+    @Test
+    void updateRatingIfPendingStatus() {
+        assertThatThrownBy(() -> store.updateRating(Rating.of(5.0f)))
+                .isInstanceOf(IllegalStateException.class);
+    }
+
+    @Test
+    void updateRatingIfNullRating() {
+        store.acceptRegisterRequest();
+
+        assertThatThrownBy(() -> store.updateRating(null))
+                .isInstanceOf(NullPointerException.class);
+    }
+
     private static StoreInfoUpdateRequest createStoreInfoUpdateRequest() {
         StoreInfoUpdateRequest updateRequest = new StoreInfoUpdateRequest(
                 "홍길동 분식",
