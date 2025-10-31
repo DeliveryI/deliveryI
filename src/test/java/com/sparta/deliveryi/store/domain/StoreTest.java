@@ -4,9 +4,12 @@ import com.sparta.deliveryi.TestMessageResolverInitializer;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.util.List;
 import java.util.UUID;
 
+import static org.assertj.core.api.Assertions.*;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class StoreTest {
@@ -95,6 +98,65 @@ class StoreTest {
 
         assertThatThrownBy(() -> store.close())
                 .isInstanceOf(StoreException.class);
+    }
+
+    @Test
+    void updateInfo() {
+        StoreInfoUpdateRequest updateRequest = createStoreInfoUpdateRequest();
+        store.acceptRegisterRequest();
+
+        store.updateInfo(updateRequest);
+
+        assertThat(store.getCategory()).isEqualTo(Category.of("SNACK_FOOD"));
+        assertThat(store.getName()).isEqualTo("홍길동 분식");
+        assertThat(store.getDescription()).isEqualTo("분식 가게입니다.");
+        assertThat(store.getAddress()).isEqualTo("서울시 강남구 테스트로 13");
+        assertThat(store.getPhone()).isEqualTo("02-1234-5678");
+        assertThat(store.getAvailableAddress()).contains("강남구", "관악구", "강동구");
+        assertThat(store.getOperationHours()).isEqualTo("06:00 ~ 22:00");
+        assertThat(store.getClosedDays()).isEqualTo("매주 일요일");
+    }
+
+    @Test
+    void updateInfoIfPendingStatus() {
+        StoreInfoUpdateRequest updateRequest = createStoreInfoUpdateRequest();
+
+        assertThatThrownBy(() -> store.updateInfo(updateRequest))
+            .isInstanceOf(IllegalStateException.class);
+    }
+
+    @Test
+    void updateInfoIfNullValue() {
+        StoreInfoUpdateRequest updateRequest = new StoreInfoUpdateRequest(
+                null,
+                "SNACK_FOOD",
+                "분식 가게입니다.",
+                "서울시 강남구 테스트로 13",
+                "02-1234-5678",
+                "매주 일요일 휴무입니다.",
+                List.of("강남구", "관악구", "강동구"),
+                "06:00 ~ 22:00",
+                "매주 일요일"
+        );
+        store.acceptRegisterRequest();
+
+        assertThatThrownBy(() -> store.updateInfo(updateRequest))
+                .isInstanceOf(NullPointerException.class);
+    }
+
+    private static StoreInfoUpdateRequest createStoreInfoUpdateRequest() {
+        StoreInfoUpdateRequest updateRequest = new StoreInfoUpdateRequest(
+                "홍길동 분식",
+                "SNACK_FOOD",
+                "분식 가게입니다.",
+                "서울시 강남구 테스트로 13",
+                "02-1234-5678",
+                "매주 일요일 휴무입니다.",
+                List.of("강남구", "관악구", "강동구"),
+                "06:00 ~ 22:00",
+                "매주 일요일"
+        );
+        return updateRequest;
     }
 
     private static Store createStoreRegisterRequest() {

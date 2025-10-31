@@ -7,8 +7,10 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
+import org.springframework.util.Assert;
 
 import java.util.List;
+import java.util.Objects;
 
 import static org.springframework.util.Assert.*;
 
@@ -100,5 +102,19 @@ public class Store extends AbstractEntity {
         }
 
         this.status = StoreStatus.READY;
+    }
+
+    public void updateInfo(StoreInfoUpdateRequest updateRequest) {
+        state(this.status != StoreStatus.PENDING, "등록 대기 상태에서는 가게 정보를 수정할 수 없습니다.");
+
+        this.name = Objects.requireNonNull(updateRequest.name());
+        this.category = Category.of(Objects.requireNonNull(updateRequest.category()));
+        this.description = Objects.requireNonNull(updateRequest.description());
+        this.address = Objects.requireNonNull(updateRequest.address());
+        this.phone = Objects.requireNonNull(updateRequest.phone());
+        this.notice = updateRequest.notice();
+        this.availableAddress = updateRequest.availableAddress();
+        this.operationHours = updateRequest.operationHours();
+        this.closedDays = updateRequest.closedDays();
     }
 }
