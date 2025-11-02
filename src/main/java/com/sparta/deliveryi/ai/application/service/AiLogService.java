@@ -10,12 +10,17 @@ import com.sparta.deliveryi.ai.infrastructure.dto.GeminiRequest;
 import com.sparta.deliveryi.ai.infrastructure.dto.GeminiResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -34,26 +39,38 @@ public class AiLogService {
 
     @Transactional
     public AiLogResponse createAiLog(AiLogRequest requestDto) {
-        String prompt = requestDto.prompt();
+        // AI 호출용 프롬프트
+        String processedPrompt = AiLog.appendPrefixAndSuffix(requestDto.prompt());
 
+        // Gemini API 호출
         String response;
+        AiStatus status = AiStatus.SUCCESS;
         try {
-            response = callGeminiApi(prompt);
+            response = callGeminiApi(processedPrompt);
         } catch (Exception e) {
             System.err.println("Gemini API 호출 실패: " + e.getMessage());
             response = "API 호출 실패: " + e.getMessage();
+            status = AiStatus.FAILED;
         }
 
+        // 로그인 사용자 가져오기 (Spring Security 없으면 anonymousUser)
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String currentUsername = (auth != null && auth.isAuthenticated() && !"anonymousUser".equals(auth.getName()))
+                ? auth.getName()
+                : "anonymousUser";
+
+        // DB 저장
         AiLog aiLog = AiLog.create(
                 requestDto.menuId(),
-                prompt,
+                requestDto.prompt(),
                 response,
-                AiStatus.SUCCESS,
-                requestDto.createdBy()
+                status,
+                currentUsername
         );
 
         AiLog savedLog = aiLogRepository.save(aiLog);
 
+        // 응답 반환
         return new AiLogResponse(
                 savedLog.getAiId(),
                 savedLog.getMenuId(),
@@ -84,20 +101,36 @@ public class AiLogService {
         }
     }
 
-    /**
-     * Gemini API 요청에 사용할 JSON 본문을 생성합니다.
-     */
     private String createRequestBody(String prompt) throws Exception {
         GeminiRequest geminiRequest = GeminiRequest.of(prompt);
         return objectMapper.writeValueAsString(geminiRequest);
     }
 
-    /**
-     * Gemini API 응답 JSON에서 최종 텍스트만 추출합니다. (Jackson 사용)
-     */
     private String extractTextFromGeminiResponse(String jsonResponse) throws Exception {
         GeminiResponse geminiResponse = objectMapper.readValue(jsonResponse, GeminiResponse.class);
 
-        return geminiResponse.extractText();
+        String combinedText = geminiResponse.candidates().stream()
+                .flatMap(c -> c.content().parts().stream())
+                .map(p -> p.text())
+                .filter(Objects::nonNull)
+                .collect(Collectors.joining("\n"));
+
+        if (combinedText.trim().startsWith("[") || combinedText.trim().startsWith("{")) {
+            try {
+                List<DescriptionWrapper> descriptions = objectMapper.readValue(
+                        combinedText,
+                        objectMapper.getTypeFactory().constructCollectionType(List.class, DescriptionWrapper.class)
+                );
+                return descriptions.stream()
+                        .map(DescriptionWrapper::description)
+                        .collect(Collectors.joining("\n"));
+            } catch (Exception e) {
+                return combinedText;
+            }
+        }
+
+        return combinedText;
     }
+
+    record DescriptionWrapper(String description) {}
 }

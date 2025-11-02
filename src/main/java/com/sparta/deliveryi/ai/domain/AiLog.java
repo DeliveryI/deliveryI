@@ -7,17 +7,14 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import static org.springframework.util.Assert.state;
-import java.nio.charset.StandardCharsets;
-
 @Entity
 @Table(name = "p_ai")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class AiLog extends AbstractEntity {
 
-    private static final int PROMPT_MAX_BYTES = 255;
-    private static final String SUFFIX = " 답변을 최대한 간결하게 50자 이하로";
+    private static final String PREFIX = "너는 지금 음식점 마케터야. 다른 설명없이 다음 질문에 대한 답만 해줘.";
+    private static final String SUFFIX = "설명을 더 잘 팔릴 수 있게 상품 설명을 70~100글자 안으로 3가지 작성해줘. 3가지는 _-_-_로 구분해 ";
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -31,38 +28,34 @@ public class AiLog extends AbstractEntity {
     @Column(name = "ai_status", nullable = false)
     private AiStatus aiStatus;
 
+    @Lob
     @Column(name = "prompt", nullable = false)
     private String prompt;
 
+    @Lob
     @Column(name = "response", nullable = false)
     private String response;
 
-    // 생성 메서드
     public static AiLog create(Long menuId, String prompt, String response, AiStatus aiStatus, String createdBy) {
         validatePromptNotEmpty(prompt);
-        validatePromptLength(prompt);
         validateResponseNotEmpty(response);
         validateCreatedBy(createdBy);
 
         AiLog log = new AiLog();
         log.menuId = menuId;
-        log.prompt = appendSuffix(prompt);
+        log.prompt = prompt;
         log.response = response;
         log.aiStatus = aiStatus != null ? aiStatus : AiStatus.SUCCESS;
         log.createBy(createdBy);
         return log;
     }
 
-    private static void validatePromptNotEmpty(String prompt) {
-        if (prompt == null || prompt.isBlank()) throw new AiPromptEmptyException();
+    public static String appendPrefixAndSuffix(String prompt) {
+        return PREFIX + " " + prompt + " " + SUFFIX;
     }
 
-    private static void validatePromptLength(String prompt) {
-        int promptBytes = prompt.getBytes(StandardCharsets.UTF_8).length;
-        int suffixBytes = SUFFIX.getBytes(StandardCharsets.UTF_8).length;
-
-        state(promptBytes + suffixBytes <= PROMPT_MAX_BYTES,
-                "AI 요청 프롬프트가 너무 깁니다. 최대 " + (PROMPT_MAX_BYTES - suffixBytes) + "바이트까지 가능합니다.");
+    private static void validatePromptNotEmpty(String prompt) {
+        if (prompt == null || prompt.isBlank()) throw new AiPromptEmptyException();
     }
 
     private static void validateResponseNotEmpty(String response) {
@@ -71,10 +64,6 @@ public class AiLog extends AbstractEntity {
 
     private static void validateCreatedBy(String createdBy) {
         if (createdBy == null || createdBy.isBlank()) throw new AiCreatedByEmptyException();
-    }
-
-    private static String appendSuffix(String prompt) {
-        return prompt + SUFFIX;
     }
 
     @Override
