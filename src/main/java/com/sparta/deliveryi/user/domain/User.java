@@ -40,7 +40,7 @@ public class User extends AbstractEntity {
     public static User register(UserRegisterRequest registerRequest) {
         User user = new User();
 
-        user.id = UserId.of();
+        user.id = UserId.generateId();
         user.keycloakId = KeycloakId.of(registerRequest.keycloakId());
         user.username = registerRequest.username();
         user.role = registerRequest.role();

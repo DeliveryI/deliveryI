@@ -17,7 +17,7 @@ public class UserId {
 
     protected UserId(UUID id) { this.id = id;}
 
-    public static UserId of() { return of(UUID.randomUUID()); }
+    public static UserId generateId() { return of(UUID.randomUUID()); }
 
     public static UserId of(UUID id) { return new UserId(id); }
 
