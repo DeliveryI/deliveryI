@@ -33,21 +33,26 @@ public class AiLog extends AbstractEntity {
     private String prompt;
 
     @Lob
+    @Column(name ="full_prompt", nullable = false)
+    private String fullPrompt;
+
+    @Lob
     @Column(name = "response", nullable = false)
     private String response;
 
-    public static AiLog create(Long menuId, String prompt, String response, AiStatus aiStatus, String createdBy) {
+    public static AiLog create(Long menuId, String prompt, String fullPrompt, String response, AiStatus aiStatus, String createdBy) {
         validatePromptNotEmpty(prompt);
         validateResponseNotEmpty(response);
         validateCreatedBy(createdBy);
 
-        AiLog log = new AiLog();
-        log.menuId = menuId;
-        log.prompt = prompt;
-        log.response = response;
-        log.aiStatus = aiStatus != null ? aiStatus : AiStatus.SUCCESS;
-        log.createBy(createdBy);
-        return log;
+        AiLog aiLog = new AiLog();
+        aiLog.menuId = menuId;
+        aiLog.prompt = prompt;
+        aiLog.fullPrompt = fullPrompt;
+        aiLog.response = response;
+        aiLog.aiStatus = aiStatus != null ? aiStatus : AiStatus.SUCCESS;
+        aiLog.createBy(createdBy);
+        return aiLog;
     }
 
     public static String appendPrefixAndSuffix(String prompt) {

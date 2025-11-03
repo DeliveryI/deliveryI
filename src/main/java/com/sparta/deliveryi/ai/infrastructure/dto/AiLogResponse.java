@@ -6,6 +6,7 @@ public record AiLogResponse(
         Long aiId,
         Long menuId,
         String prompt,
+        String fullPrompt,
         String response,
         AiStatus aiStatus,
         String createdBy

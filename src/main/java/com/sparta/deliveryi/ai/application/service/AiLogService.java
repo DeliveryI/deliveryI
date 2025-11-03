@@ -40,13 +40,13 @@ public class AiLogService {
     @Transactional
     public AiLogResponse createAiLog(AiLogRequest requestDto) {
         // AI 호출용 프롬프트
-        String processedPrompt = AiLog.appendPrefixAndSuffix(requestDto.prompt());
+        String fullPrompt = AiLog.appendPrefixAndSuffix(requestDto.prompt());
 
         // Gemini API 호출
         String response;
         AiStatus status = AiStatus.SUCCESS;
         try {
-            response = callGeminiApi(processedPrompt);
+            response = callGeminiApi(fullPrompt);
         } catch (Exception e) {
             System.err.println("Gemini API 호출 실패: " + e.getMessage());
             response = "API 호출 실패: " + e.getMessage();
@@ -63,6 +63,7 @@ public class AiLogService {
         AiLog aiLog = AiLog.create(
                 requestDto.menuId(),
                 requestDto.prompt(),
+                fullPrompt,
                 response,
                 status,
                 currentUsername
@@ -75,6 +76,7 @@ public class AiLogService {
                 savedLog.getAiId(),
                 savedLog.getMenuId(),
                 savedLog.getPrompt(),
+                savedLog.getFullPrompt(),
                 savedLog.getResponse(),
                 savedLog.getAiStatus(),
                 savedLog.getCreatedBy()
