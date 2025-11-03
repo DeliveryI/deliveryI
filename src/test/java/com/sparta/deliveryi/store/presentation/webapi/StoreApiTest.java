@@ -193,6 +193,40 @@ class StoreApiTest {
                 .hasPathSatisfying("$.success", isFalse());
     }
 
+    @Test
+    @WithMockUser(username = "owner", roles = "OWNER")
+    void remove() {
+        Store store = registerService.register(StoreFixture.createStoreRegisterRequest());
+        registerService.acceptRegisterRequest(store.getId().toUuid());
+        mockedToken(store.getOwner().getId().toString(), "OWNER");
+
+        MvcTestResult result = mvcTester.delete()
+                .uri("/v1/stores/{storeId}", store.getId().toString())
+                .exchange();
+
+        assertThat(result)
+                .hasStatusOk()
+                .bodyJson()
+                .hasPathSatisfying("$.success", isTrue());
+    }
+
+    @Test
+    @WithMockUser(username = "customer", roles = "CUSTOMER")
+    void removeIfUnauthorized() {
+        Store store = registerService.register(StoreFixture.createStoreRegisterRequest());
+        registerService.acceptRegisterRequest(store.getId().toUuid());
+        mockedToken(UUID.randomUUID().toString(), "CUSTOMER");
+
+        MvcTestResult result = mvcTester.delete()
+                .uri("/v1/stores/{storeId}", store.getId().toString())
+                .exchange();
+
+        assertThat(result)
+                .hasStatus(HttpStatus.FORBIDDEN)
+                .bodyJson()
+                .hasPathSatisfying("$.success", isFalse());
+    }
+
     private static void mockedToken(String subject, String role) {
         Jwt jwt = Jwt.withTokenValue("dummy-token")
                 .header("alg", "none")

@@ -11,7 +11,7 @@ import java.util.UUID;
 @Service
 @Transactional
 @RequiredArgsConstructor
-public class StoreService {
+public class StoreApplicationService implements StoreApplication{
 
     private final StoreManager storeManager;
 
@@ -34,10 +34,22 @@ public class StoreService {
 //        User user = userFinder.find(requestId);
 //
 //        if(user.isManager()){
-//            storeManager.forcedOpen((StoreId.of(storeId));
+//            storeManager.forcedClose((StoreId.of(storeId));
 //            return;
 //        }
 
         storeManager.close((StoreId.of(storeId)), requestId);
+    }
+
+    public void remove(UUID storeId, UUID requestId) {
+//        TODO 권한 확인 후 다른 메서드 호출
+//        ex)
+//        User user = userFinder.find(requestId);
+//
+//        if(user.isManager()){
+//            storeManager.forcedRemove((StoreId.of(storeId));
+//            return;
+//        }
+        storeManager.remove((StoreId.of(storeId)), requestId);
     }
 }

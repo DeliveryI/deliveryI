@@ -24,9 +24,7 @@ public class StoreManageService implements StoreManager {
     public void open(StoreId storeId, UUID requestId) {
         Store store = storeFinder.find(storeId);
 
-        if (!store.getOwner().getId().equals(requestId)) {
-            throw new IllegalArgumentException("가게 주인이 아닙니다.");
-        }
+        checkOwner(requestId, store);
 
         store.open();
 
@@ -46,9 +44,7 @@ public class StoreManageService implements StoreManager {
     public void close(StoreId storeId, UUID requestId) {
         Store store = storeFinder.find(storeId);
 
-        if (!store.getOwner().getId().equals(requestId)) {
-            throw new IllegalArgumentException("가게 주인이 아닙니다.");
-        }
+        checkOwner(requestId, store);
 
         store.close();
 
@@ -62,5 +58,31 @@ public class StoreManageService implements StoreManager {
         store.close();
 
         storeRepository.save(store);
+    }
+
+    @Override
+    public void remove(StoreId storeId, UUID requestId) {
+        Store store = storeFinder.find(storeId);
+
+        checkOwner(requestId, store);
+
+        store.remove();
+
+        storeRepository.save(store);
+    }
+
+    @Override
+    public void forcedRemove(StoreId storeId) {
+        Store store = storeFinder.find(storeId);
+
+        store.remove();
+
+        storeRepository.save(store);
+    }
+
+    private void checkOwner(UUID requestId, Store store) {
+        if (!store.getOwner().getId().equals(requestId)) {
+            throw new IllegalArgumentException("가게 주인이 아닙니다.");
+        }
     }
 }

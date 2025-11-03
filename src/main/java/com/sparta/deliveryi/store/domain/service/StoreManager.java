@@ -9,4 +9,6 @@ public interface StoreManager {
     void forcedOpen(StoreId storeId);
     void close(StoreId storeId, UUID requestId);
     void forcedClose(StoreId storeId);
+    void remove(StoreId storeId, UUID requestId);
+    void forcedRemove(StoreId storeId);
 }

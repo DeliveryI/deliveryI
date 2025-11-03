@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import static java.util.UUID.randomUUID;
+import static org.assertj.core.api.Assertions.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
@@ -56,6 +57,7 @@ record StoreManagerTest(StoreRegister storeRegister, StoreManager storeManager, 
         storeManager.close(store.getId(), store.getOwner().getId());
         entityManager.flush();
         entityManager.clear();
+
         store = storeFinder.find(store.getId());
 
         assertThat(store.getStatus()).isEqualTo(StoreStatus.READY);
@@ -78,9 +80,44 @@ record StoreManagerTest(StoreRegister storeRegister, StoreManager storeManager, 
         storeManager.forcedClose(store.getId());
         entityManager.flush();
         entityManager.clear();
+
         store = storeFinder.find(store.getId());
 
         assertThat(store.getStatus()).isEqualTo(StoreStatus.READY);
+    }
+
+    @Test
+    void remove() {
+        Store store = registerStore();
+
+        storeManager.remove(store.getId(), store.getOwner().getId());
+        entityManager.flush();
+        entityManager.clear();
+
+        store = storeFinder.find(store.getId());
+
+        assertThat(store.getStatus()).isEqualTo(StoreStatus.REMOVED);
+    }
+
+    @Test
+    void removeIfNotOwner() {
+        Store store = registerStore();
+
+        assertThatThrownBy(() -> storeManager.remove(store.getId(), randomUUID()))
+                .isInstanceOf(IllegalArgumentException.class);
+    }
+
+    @Test
+    void forcedRemove() {
+        Store store = registerStore();
+
+        storeManager.forcedRemove(store.getId());
+        entityManager.flush();
+        entityManager.clear();
+
+        store = storeFinder.find(store.getId());
+
+        assertThat(store.getStatus()).isEqualTo(StoreStatus.REMOVED);
     }
 
     private Store registerStore() {
