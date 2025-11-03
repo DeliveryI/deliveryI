@@ -8,6 +8,7 @@ import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import static org.assertj.core.api.Assertions.*;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
@@ -33,6 +34,18 @@ record StoreRegisterTest(StoreRegister storeRegister, StoreFinder storeFinder, E
         store = storeFinder.find(store.getId());
 
         assertThat(store.getStatus()).isEqualTo(StoreStatus.READY);
+    }
+
+    @Test
+    void rejectRegisterRequest() {
+        Store store = registerStore();
+
+        storeRegister.rejectRegisterRequest(store.getId());
+        entityManager.flush();
+        entityManager.clear();
+        store = storeFinder.find(store.getId());
+
+        assertThat(store.getStatus()).isEqualTo(StoreStatus.REJECTED);
     }
 
     private Store registerStore() {

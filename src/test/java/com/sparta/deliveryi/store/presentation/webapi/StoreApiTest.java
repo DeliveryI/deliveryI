@@ -43,7 +43,7 @@ class StoreApiTest {
 
     @Test
     @WithMockUser
-    void register() throws JsonProcessingException, UnsupportedEncodingException {
+    void register() throws JsonProcessingException {
         StoreRegisterRequest request = StoreFixture.createStoreRegisterRequest();
         String requestJson = objectMapper.writeValueAsString(request);
 
@@ -62,7 +62,7 @@ class StoreApiTest {
 
     @Test
     @WithMockUser(username = "manager", roles = "MANAGER")
-    void acceptRegisterRequest() throws JsonProcessingException {
+    void acceptRegisterRequest() {
         Store store = registerService.register(StoreFixture.createStoreRegisterRequest());
 
         MvcTestResult result = mvcTester.post()
@@ -77,11 +77,41 @@ class StoreApiTest {
 
     @Test
     @WithMockUser(username = "owner", roles = "OWNER")
-    void acceptRegisterRequestIfUnauthorized() throws JsonProcessingException {
+    void acceptRegisterRequestIfUnauthorized() {
         Store store = registerService.register(StoreFixture.createStoreRegisterRequest());
 
         MvcTestResult result = mvcTester.post()
                 .uri("/v1/stores/{storeId}/accept", store.getId().toString())
+                .exchange();
+
+        assertThat(result)
+                .hasStatus(HttpStatus.FORBIDDEN)
+                .bodyJson()
+                .hasPathSatisfying("$.success", isFalse());
+    }
+
+    @Test
+    @WithMockUser(username = "manager", roles = "MANAGER")
+    void rejectRegisterRequest() {
+        Store store = registerService.register(StoreFixture.createStoreRegisterRequest());
+
+        MvcTestResult result = mvcTester.post()
+                .uri("/v1/stores/{storeId}/reject", store.getId().toString())
+                .exchange();
+
+        assertThat(result)
+                .hasStatusOk()
+                .bodyJson()
+                .hasPathSatisfying("$.success", isTrue());
+    }
+
+    @Test
+    @WithMockUser(username = "owner", roles = "OWNER")
+    void rejectRegisterRequestIfUnauthorized() {
+        Store store = registerService.register(StoreFixture.createStoreRegisterRequest());
+
+        MvcTestResult result = mvcTester.post()
+                .uri("/v1/stores/{storeId}/reject", store.getId().toString())
                 .exchange();
 
         assertThat(result)

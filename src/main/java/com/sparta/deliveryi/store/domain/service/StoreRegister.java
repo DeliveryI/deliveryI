@@ -8,4 +8,5 @@ import jakarta.validation.Valid;
 public interface StoreRegister {
     Store register(@Valid StoreRegisterRequest registerRequest);
     void acceptRegisterRequest(StoreId storeId);
+    void rejectRegisterRequest(StoreId storeId);
 }

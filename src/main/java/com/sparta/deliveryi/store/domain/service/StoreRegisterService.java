@@ -37,5 +37,14 @@ public class StoreRegisterService implements StoreRegister {
         storeRepository.save(store);
     }
 
+    @Override
+    public void rejectRegisterRequest(StoreId storeId) {
+        Store store = storeFinder.find(storeId);
+
+        store.rejectRegisterRequest();
+
+        storeRepository.save(store);
+    }
+
 
 }

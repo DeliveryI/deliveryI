@@ -40,4 +40,13 @@ public class StoreApi {
 
         return ok(success());
     }
+
+    @PreAuthorize("hasAnyRole('MANAGER', 'MASTER')")
+    @PostMapping("/v1/stores/{storeId}/reject")
+    public ResponseEntity<ApiResponse<Void>> rejectRegister(@PathVariable UUID storeId) {
+        storeRegister.rejectRegisterRequest(StoreId.of(storeId));
+
+        return ok(success());
+    }
+
 }
