@@ -129,4 +129,9 @@ public class Store extends AbstractEntity {
 
         this.rating = Objects.requireNonNull(rating);
     }
+
+    public void remove() {
+        super.delete();
+        this.status = StoreStatus.REMOVED;
+    }
 }
