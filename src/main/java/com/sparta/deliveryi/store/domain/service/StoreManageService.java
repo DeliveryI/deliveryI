@@ -2,7 +2,6 @@ package com.sparta.deliveryi.store.domain.service;
 
 import com.sparta.deliveryi.store.domain.Store;
 import com.sparta.deliveryi.store.domain.StoreId;
-import com.sparta.deliveryi.store.domain.StoreRegisterRequest;
 import com.sparta.deliveryi.store.domain.StoreRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -15,38 +14,31 @@ import java.util.UUID;
 @Transactional
 @Validated
 @RequiredArgsConstructor
-public class StoreRegisterService implements StoreRegister {
+public class StoreManageService implements StoreManager {
 
     private final StoreRepository storeRepository;
 
     private final StoreFinder storeFinder;
 
     @Override
-    public Store register(StoreRegisterRequest registerRequest) {
-        Store store = Store.registerRequest(registerRequest);
+    public void open(StoreId storeId, UUID requestId) {
+        Store store = storeFinder.find(storeId);
 
-        storeRepository.save(store);
+        if (!store.getOwner().getId().equals(requestId)) {
+            throw new IllegalArgumentException("가게 주인이 아닙니다.");
+        }
 
-        return store;
-    }
-
-    @Override
-    public void acceptRegisterRequest(UUID storeId) {
-        Store store = storeFinder.find(StoreId.of(storeId));
-
-        store.acceptRegisterRequest();
+        store.open();
 
         storeRepository.save(store);
     }
 
     @Override
-    public void rejectRegisterRequest(UUID storeId) {
-        Store store = storeFinder.find(StoreId.of(storeId));
+    public void forcedOpen(StoreId storeId) {
+        Store store = storeFinder.find(storeId);
 
-        store.rejectRegisterRequest();
+        store.open();
 
         storeRepository.save(store);
     }
-
-
 }

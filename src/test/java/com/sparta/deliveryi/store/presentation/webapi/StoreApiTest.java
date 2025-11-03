@@ -17,9 +17,13 @@ import org.springframework.http.MediaType;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.CsrfConfigurer;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.security.web.SecurityFilterChain;
@@ -27,7 +31,8 @@ import org.springframework.test.web.servlet.assertj.MockMvcTester;
 import org.springframework.test.web.servlet.assertj.MvcTestResult;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.io.UnsupportedEncodingException;
+import java.util.List;
+import java.util.UUID;
 
 import static com.sparta.deliveryi.AssertThatUtils.*;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -120,6 +125,53 @@ class StoreApiTest {
                 .hasPathSatisfying("$.success", isFalse());
     }
 
+    @Test
+    @WithMockUser(username = "owner", roles = "OWNER")
+    void open() {
+        Store store = registerService.register(StoreFixture.createStoreRegisterRequest());
+        registerService.acceptRegisterRequest(store.getId().toUuid());
+        mockedToken(store.getOwner().getId().toString(), "OWNER");
+
+        MvcTestResult result = mvcTester.post()
+                .uri("/v1/stores/{storeId}/open", store.getId().toString())
+                .exchange();
+
+        assertThat(result)
+                .hasStatusOk()
+                .bodyJson()
+                .hasPathSatisfying("$.success", isTrue());
+    }
+
+    @Test
+    @WithMockUser(username = "customer", roles = "CUSTOMER")
+    void openIfUnauthorized() {
+        Store store = registerService.register(StoreFixture.createStoreRegisterRequest());
+        registerService.acceptRegisterRequest(store.getId().toUuid());
+        mockedToken(UUID.randomUUID().toString(), "CUSTOMER");
+
+        MvcTestResult result = mvcTester.post()
+                .uri("/v1/stores/{storeId}/open", store.getId().toString())
+                .exchange();
+
+        assertThat(result)
+                .hasStatus(HttpStatus.FORBIDDEN)
+                .bodyJson()
+                .hasPathSatisfying("$.success", isFalse());
+    }
+
+    private static void mockedToken(String subject, String role) {
+        Jwt jwt = Jwt.withTokenValue("dummy-token")
+                .header("alg", "none")
+                .subject(subject)
+                .build();
+
+        JwtAuthenticationToken auth = new JwtAuthenticationToken(
+                jwt,
+                List.of(new SimpleGrantedAuthority("ROLE_" + role))
+        );
+        SecurityContextHolder.getContext().setAuthentication(auth);
+    }
+
     @TestConfiguration
     @EnableMethodSecurity
     static class NoSecurityConfig {
@@ -135,17 +187,22 @@ class StoreApiTest {
 
         @Bean
         public UserDetailsService userDetailsService() {
-            UserDetails admin = User.withUsername("manager")
+            UserDetails manager = User.withUsername("manager")
                     .password("{noop}password")
                     .roles("MANAGER")
                     .build();
 
-            UserDetails user = User.withUsername("owner")
+            UserDetails owner = User.withUsername("owner")
                     .password("{noop}password")
                     .roles("OWNER")
                     .build();
 
-            return new InMemoryUserDetailsManager(admin, user);
+            UserDetails customer = User.withUsername("customer")
+                    .password("{noop}password")
+                    .roles("CUSTOMER")
+                    .build();
+
+            return new InMemoryUserDetailsManager(manager, owner, customer);
         }
     }
 }

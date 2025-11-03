@@ -8,49 +8,53 @@ import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import static java.util.UUID.randomUUID;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @SpringBootTest
 @Transactional
-record StoreRegisterTest(StoreRegister storeRegister, StoreFinder storeFinder, EntityManager entityManager) {
+record StoreManagerTest(StoreRegister storeRegister, StoreManager storeManager, StoreFinder storeFinder, EntityManager entityManager) {
 
     @Test
-    void register() {
-        Store store = storeRegister.register(StoreFixture.createStoreRegisterRequest());
-
-        assertThat(store.getId()).isNotNull();
-        assertThat(store.getStatus()).isEqualTo(StoreStatus.PENDING);
-        assertThat(store.getRating().score()).isEqualTo("0.0");
-    }
-
-    @Test
-    void acceptRegisterRequest() {
+    void open() {
         Store store = registerStore();
 
-        storeRegister.acceptRegisterRequest(store.getId().toUuid());
+        storeManager.open(store.getId(), store.getOwner().getId());
         entityManager.flush();
         entityManager.clear();
         store = storeFinder.find(store.getId());
 
-        assertThat(store.getStatus()).isEqualTo(StoreStatus.READY);
+        assertThat(store.getStatus()).isEqualTo(StoreStatus.OPEN);
     }
 
     @Test
-    void rejectRegisterRequest() {
+    void openIfNotOwner() {
         Store store = registerStore();
 
-        storeRegister.rejectRegisterRequest(store.getId().toUuid());
+        assertThatThrownBy(() -> storeManager.open(store.getId(), randomUUID()))
+            .isInstanceOf(IllegalArgumentException.class);
+    }
+
+    @Test
+    void forcedOpen() {
+        Store store = registerStore();
+
+        storeManager.forcedOpen(store.getId());
         entityManager.flush();
         entityManager.clear();
         store = storeFinder.find(store.getId());
 
-        assertThat(store.getStatus()).isEqualTo(StoreStatus.REJECTED);
+        assertThat(store.getStatus()).isEqualTo(StoreStatus.OPEN);
     }
 
     private Store registerStore() {
         Store store = storeRegister.register(StoreFixture.createStoreRegisterRequest());
         entityManager.flush();
         entityManager.clear();
+
+        storeRegister.acceptRegisterRequest(store.getId().toUuid());
+
         return store;
     }
 }
