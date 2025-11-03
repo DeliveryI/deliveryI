@@ -3,6 +3,7 @@ package com.sparta.deliveryi.global.exception;
 import com.sparta.deliveryi.global.presentation.dto.ApiResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
@@ -39,6 +40,19 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         ApiResponse<Void> failure = ApiResponse.failureWithMessageArguments(e.getMessageCode().getCode(), e.toString(), e.getMessageArguments());
         log.error("[{}] {}", e.getClass().getSimpleName(), e.getMessage());
         return new ResponseEntity<>(failure, e.getMessageCode().getStatus());
+    }
+
+    /**
+     * AuthorizationDeniedException를 처리하여 실패 응답을 반환한다.
+     *
+     * @param e 처리할 AuthorizationDeniedException
+     * @return ApiResponse<Void> 실패 응답
+     */
+    @ExceptionHandler(AuthorizationDeniedException.class)
+    public ResponseEntity<ApiResponse<Void>> authorizationDeniedException(Exception e) {
+        ApiResponse<Void> failure = ApiResponse.failure(GlobalMessageCode.UNAUTHORIZED.getCode());
+        log.error("[{}] {}", e.getClass().getSimpleName(), e.getMessage());
+        return new ResponseEntity<>(failure, GlobalMessageCode.UNAUTHORIZED.getStatus());
     }
 
     /**
