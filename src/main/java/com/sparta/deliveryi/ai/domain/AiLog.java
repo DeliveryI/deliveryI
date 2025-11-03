@@ -1,9 +1,6 @@
 package com.sparta.deliveryi.ai.domain;
 
-import com.sparta.deliveryi.ai.domain.exception.AiCreatedByEmptyException;
-import com.sparta.deliveryi.ai.domain.exception.AiLogDeletionNotAllowedException;
-import com.sparta.deliveryi.ai.domain.exception.AiPromptEmptyException;
-import com.sparta.deliveryi.ai.domain.exception.AiResponseEmptyException;
+import com.sparta.deliveryi.ai.domain.exception.*;
 import com.sparta.deliveryi.global.domain.AbstractEntity;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -15,6 +12,9 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class AiLog extends AbstractEntity {
+
+    private static final String PREFIX = "너는 지금 음식점 마케터야. 다른 설명없이 다음 질문에 대한 답만 해줘.";
+    private static final String SUFFIX = "설명을 더 잘 팔릴 수 있게 상품 설명을 70~100글자 안으로 3가지 작성해줘. 3가지는 _-_-_로 구분해 ";
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -28,44 +28,47 @@ public class AiLog extends AbstractEntity {
     @Column(name = "ai_status", nullable = false)
     private AiStatus aiStatus;
 
-    @Column(name = "prompt", nullable = false, length = 255)
+    @Lob
+    @Column(name = "prompt", nullable = false)
     private String prompt;
 
-    @Column(name = "response", nullable = false, length = 255)
+    @Lob
+    @Column(name ="full_prompt", nullable = false)
+    private String fullPrompt;
+
+    @Lob
+    @Column(name = "response", nullable = false)
     private String response;
 
-    // 생성 메서드
-    public static AiLog create(Long menuId, String prompt, String response, AiStatus aiStatus, String createdBy) {
-        validatePrompt(prompt);
-        validateResponse(response);
+    public static AiLog create(Long menuId, String prompt, String fullPrompt, String response, AiStatus aiStatus, String createdBy) {
+        validatePromptNotEmpty(prompt);
+        validateResponseNotEmpty(response);
         validateCreatedBy(createdBy);
 
-        AiLog log = new AiLog();
-        log.menuId = menuId;
-        log.prompt = appendLimitText(prompt);
-        log.response = response;
-        log.aiStatus = aiStatus != null ? aiStatus : AiStatus.SUCCESS;
-        log.createBy(createdBy);
-        return log;
+        AiLog aiLog = new AiLog();
+        aiLog.menuId = menuId;
+        aiLog.prompt = prompt;
+        aiLog.fullPrompt = fullPrompt;
+        aiLog.response = response;
+        aiLog.aiStatus = aiStatus != null ? aiStatus : AiStatus.SUCCESS;
+        aiLog.createBy(createdBy);
+        return aiLog;
     }
 
-    private static void validatePrompt(String prompt) {
+    public static String appendPrefixAndSuffix(String prompt) {
+        return PREFIX + " " + prompt + " " + SUFFIX;
+    }
+
+    private static void validatePromptNotEmpty(String prompt) {
         if (prompt == null || prompt.isBlank()) throw new AiPromptEmptyException();
     }
 
-    private static void validateResponse(String response) {
+    private static void validateResponseNotEmpty(String response) {
         if (response == null || response.isBlank()) throw new AiResponseEmptyException();
     }
 
     private static void validateCreatedBy(String createdBy) {
         if (createdBy == null || createdBy.isBlank()) throw new AiCreatedByEmptyException();
-    }
-
-    private static String appendLimitText(String prompt) {
-        String suffix = " 답변을 최대한 간결하게 50자 이하로";
-        int maxLength = 255 - suffix.length();
-        String trimmed = (prompt.length() > maxLength) ? prompt.substring(0, maxLength) : prompt;
-        return trimmed + suffix;
     }
 
     @Override
