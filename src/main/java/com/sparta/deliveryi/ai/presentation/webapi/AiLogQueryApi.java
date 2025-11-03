@@ -19,7 +19,7 @@ public class AiLogQueryApi {
     @GetMapping("/{menuId}")
     public ApiResponse<Page<AiLogQueryResponse>> getAiLogsByMenu(
             @PathVariable Long menuId,
-            @PageableDefault(size = 10, sort = "createdAt", direction = org.springframework.data.domain.Sort.Direction.DESC)
+            @PageableDefault(sort = "createdAt", direction = org.springframework.data.domain.Sort.Direction.DESC)
             Pageable pageable
     ) {
         return ApiResponse.successWithDataOnly(aiLogQueryService.getAiLogsByMenu(menuId, pageable));
