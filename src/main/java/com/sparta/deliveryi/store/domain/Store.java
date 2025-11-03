@@ -9,9 +9,9 @@ import lombok.NoArgsConstructor;
 import lombok.ToString;
 
 import java.util.List;
-import java.util.Objects;
 import java.util.UUID;
 
+import static java.util.Objects.requireNonNull;
 import static org.springframework.util.Assert.state;
 
 @Table(name = "p_store")
@@ -65,10 +65,10 @@ public class Store extends AbstractEntity {
         store.id = StoreId.generateId();
         store.owner = Owner.of(registerRequest.ownerId());
         store.category = Category.of(registerRequest.category());
-        store.name = registerRequest.name();
-        store.description = registerRequest.description();
-        store.address = registerRequest.address();
-        store.phone = registerRequest.phone();
+        store.name = requireNonNull(registerRequest.name());
+        store.description = requireNonNull(registerRequest.description());
+        store.address = requireNonNull(registerRequest.address());
+        store.phone = requireNonNull(registerRequest.phone());
 
         store.rating = new Rating();
         store.status = StoreStatus.PENDING;
@@ -107,11 +107,11 @@ public class Store extends AbstractEntity {
     public void updateInfo(StoreInfoUpdateRequest updateRequest) {
         state(this.status != StoreStatus.PENDING, "등록 대기 상태에서는 가게 정보를 수정할 수 없습니다.");
 
-        this.name = Objects.requireNonNull(updateRequest.name());
-        this.category = Category.of(Objects.requireNonNull(updateRequest.category()));
-        this.description = Objects.requireNonNull(updateRequest.description());
-        this.address = Objects.requireNonNull(updateRequest.address());
-        this.phone = Objects.requireNonNull(updateRequest.phone());
+        this.name = requireNonNull(updateRequest.name());
+        this.category = Category.of(requireNonNull(updateRequest.category()));
+        this.description = requireNonNull(updateRequest.description());
+        this.address = requireNonNull(updateRequest.address());
+        this.phone = requireNonNull(updateRequest.phone());
         this.notice = updateRequest.notice();
         this.availableAddress = updateRequest.availableAddress();
         this.operationHours = updateRequest.operationHours();
@@ -121,13 +121,13 @@ public class Store extends AbstractEntity {
     public void transferOwnership(UUID ownerId) {
         state(this.status != StoreStatus.PENDING, "등록 대기 상태에서는 인수인계할 수 없습니다.");
 
-        owner = Owner.of(Objects.requireNonNull(ownerId));
+        owner = Owner.of(requireNonNull(ownerId));
     }
 
     public void updateRating(Rating rating) {
         state(this.status != StoreStatus.PENDING, "등록 대기 상태에서는 평점을 갱신할 수 없습니다.");
 
-        this.rating = Objects.requireNonNull(rating);
+        this.rating = requireNonNull(rating);
     }
 
     public void remove() {

@@ -12,7 +12,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
 @Transactional
-record StoreRegisterTest(StoreRegister storeRegister, EntityManager entityManager) {
+record StoreRegisterTest(StoreRegister storeRegister, StoreFinder storeFinder, EntityManager entityManager) {
 
     @Test
     void register() {
@@ -21,5 +21,36 @@ record StoreRegisterTest(StoreRegister storeRegister, EntityManager entityManage
         assertThat(store.getId()).isNotNull();
         assertThat(store.getStatus()).isEqualTo(StoreStatus.PENDING);
         assertThat(store.getRating().score()).isEqualTo("0.0");
+    }
+
+    @Test
+    void acceptRegisterRequest() {
+        Store store = registerStore();
+
+        storeRegister.acceptRegisterRequest(store.getId().toUuid());
+        entityManager.flush();
+        entityManager.clear();
+        store = storeFinder.find(store.getId());
+
+        assertThat(store.getStatus()).isEqualTo(StoreStatus.READY);
+    }
+
+    @Test
+    void rejectRegisterRequest() {
+        Store store = registerStore();
+
+        storeRegister.rejectRegisterRequest(store.getId().toUuid());
+        entityManager.flush();
+        entityManager.clear();
+        store = storeFinder.find(store.getId());
+
+        assertThat(store.getStatus()).isEqualTo(StoreStatus.REJECTED);
+    }
+
+    private Store registerStore() {
+        Store store = storeRegister.register(StoreFixture.createStoreRegisterRequest());
+        entityManager.flush();
+        entityManager.clear();
+        return store;
     }
 }

@@ -4,12 +4,10 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
-import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.util.UUID;
 
-@Getter
 @EqualsAndHashCode
 @Embeddable
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -28,6 +26,10 @@ public class StoreId {
 
     public static StoreId of(UUID id) {
         return new StoreId(id);
+    }
+
+    public UUID toUuid() {
+        return id;
     }
 
     public String toString(){

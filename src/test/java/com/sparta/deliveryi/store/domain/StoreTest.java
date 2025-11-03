@@ -190,4 +190,13 @@ class StoreTest {
         assertThatThrownBy(() -> store.updateRating(null))
                 .isInstanceOf(NullPointerException.class);
     }
+
+    @Test
+    void remove() {
+        store.remove();
+
+        assertThat(store.getStatus()).isEqualTo(StoreStatus.REMOVED);
+        assertThat(store.getDeletedAt()).isNotNull();
+        assertThat(store.getDeletedBy()).isNotNull();
+    }
 }
