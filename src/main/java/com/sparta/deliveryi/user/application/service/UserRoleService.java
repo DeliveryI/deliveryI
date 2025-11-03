@@ -1,11 +1,11 @@
 package com.sparta.deliveryi.user.application.service;
 
-import com.sparta.deliveryi.user.domain.UserId;
 import com.sparta.deliveryi.user.domain.UserRole;
 
-public interface UserRoleService {
-    boolean isUserRole(UserId userId, UserRole role);
+import java.util.UUID;
 
-    UserRole getUserRole(UserId userId);
-    void updateUserRole(UserId userId, UserRole role);
+public interface UserRoleService {
+    boolean isAdmin(UUID userId);
+
+    void updateUserRole(UUID userId, UserRole role);
 }
