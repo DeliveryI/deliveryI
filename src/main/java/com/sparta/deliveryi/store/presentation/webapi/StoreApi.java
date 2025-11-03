@@ -2,14 +2,23 @@ package com.sparta.deliveryi.store.presentation.webapi;
 
 import com.sparta.deliveryi.global.presentation.dto.ApiResponse;
 import com.sparta.deliveryi.store.domain.Store;
+import com.sparta.deliveryi.store.domain.StoreId;
 import com.sparta.deliveryi.store.domain.StoreRegisterRequest;
 import com.sparta.deliveryi.store.domain.service.StoreRegister;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.UUID;
+
+import static com.sparta.deliveryi.global.presentation.dto.ApiResponse.success;
+import static com.sparta.deliveryi.global.presentation.dto.ApiResponse.successWithDataOnly;
+import static org.springframework.http.ResponseEntity.ok;
 
 @RestController
 @RequiredArgsConstructor
@@ -21,7 +30,14 @@ public class StoreApi {
     public ResponseEntity<ApiResponse<StoreRegisterResponse>> register(@RequestBody @Valid StoreRegisterRequest registerRequest) {
         Store store = storeRegister.register(registerRequest);
 
-        return ResponseEntity.ok(ApiResponse.successWithDataOnly(StoreRegisterResponse.from(store)));
+        return ok(successWithDataOnly(StoreRegisterResponse.from(store)));
     }
 
+    @PreAuthorize("hasAnyRole('MANAGER', 'MASTER')")
+    @PostMapping("/v1/stores/{storeId}/accept")
+    public ResponseEntity<ApiResponse<Void>> acceptRegister(@PathVariable UUID storeId) {
+        storeRegister.acceptRegisterRequest(StoreId.of(storeId));
+
+        return ok(success());
+    }
 }

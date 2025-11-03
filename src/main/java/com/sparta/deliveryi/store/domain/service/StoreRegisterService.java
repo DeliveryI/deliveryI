@@ -1,6 +1,7 @@
 package com.sparta.deliveryi.store.domain.service;
 
 import com.sparta.deliveryi.store.domain.Store;
+import com.sparta.deliveryi.store.domain.StoreId;
 import com.sparta.deliveryi.store.domain.StoreRegisterRequest;
 import com.sparta.deliveryi.store.domain.StoreRepository;
 import jakarta.transaction.Transactional;
@@ -16,6 +17,8 @@ public class StoreRegisterService implements StoreRegister {
 
     private final StoreRepository storeRepository;
 
+    private final StoreFinder storeFinder;
+
     @Override
     public Store register(StoreRegisterRequest registerRequest) {
         Store store = Store.registerRequest(registerRequest);
@@ -24,4 +27,15 @@ public class StoreRegisterService implements StoreRegister {
 
         return store;
     }
+
+    @Override
+    public void acceptRegisterRequest(StoreId storeId) {
+        Store store = storeFinder.find(storeId);
+
+        store.acceptRegisterRequest();
+
+        storeRepository.save(store);
+    }
+
+
 }
