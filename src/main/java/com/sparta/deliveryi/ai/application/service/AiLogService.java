@@ -111,7 +111,7 @@ public class AiLogService {
 
         String combinedText = geminiResponse.candidates().stream()
                 .flatMap(c -> c.content().parts().stream())
-                .map(p -> p.text())
+                .map(GeminiResponse.Part::text)
                 .filter(Objects::nonNull)
                 .collect(Collectors.joining("\n"));
 
