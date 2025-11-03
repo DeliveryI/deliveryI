@@ -3,6 +3,7 @@ package com.sparta.deliveryi.store.presentation.webapi;
 import com.sparta.deliveryi.global.presentation.dto.ApiResponse;
 import com.sparta.deliveryi.store.application.service.StoreApplication;
 import com.sparta.deliveryi.store.domain.Store;
+import com.sparta.deliveryi.store.domain.StoreInfoUpdateRequest;
 import com.sparta.deliveryi.store.domain.StoreRegisterRequest;
 import com.sparta.deliveryi.store.domain.service.StoreRegister;
 import jakarta.validation.Valid;
@@ -34,14 +35,23 @@ public class StoreApi {
         return ok(successWithDataOnly(StoreRegisterResponse.from(store)));
     }
 
-    @PreAuthorize("hasAnyRole('OWNER', 'MANAGER', 'MASTER')")
-    @DeleteMapping("/v1/stores/{storeId}")
-    public ResponseEntity<ApiResponse<Void>> remove(@AuthenticationPrincipal Jwt jwt, @PathVariable UUID storeId) {
+    @PutMapping("/v1/stores/{storeId}")
+    public ResponseEntity<ApiResponse<StoreUpdateInfoResponse>> updateInfo(@AuthenticationPrincipal Jwt jwt, @PathVariable UUID storeId, @RequestBody @Valid StoreInfoUpdateRequest updateRequest) {
         UUID requestId = UUID.fromString(jwt.getSubject());
 
-        storeApplication.remove(storeId, requestId);
+        Store store = storeApplication.updateInfo(storeId, updateRequest, requestId);
 
-        return ok(success());
+        return ok(successWithDataOnly(StoreUpdateInfoResponse.from(store)));
+    }
+
+    @PreAuthorize("hasAnyRole('OWNER', 'MANAGER', 'MASTER')")
+    @DeleteMapping("/v1/stores/{storeId}")
+    public ResponseEntity<ApiResponse<StoreRemoveResponse>> remove(@AuthenticationPrincipal Jwt jwt, @PathVariable UUID storeId) {
+        UUID requestId = UUID.fromString(jwt.getSubject());
+
+        Store store = storeApplication.remove(storeId, requestId);
+
+        return ok(successWithDataOnly(StoreRemoveResponse.from(store)));
     }
 
     @PreAuthorize("hasAnyRole('MANAGER', 'MASTER')")

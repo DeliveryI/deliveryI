@@ -2,6 +2,7 @@ package com.sparta.deliveryi.store.domain.service;
 
 import com.sparta.deliveryi.store.domain.Store;
 import com.sparta.deliveryi.store.domain.StoreId;
+import com.sparta.deliveryi.store.domain.StoreInfoUpdateRequest;
 import com.sparta.deliveryi.store.domain.StoreRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -19,6 +20,46 @@ public class StoreManageService implements StoreManager {
     private final StoreRepository storeRepository;
 
     private final StoreFinder storeFinder;
+
+    @Override
+    public Store updateInfo(StoreId storeId, StoreInfoUpdateRequest updateRequest, UUID requestId) {
+        Store store = storeFinder.find(storeId);
+
+        checkOwner(requestId, store);
+
+        store.updateInfo(updateRequest);
+
+        return storeRepository.save(store);
+    }
+
+    @Override
+    public Store forcedUpdateInfo(StoreId storeId, StoreInfoUpdateRequest updateRequest) {
+        Store store = storeFinder.find(storeId);
+
+        store.updateInfo(updateRequest);
+
+        return storeRepository.save(store);
+    }
+
+    @Override
+    public Store remove(StoreId storeId, UUID requestId) {
+        Store store = storeFinder.find(storeId);
+
+        checkOwner(requestId, store);
+
+        store.remove();
+
+        return storeRepository.save(store);
+    }
+
+    @Override
+    public Store forcedRemove(StoreId storeId) {
+        Store store = storeFinder.find(storeId);
+
+        store.remove();
+
+        return storeRepository.save(store);
+    }
 
     @Override
     public void open(StoreId storeId, UUID requestId) {
@@ -56,26 +97,6 @@ public class StoreManageService implements StoreManager {
         Store store = storeFinder.find(storeId);
 
         store.close();
-
-        storeRepository.save(store);
-    }
-
-    @Override
-    public void remove(StoreId storeId, UUID requestId) {
-        Store store = storeFinder.find(storeId);
-
-        checkOwner(requestId, store);
-
-        store.remove();
-
-        storeRepository.save(store);
-    }
-
-    @Override
-    public void forcedRemove(StoreId storeId) {
-        Store store = storeFinder.find(storeId);
-
-        store.remove();
 
         storeRepository.save(store);
     }

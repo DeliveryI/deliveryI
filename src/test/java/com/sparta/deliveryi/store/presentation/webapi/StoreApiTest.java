@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sparta.deliveryi.store.StoreFixture;
 import com.sparta.deliveryi.store.domain.Store;
+import com.sparta.deliveryi.store.domain.StoreInfoUpdateRequest;
 import com.sparta.deliveryi.store.domain.StoreRegisterRequest;
 import com.sparta.deliveryi.store.domain.service.StoreRegisterService;
 import lombok.RequiredArgsConstructor;
@@ -63,6 +64,85 @@ class StoreApiTest {
                 .bodyJson()
                 .hasPathSatisfying("$.success", isTrue())
                 .hasPathSatisfying("$.data", notNull());
+    }
+
+    @Test
+    @WithMockUser(username = "owner", roles = "OWNER")
+    void updateInfo() throws JsonProcessingException {
+        Store store = registerService.register(StoreFixture.createStoreRegisterRequest());
+        registerService.acceptRegisterRequest(store.getId().toUuid());
+        StoreInfoUpdateRequest request = StoreFixture.createStoreUpdateRequest();
+        String requestJson = objectMapper.writeValueAsString(request);
+        mockedToken(store.getOwner().getId().toString(), "OWNER");
+
+        MvcTestResult result = mvcTester.put()
+                .uri("/v1/stores/{storeId}", store.getId().toString())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(requestJson)
+                .exchange();
+
+        assertThat(result)
+                .hasStatusOk()
+                .bodyJson()
+                .hasPathSatisfying("$.success", isTrue())
+                .hasPathSatisfying("$.data", notNull());
+    }
+
+    @Test
+    @WithMockUser(username = "customer", roles = "CUSTOMER")
+    void updateInfoIfUnauthorized() throws JsonProcessingException {
+        Store store = registerService.register(StoreFixture.createStoreRegisterRequest());
+        registerService.acceptRegisterRequest(store.getId().toUuid());
+        StoreInfoUpdateRequest request = StoreFixture.createStoreUpdateRequest();
+        String requestJson = objectMapper.writeValueAsString(request);
+        mockedToken(store.getOwner().getId().toString(), "CUSTOMER");
+
+        MvcTestResult result = mvcTester.put()
+                .uri("/v1/stores/{storeId}", store.getId().toString())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(requestJson)
+                .exchange();
+
+        assertThat(result)
+                .hasStatusOk()
+                .bodyJson()
+                .hasPathSatisfying("$.success", isTrue())
+                .hasPathSatisfying("$.data", notNull());
+    }
+
+    @Test
+    @WithMockUser(username = "owner", roles = "OWNER")
+    void remove() {
+        Store store = registerService.register(StoreFixture.createStoreRegisterRequest());
+        registerService.acceptRegisterRequest(store.getId().toUuid());
+        mockedToken(store.getOwner().getId().toString(), "OWNER");
+
+        MvcTestResult result = mvcTester.delete()
+                .uri("/v1/stores/{storeId}", store.getId().toString())
+                .exchange();
+
+        assertThat(result)
+                .hasStatusOk()
+                .bodyJson()
+                .hasPathSatisfying("$.success", isTrue())
+                .hasPathSatisfying("$.data", notNull());
+    }
+
+    @Test
+    @WithMockUser(username = "customer", roles = "CUSTOMER")
+    void removeIfUnauthorized() {
+        Store store = registerService.register(StoreFixture.createStoreRegisterRequest());
+        registerService.acceptRegisterRequest(store.getId().toUuid());
+        mockedToken(UUID.randomUUID().toString(), "CUSTOMER");
+
+        MvcTestResult result = mvcTester.delete()
+                .uri("/v1/stores/{storeId}", store.getId().toString())
+                .exchange();
+
+        assertThat(result)
+                .hasStatus(HttpStatus.FORBIDDEN)
+                .bodyJson()
+                .hasPathSatisfying("$.success", isFalse());
     }
 
     @Test
@@ -185,40 +265,6 @@ class StoreApiTest {
 
         MvcTestResult result = mvcTester.post()
                 .uri("/v1/stores/{storeId}/close", store.getId().toString())
-                .exchange();
-
-        assertThat(result)
-                .hasStatus(HttpStatus.FORBIDDEN)
-                .bodyJson()
-                .hasPathSatisfying("$.success", isFalse());
-    }
-
-    @Test
-    @WithMockUser(username = "owner", roles = "OWNER")
-    void remove() {
-        Store store = registerService.register(StoreFixture.createStoreRegisterRequest());
-        registerService.acceptRegisterRequest(store.getId().toUuid());
-        mockedToken(store.getOwner().getId().toString(), "OWNER");
-
-        MvcTestResult result = mvcTester.delete()
-                .uri("/v1/stores/{storeId}", store.getId().toString())
-                .exchange();
-
-        assertThat(result)
-                .hasStatusOk()
-                .bodyJson()
-                .hasPathSatisfying("$.success", isTrue());
-    }
-
-    @Test
-    @WithMockUser(username = "customer", roles = "CUSTOMER")
-    void removeIfUnauthorized() {
-        Store store = registerService.register(StoreFixture.createStoreRegisterRequest());
-        registerService.acceptRegisterRequest(store.getId().toUuid());
-        mockedToken(UUID.randomUUID().toString(), "CUSTOMER");
-
-        MvcTestResult result = mvcTester.delete()
-                .uri("/v1/stores/{storeId}", store.getId().toString())
                 .exchange();
 
         assertThat(result)

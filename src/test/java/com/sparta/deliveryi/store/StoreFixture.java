@@ -40,4 +40,18 @@ public class StoreFixture {
                 "02-1234-1234"
         );
     }
+
+    public static StoreInfoUpdateRequest createStoreUpdateRequest() {
+        return new StoreInfoUpdateRequest(
+                "홍길동 분식",
+                "SNACK_FOOD",
+                "분식 가게입니다.",
+                "서울시 강남구 테스트로 13",
+                "02-1234-5678",
+                "매주 일요일 휴무입니다.",
+                List.of("강남구", "관악구", "강동구"),
+                "06:00 ~ 22:00",
+                "매주 일요일"
+        );
+    }
 }

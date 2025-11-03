@@ -1,6 +1,8 @@
 package com.sparta.deliveryi.store.application.service;
 
+import com.sparta.deliveryi.store.domain.Store;
 import com.sparta.deliveryi.store.domain.StoreId;
+import com.sparta.deliveryi.store.domain.StoreInfoUpdateRequest;
 import com.sparta.deliveryi.store.domain.service.StoreManager;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -15,6 +17,33 @@ public class StoreApplicationService implements StoreApplication{
 
     private final StoreManager storeManager;
 
+    @Override
+    public Store updateInfo(UUID storeId, StoreInfoUpdateRequest updateRequest, UUID requestId) {
+        //        TODO 권한 확인 후 다른 메서드 호출
+//        ex)
+//        User user = userFinder.find(requestId);
+//
+//        if(user.isManager()){
+//            storeManager.forcedUpdateInfo((StoreId.of(storeId));
+//            return;
+//        }
+        return storeManager.updateInfo(StoreId.of(storeId), updateRequest, requestId);
+    }
+
+    @Override
+    public Store remove(UUID storeId, UUID requestId) {
+//        TODO 권한 확인 후 다른 메서드 호출
+//        ex)
+//        User user = userFinder.find(requestId);
+//
+//        if(user.isManager()){
+//            storeManager.forcedRemove((StoreId.of(storeId));
+//            return;
+//        }
+        return storeManager.remove((StoreId.of(storeId)), requestId);
+    }
+
+    @Override
     public void open(UUID storeId, UUID requestId) {
 //        TODO 권한 확인 후 다른 메서드 호출
 //        ex)
@@ -28,6 +57,7 @@ public class StoreApplicationService implements StoreApplication{
         storeManager.open((StoreId.of(storeId)), requestId);
     }
 
+    @Override
     public void close(UUID storeId, UUID requestId) {
 //        TODO 권한 확인 후 다른 메서드 호출
 //        ex)
@@ -39,17 +69,5 @@ public class StoreApplicationService implements StoreApplication{
 //        }
 
         storeManager.close((StoreId.of(storeId)), requestId);
-    }
-
-    public void remove(UUID storeId, UUID requestId) {
-//        TODO 권한 확인 후 다른 메서드 호출
-//        ex)
-//        User user = userFinder.find(requestId);
-//
-//        if(user.isManager()){
-//            storeManager.forcedRemove((StoreId.of(storeId));
-//            return;
-//        }
-        storeManager.remove((StoreId.of(storeId)), requestId);
     }
 }
