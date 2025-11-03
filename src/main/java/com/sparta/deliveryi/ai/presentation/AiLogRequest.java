@@ -1,4 +1,4 @@
-package com.sparta.deliveryi.ai.infrastructure.dto;
+package com.sparta.deliveryi.ai.presentation;
 
 public record AiLogRequest(
         Long menuId,

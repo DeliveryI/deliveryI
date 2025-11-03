@@ -2,10 +2,10 @@ package com.sparta.deliveryi.ai.application.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sparta.deliveryi.ai.domain.AiLog;
-import com.sparta.deliveryi.ai.domain.service.AiLogRepository;
+import com.sparta.deliveryi.ai.domain.service.AiLogRegister;
 import com.sparta.deliveryi.ai.domain.AiStatus;
-import com.sparta.deliveryi.ai.infrastructure.dto.AiLogRequest;
-import com.sparta.deliveryi.ai.infrastructure.dto.AiLogResponse;
+import com.sparta.deliveryi.ai.presentation.AiLogRequest;
+import com.sparta.deliveryi.ai.presentation.AiLogResponse;
 import com.sparta.deliveryi.ai.infrastructure.dto.GeminiRequest;
 import com.sparta.deliveryi.ai.infrastructure.dto.GeminiResponse;
 import lombok.RequiredArgsConstructor;
@@ -26,7 +26,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class AiLogService {
 
-    private final AiLogRepository aiLogRepository;
+    private final AiLogRegister aiLogRegister;
     private final ObjectMapper objectMapper;
 
     @Value("${google.ai.api-key}")
@@ -69,7 +69,7 @@ public class AiLogService {
                 currentUsername
         );
 
-        AiLog savedLog = aiLogRepository.save(aiLog);
+        AiLog savedLog = aiLogRegister.save(aiLog);
 
         // 응답 반환
         return new AiLogResponse(

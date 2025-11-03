@@ -1,8 +1,8 @@
 package com.sparta.deliveryi.ai.presentation.webapi;
 
 import com.sparta.deliveryi.ai.application.service.AiLogService;
-import com.sparta.deliveryi.ai.infrastructure.dto.AiLogRequest;
-import com.sparta.deliveryi.ai.infrastructure.dto.AiLogResponse;
+import com.sparta.deliveryi.ai.presentation.AiLogRequest;
+import com.sparta.deliveryi.ai.presentation.AiLogResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
