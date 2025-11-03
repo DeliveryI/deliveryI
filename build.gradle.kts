@@ -31,6 +31,13 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.boot:spring-boot-starter-validation")
 
+    // QueryDSL
+    implementation("io.github.openfeign.querydsl:querydsl-jpa:5.6.1:jakarta")
+    implementation("io.github.openfeign.querydsl:querydsl-core:5.6.1")
+    annotationProcessor("io.github.openfeign.querydsl:querydsl-apt:5.6.1:jakarta")
+    annotationProcessor("jakarta.annotation:jakarta.annotation-api")
+    annotationProcessor("jakarta.persistence:jakarta.persistence-api")
+    
     // 인증, 인가
     implementation("org.keycloak:keycloak-admin-client:26.0.7")
     implementation("org.springframework.boot:spring-boot-starter-security")
