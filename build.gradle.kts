@@ -28,9 +28,14 @@ val mockitoAgent: Configuration = configurations.create("mockitoAgent")
 
 dependencies {
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
-    implementation("org.springframework.boot:spring-boot-starter-security")
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.boot:spring-boot-starter-validation")
+
+    // 인증, 인가
+    implementation("org.keycloak:keycloak-admin-client:26.0.7")
+    implementation("org.springframework.boot:spring-boot-starter-security")
+    implementation("org.springframework.boot:spring-boot-starter-oauth2-client")
+    implementation("org.springframework.boot:spring-boot-starter-oauth2-resource-server")
 
     compileOnly("org.projectlombok:lombok")
     developmentOnly("org.springframework.boot:spring-boot-devtools")
@@ -52,4 +57,11 @@ dependencies {
 tasks.withType<Test> {
     useJUnitPlatform()
     jvmArgs("-javaagent:${mockitoAgent.asPath}")
+}
+
+tasks.test {
+    environment("KEYCLOAK_CLIENT_ID", System.getenv("KEYCLOAK_CLIENT_ID"))
+    environment("KEYCLOAK_CLIENT_SECRET", System.getenv("KEYCLOAK_CLIENT_SECRET"))
+    environment("KEYCLOAK_ADMIN_USERNAME", System.getenv("KEYCLOAK_ADMIN_USERNAME"))
+    environment("KEYCLOAK_ADMIN_PASSWORD", System.getenv("KEYCLOAK_ADMIN_PASSWORD"))
 }
