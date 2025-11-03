@@ -63,4 +63,14 @@ public class StoreApi {
         return ok(success());
     }
 
+    @PreAuthorize("hasAnyRole('OWNER', 'MANAGER', 'MASTER')")
+    @PostMapping("/v1/stores/{storeId}/close")
+    public ResponseEntity<ApiResponse<Void>> close(@AuthenticationPrincipal Jwt jwt, @PathVariable UUID storeId) {
+        UUID requestId = UUID.fromString(jwt.getSubject());
+
+        storeService.open(storeId, requestId);
+
+        return ok(success());
+    }
+
 }

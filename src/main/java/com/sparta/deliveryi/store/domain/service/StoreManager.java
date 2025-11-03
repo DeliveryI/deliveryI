@@ -7,4 +7,6 @@ import java.util.UUID;
 public interface StoreManager {
     void open(StoreId storeId, UUID requestId);
     void forcedOpen(StoreId storeId);
+    void close(StoreId storeId, UUID requestId);
+    void forcedClose(StoreId storeId);
 }

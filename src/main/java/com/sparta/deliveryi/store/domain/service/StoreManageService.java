@@ -41,4 +41,26 @@ public class StoreManageService implements StoreManager {
 
         storeRepository.save(store);
     }
+
+    @Override
+    public void close(StoreId storeId, UUID requestId) {
+        Store store = storeFinder.find(storeId);
+
+        if (!store.getOwner().getId().equals(requestId)) {
+            throw new IllegalArgumentException("가게 주인이 아닙니다.");
+        }
+
+        store.close();
+
+        storeRepository.save(store);
+    }
+
+    @Override
+    public void forcedClose(StoreId storeId) {
+        Store store = storeFinder.find(storeId);
+
+        store.close();
+
+        storeRepository.save(store);
+    }
 }

@@ -48,6 +48,41 @@ record StoreManagerTest(StoreRegister storeRegister, StoreManager storeManager, 
         assertThat(store.getStatus()).isEqualTo(StoreStatus.OPEN);
     }
 
+    @Test
+    void close() {
+        Store store = registerStore();
+        storeManager.forcedOpen(store.getId());
+
+        storeManager.close(store.getId(), store.getOwner().getId());
+        entityManager.flush();
+        entityManager.clear();
+        store = storeFinder.find(store.getId());
+
+        assertThat(store.getStatus()).isEqualTo(StoreStatus.READY);
+    }
+
+    @Test
+    void closeIfNotOwner() {
+        Store store = registerStore();
+        storeManager.forcedOpen(store.getId());
+
+        assertThatThrownBy(() -> storeManager.close(store.getId(), randomUUID()))
+                .isInstanceOf(IllegalArgumentException.class);
+    }
+
+    @Test
+    void forcedClose() {
+        Store store = registerStore();
+        storeManager.forcedOpen(store.getId());
+
+        storeManager.forcedClose(store.getId());
+        entityManager.flush();
+        entityManager.clear();
+        store = storeFinder.find(store.getId());
+
+        assertThat(store.getStatus()).isEqualTo(StoreStatus.READY);
+    }
+
     private Store registerStore() {
         Store store = storeRegister.register(StoreFixture.createStoreRegisterRequest());
         entityManager.flush();

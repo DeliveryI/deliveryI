@@ -27,4 +27,17 @@ public class StoreService {
 
         storeManager.open((StoreId.of(storeId)), requestId);
     }
+
+    public void close(UUID storeId, UUID requestId) {
+//        TODO 권한 확인 후 다른 메서드 호출
+//        ex)
+//        User user = userFinder.find(requestId);
+//
+//        if(user.isManager()){
+//            storeManager.forcedOpen((StoreId.of(storeId));
+//            return;
+//        }
+
+        storeManager.close((StoreId.of(storeId)), requestId);
+    }
 }
