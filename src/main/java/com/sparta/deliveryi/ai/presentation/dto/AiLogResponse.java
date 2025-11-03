@@ -1,14 +1,14 @@
-package com.sparta.deliveryi.ai.presentation;
+package com.sparta.deliveryi.ai.presentation.dto;
 
 import com.sparta.deliveryi.ai.domain.AiStatus;
 
-public record AiLogQueryResponse(
+public record AiLogResponse(
         Long aiId,
         Long menuId,
         String prompt,
         String fullPrompt,
         String response,
         AiStatus aiStatus,
-        String createdBy,
-        String createdAt
-) {}
+        String createdBy
+) {
+}

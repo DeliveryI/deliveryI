@@ -3,7 +3,7 @@ package com.sparta.deliveryi.ai.infrastructure.service;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.sparta.deliveryi.ai.domain.QAiLog;
 import com.sparta.deliveryi.ai.domain.service.AiLogFinder;
-import com.sparta.deliveryi.ai.presentation.AiLogQueryResponse;
+import com.sparta.deliveryi.ai.presentation.dto.AiLogQueryResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Repository;

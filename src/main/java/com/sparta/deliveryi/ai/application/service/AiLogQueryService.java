@@ -1,7 +1,7 @@
 package com.sparta.deliveryi.ai.application.service;
 
 import com.sparta.deliveryi.ai.domain.service.AiLogFinder;
-import com.sparta.deliveryi.ai.presentation.AiLogQueryResponse;
+import com.sparta.deliveryi.ai.presentation.dto.AiLogQueryResponse;
 import com.sparta.deliveryi.menu.domain.repository.MenuRepository;
 import com.sparta.deliveryi.menu.domain.exception.MenuNotFoundException;
 import lombok.RequiredArgsConstructor;
