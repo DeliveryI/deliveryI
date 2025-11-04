@@ -73,6 +73,18 @@ public class Menu extends AbstractEntity {
         updateBy(updatedBy);
     }
 
+    // 메뉴 상태 변경
+    public void changeStatus(MenuStatus newStatus, String updatedBy) {
+        if (this.isDeleted()) {
+            throw new MenuDeletedException();
+        }
+        if (this.menuStatus == newStatus) {
+            return;
+        }
+        this.menuStatus = newStatus;
+        updateBy(updatedBy);
+    }
+
     @Override
     public void delete() {
         super.delete();

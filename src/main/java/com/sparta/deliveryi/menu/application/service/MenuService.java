@@ -4,19 +4,19 @@ import com.sparta.deliveryi.ai.domain.AiLog;
 import com.sparta.deliveryi.ai.domain.AiStatus;
 import com.sparta.deliveryi.ai.domain.service.AiLogRegister;
 import com.sparta.deliveryi.menu.domain.Menu;
+import com.sparta.deliveryi.menu.domain.MenuStatus;
 import com.sparta.deliveryi.menu.domain.exception.MenuDeletedException;
 import com.sparta.deliveryi.menu.domain.exception.MenuNotFoundException;
 import com.sparta.deliveryi.menu.domain.repository.MenuRepository;
 import com.sparta.deliveryi.menu.domain.service.MenuDescriptionGenerator;
-import com.sparta.deliveryi.menu.presentation.dto.MenuRemoveResponse;
-import com.sparta.deliveryi.menu.presentation.dto.MenuRequest;
-import com.sparta.deliveryi.menu.presentation.dto.MenuResponse;
+import com.sparta.deliveryi.menu.presentation.dto.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -96,6 +96,20 @@ public class MenuService {
 
         menu.delete();
         return MenuRemoveResponse.from(menu);
+    }
+
+    // 메뉴 상태 변경
+    @Transactional
+    public MenuStatusResponse changeMenuStatus(List<MenuStatusRequest.MenuStatusChangeItem> items, String updatedBy) {
+        List<Long> updatedIds = items.stream().map(item -> {
+            Menu menu = menuRepository.findById(item.menuId())
+                    .orElseThrow(MenuNotFoundException::new);
+
+            menu.changeStatus(item.status(), updatedBy);
+            return menu.getMenuId();
+        }).toList();
+
+        return MenuStatusResponse.of(updatedIds);
     }
 
     // Ai 로그 저장

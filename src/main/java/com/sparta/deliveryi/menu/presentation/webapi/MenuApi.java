@@ -2,9 +2,7 @@ package com.sparta.deliveryi.menu.presentation.webapi;
 
 import com.sparta.deliveryi.global.presentation.dto.ApiResponse;
 import com.sparta.deliveryi.menu.application.service.MenuService;
-import com.sparta.deliveryi.menu.presentation.dto.MenuRemoveResponse;
-import com.sparta.deliveryi.menu.presentation.dto.MenuRequest;
-import com.sparta.deliveryi.menu.presentation.dto.MenuResponse;
+import com.sparta.deliveryi.menu.presentation.dto.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -47,4 +45,12 @@ public class MenuApi {
         return ResponseEntity.ok(ApiResponse.successWithDataOnly(response));
     }
 
+    @PostMapping("/status")
+    public ResponseEntity<ApiResponse<MenuStatusResponse>> changeMenuStatus(
+            @RequestBody @Valid MenuStatusRequest request
+    ) {
+        String updatedBy = "system"; // 수정 예정
+        MenuStatusResponse response = menuService.changeMenuStatus(request.items(), updatedBy);
+        return ResponseEntity.ok(ApiResponse.successWithDataOnly(response));
+    }
 }
