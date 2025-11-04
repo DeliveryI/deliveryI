@@ -21,9 +21,9 @@ public class SecurityConfig {
         conv.setJwtGrantedAuthoritiesConverter(new KeycloakClientRoleConverter());
 
         http.csrf(c -> c.disable())
-//                .authorizeHttpRequests(authorize -> authorize
+                .authorizeHttpRequests(authorize -> authorize
 //                        .requestMatchers("/v1/user/profile/**", "/v1/user/password/**", "/v1/user/role/**").hasRole("USER")
-//                        .anyRequest().permitAll())
+                        .anyRequest().permitAll())
                 .oauth2Login(c -> c.disable())
                 .oauth2ResourceServer(c -> c
                         .jwt(jwt -> jwt.jwtAuthenticationConverter(conv))

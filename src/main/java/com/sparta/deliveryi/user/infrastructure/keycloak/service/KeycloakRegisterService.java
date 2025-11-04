@@ -1,9 +1,9 @@
 package com.sparta.deliveryi.user.infrastructure.keycloak.service;
 
-import com.sparta.deliveryi.user.domain.KeycloakId;
 import com.sparta.deliveryi.user.domain.UserRole;
 import com.sparta.deliveryi.user.infrastructure.keycloak.KeycloakProperties;
-import com.sparta.deliveryi.user.infrastructure.keycloak.dto.RegisterRequest;
+import com.sparta.deliveryi.user.infrastructure.keycloak.KeycloakUser;
+import com.sparta.deliveryi.user.infrastructure.keycloak.dto.KeycloakRegisterRequest;
 import jakarta.validation.Valid;
 import jakarta.ws.rs.core.Response;
 import lombok.RequiredArgsConstructor;
@@ -21,23 +21,24 @@ import org.springframework.web.client.HttpClientErrorException;
 
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 @Validated
 @RequiredArgsConstructor
 @EnableConfigurationProperties(KeycloakProperties.class)
-public class KeycloakUserService implements KeycloakUser {
+public class KeycloakRegisterService implements KeycloakRegister {
 
     private final KeycloakProperties properties;
     private final Keycloak keycloak;
 
     @Override
-    public KeycloakId register(@Valid RegisterRequest request) {
+    public KeycloakUser register(@Valid KeycloakRegisterRequest request) {
         // keycloak에 사용자 생성
         UsersResource resource = keycloak.realm(properties.getRealm()).users();
 
         // 사용자 생성
-        String userId;
+        String keycloakId;
         try (Response response = createUser(resource, request)) {
             if (response.getStatus() != Response.Status.CREATED.getStatusCode()) {
                 throw new HttpClientErrorException(
@@ -48,20 +49,24 @@ public class KeycloakUserService implements KeycloakUser {
                 );
             }
 
-            userId = CreatedResponseUtil.getCreatedId(response);
+            keycloakId = CreatedResponseUtil.getCreatedId(response);
         }
 
         // 비밀번호 설정
-        setPassword(resource, userId, request.password());
+        setPassword(resource, keycloakId, request.password());
 
         // 기본 Role 부여
-        setDefaultRole(resource, userId);
+        UserRole defaultRole = setDefaultRole(resource, keycloakId);
 
-        return KeycloakId.of(userId);
+        return KeycloakUser.builder()
+                .id(UUID.fromString(keycloakId))
+                .username(request.username())
+                .role(defaultRole)
+                .build();
 
     }
 
-    private Response createUser(UsersResource resource, RegisterRequest request) {
+    private Response createUser(UsersResource resource, KeycloakRegisterRequest request) {
         UserRepresentation user = new UserRepresentation();
         user.setEnabled(true);
         user.setUsername(request.username());
@@ -78,17 +83,21 @@ public class KeycloakUserService implements KeycloakUser {
         resource.get(userId).resetPassword(credential);
     }
 
-    private void setDefaultRole(UsersResource resource, String userId) {
+    private UserRole setDefaultRole(UsersResource resource, String userId) {
+        String defaultRole = UserRole.CUSTOMER.getAuthority();
+
         RoleRepresentation role = keycloak.realm(properties.getRealm())
                 .roles()
-                .get(UserRole.CUSTOMER.getAuthority())
+                .get(defaultRole)
                 .toRepresentation();
 
 
         if (role == null) {
-            throw new IllegalStateException(UserRole.CUSTOMER.getAuthority() + "가 Keycloak에 존재하지 않습니다.");
+            throw new IllegalStateException(defaultRole + "가 Keycloak에 존재하지 않습니다.");
         }
 
         resource.get(userId).roles().realmLevel().add(List.of(role));
+
+        return UserRole.CUSTOMER;
     }
 }

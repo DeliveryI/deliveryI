@@ -4,9 +4,9 @@ import com.sparta.deliveryi.user.TestSecurityConfig;
 import com.sparta.deliveryi.user.UserFixture;
 import com.sparta.deliveryi.user.domain.User;
 import com.sparta.deliveryi.user.domain.UserId;
-import com.sparta.deliveryi.user.domain.dto.UserRegisterRequest;
+import com.sparta.deliveryi.user.domain.dto.UserCreateRequest;
+import com.sparta.deliveryi.user.domain.service.UserCreate;
 import com.sparta.deliveryi.user.domain.service.UserQueryService;
-import com.sparta.deliveryi.user.domain.service.UserRegister;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,7 +27,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 public class UserQueryServiceTest {
 
     @Autowired
-    private UserRegister userRegister;
+    private UserCreate userCreate;
 
     @Autowired
     private UserQueryService userQueryService;
@@ -39,8 +39,8 @@ public class UserQueryServiceTest {
     void setUp() {
         users = new ArrayList<>();
         for (int i=0; i<size; i++) {
-            UserRegisterRequest registerRequest = UserFixture.createUserRegisterRequest(i);
-            User user = userRegister.register(registerRequest);
+            UserCreateRequest registerRequest = UserFixture.createUserRegisterRequest(i);
+            User user = userCreate.create(registerRequest);
             users.add(user);
         }
     }

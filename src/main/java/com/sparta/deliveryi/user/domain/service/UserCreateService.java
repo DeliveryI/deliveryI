@@ -2,7 +2,7 @@ package com.sparta.deliveryi.user.domain.service;
 
 import com.sparta.deliveryi.user.domain.User;
 import com.sparta.deliveryi.user.domain.UserRepository;
-import com.sparta.deliveryi.user.domain.dto.UserRegisterRequest;
+import com.sparta.deliveryi.user.domain.dto.UserCreateRequest;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -13,13 +13,13 @@ import org.springframework.validation.annotation.Validated;
 @Transactional
 @Validated
 @RequiredArgsConstructor
-public class UserRegisterService implements UserRegister {
+public class UserCreateService implements UserCreate {
 
     private final UserRepository userRepository;
 
     @Override
-    public User register(@Valid UserRegisterRequest userRegisterRequest) {
-        User user = User.register(userRegisterRequest);
+    public User create(@Valid UserCreateRequest request) {
+        User user = User.create(request);
 
         userRepository.save(user);
 

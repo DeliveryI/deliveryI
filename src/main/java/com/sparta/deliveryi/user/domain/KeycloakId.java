@@ -18,7 +18,9 @@ public class KeycloakId {
     @Column(name = "keycloak_id", nullable = false)
     private UUID id;
 
-    protected KeycloakId(UUID id) { this.id = id;}
+    protected KeycloakId(UUID id) {
+        this.id = id;
+    }
 
     public static KeycloakId of(UUID id) {
         return new KeycloakId(id);

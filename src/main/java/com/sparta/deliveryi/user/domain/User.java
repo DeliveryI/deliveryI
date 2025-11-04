@@ -2,7 +2,7 @@ package com.sparta.deliveryi.user.domain;
 
 import com.sparta.deliveryi.global.domain.AbstractEntity;
 import com.sparta.deliveryi.user.domain.dto.UserInfoUpdateRequest;
-import com.sparta.deliveryi.user.domain.dto.UserRegisterRequest;
+import com.sparta.deliveryi.user.domain.dto.UserCreateRequest;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -34,32 +34,30 @@ public class User extends AbstractEntity {
     private String nickname;
 
     @Embedded
-    private PhoneNumber phoneNumber;
+    private UserPhone userPhone;
 
     @Column(name = "current_address")
     private String currentAddress;
 
-    public static User register(UserRegisterRequest registerRequest) {
+    public static User create(UserCreateRequest request) {
         User user = new User();
 
-        user.id = Objects.requireNonNull(UserId.generateId(), "UserId는 필수값입니다.");
-        user.keycloakId = Objects.requireNonNull(KeycloakId.of(registerRequest.keycloakId()), "KeycloakId는 필수값입니다.");
-        user.username = Objects.requireNonNull(registerRequest.username(), "username은 필수값입니다.");
-        user.role = Objects.requireNonNull(registerRequest.role(), "role은 필수값입니다.");
-        user.nickname = Objects.requireNonNull(registerRequest.nickname(), "nickname은 필수값입니다.");
-        user.phoneNumber = Objects.requireNonNull(PhoneNumber.of(registerRequest.phoneNumber()), "phoneNumber는 필수값입니다.");
-        user.currentAddress = registerRequest.currentAddress();
+        Objects.requireNonNull(request.keycloakUser());
+        user.keycloakId = KeycloakId.of(request.keycloakUser().id());
+        user.username = request.keycloakUser().username();
+        user.role = request.keycloakUser().role();
+
+        user.id = Objects.requireNonNull(UserId.generateId());
+        user.nickname = Objects.requireNonNull(request.nickname());
+        user.userPhone = Objects.requireNonNull(UserPhone.of(request.userPhone()));
+        user.currentAddress = request.currentAddress();
 
         return user;
     }
 
     public void updateInfo(UserInfoUpdateRequest updateRequest) {
-        this.nickname = Objects.requireNonNull(updateRequest.nickname(), "nickname은 필수값입니다.");
-        this.phoneNumber = Objects.requireNonNull(PhoneNumber.of(updateRequest.phoneNumber()), "phoneNumber는 필수값입니다.");
+        this.nickname = Objects.requireNonNull(updateRequest.nickname());
+        this.userPhone = Objects.requireNonNull(UserPhone .of(updateRequest.userPhone()));
         this.currentAddress = updateRequest.currentAddress();
-    }
-
-    public void updateRole(UserRole role) {
-        this.role = role;
     }
 }

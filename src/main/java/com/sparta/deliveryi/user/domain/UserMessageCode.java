@@ -8,7 +8,8 @@ import org.springframework.http.HttpStatus;
 @Getter
 @RequiredArgsConstructor
 public enum UserMessageCode implements MessageCode {
-    NOT_FOUND("USER.NOT_FOUND", HttpStatus.NOT_FOUND);
+    NOT_FOUND("USER.NOT_FOUND", HttpStatus.NOT_FOUND),
+    PASSWORD_MISMATCH("USER.PASSWORD_MISMATCH", HttpStatus.BAD_REQUEST);
 
     private final String code;
     private final HttpStatus status;
