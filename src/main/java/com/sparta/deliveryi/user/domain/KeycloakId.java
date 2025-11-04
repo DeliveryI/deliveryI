@@ -30,6 +30,10 @@ public class KeycloakId {
         return new KeycloakId(UUID.fromString(id));
     }
 
+    public UUID toUuid() {
+        return id;
+    }
+
     public String toString() {
         return id.toString();
     }
