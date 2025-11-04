@@ -112,7 +112,7 @@ class StoreTest {
         assertThat(store.getDescription()).isEqualTo("분식 가게입니다.");
         assertThat(store.getAddress()).isEqualTo("서울시 강남구 테스트로 13");
         assertThat(store.getPhone()).isEqualTo("02-1234-5678");
-        assertThat(store.getAvailableAddress()).contains("강남구", "관악구", "강동구");
+        assertThat(store.getAvailableAddress().getValues()).containsExactlyInAnyOrderElementsOf(updateRequest.availableAddress());
         assertThat(store.getOperationHours()).isEqualTo("06:00 ~ 22:00");
         assertThat(store.getClosedDays()).isEqualTo("매주 일요일");
     }

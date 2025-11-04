@@ -8,7 +8,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class AvailableAddressConverterTest {
 
-    AvailableAddressConverter  converter = new AvailableAddressConverter();
+    AvailableAddressConverter converter = new AvailableAddressConverter();
 
     @Test
     void convertToDatabaseColumn() {
