@@ -11,16 +11,16 @@ import java.util.UUID;
 public class UserFixture {
 
     public static User createUser() {
-        UserCreateRequest userRegister = createUserRegisterRequest();
+        UserCreateRequest userRegister = createUserCreateRequest();
 
         return User.create(userRegister);
     }
 
-    public static UserCreateRequest createUserRegisterRequest() {
-        return createUserRegisterRequest(1);
+    public static UserCreateRequest createUserCreateRequest() {
+        return createUserCreateRequest(1);
     }
 
-    public static UserCreateRequest createUserRegisterRequest(Integer number) {
+    public static UserCreateRequest createUserCreateRequest(Integer number) {
         KeycloakUser keycloakUser = KeycloakUser.builder()
                 .id(UUID.randomUUID())
                 .username("user00" + number)

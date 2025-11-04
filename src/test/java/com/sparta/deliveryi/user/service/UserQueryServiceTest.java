@@ -39,7 +39,7 @@ public class UserQueryServiceTest {
     void setUp() {
         users = new ArrayList<>();
         for (int i=0; i<size; i++) {
-            UserCreateRequest registerRequest = UserFixture.createUserRegisterRequest(i);
+            UserCreateRequest registerRequest = UserFixture.createUserCreateRequest(i);
             User user = userCreate.create(registerRequest);
             users.add(user);
         }

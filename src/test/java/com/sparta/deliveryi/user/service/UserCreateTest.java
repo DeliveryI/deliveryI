@@ -24,7 +24,7 @@ public class UserCreateTest {
 
     @Test
     void create() {
-        UserCreateRequest registerRequest = UserFixture.createUserRegisterRequest();
+        UserCreateRequest registerRequest = UserFixture.createUserCreateRequest();
 
         User user = userCreate.create(registerRequest);
 
