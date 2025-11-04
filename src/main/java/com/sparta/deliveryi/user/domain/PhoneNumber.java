@@ -3,12 +3,10 @@ package com.sparta.deliveryi.user.domain;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import lombok.AccessLevel;
-import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Getter
-@EqualsAndHashCode
 @Embeddable
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class PhoneNumber {
@@ -30,7 +28,13 @@ public class PhoneNumber {
         return new PhoneNumber(normalized);
     }
 
-    public String toString() {
-        return value;
+    public String formatted() {
+        if (value.length() == 10) {
+            return value.replaceFirst("(\\d{3})(\\d{3})(\\d{4})", "$1-$2-$3");
+        } else if (value.length() == 11) {
+            return value.replaceFirst("(\\d{3})(\\d{4})(\\d{4})", "$1-$2-$3");
+        } else {
+            throw new IllegalArgumentException("전화번호 형식이 올바르지 않습니다.");
+        }
     }
 }

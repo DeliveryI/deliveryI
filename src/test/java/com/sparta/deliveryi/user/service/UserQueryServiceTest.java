@@ -1,6 +1,7 @@
 package com.sparta.deliveryi.user.service;
 
 import com.sparta.deliveryi.user.TestSecurityConfig;
+import com.sparta.deliveryi.user.UserFixture;
 import com.sparta.deliveryi.user.domain.User;
 import com.sparta.deliveryi.user.domain.UserId;
 import com.sparta.deliveryi.user.domain.dto.UserRegisterRequest;
@@ -13,11 +14,11 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import static com.sparta.deliveryi.user.UserFixture.createUserRegisterRequest;
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @SpringBootTest
@@ -31,23 +32,28 @@ public class UserQueryServiceTest {
     @Autowired
     private UserQueryService userQueryService;
 
-    User savedUser;
+    List<User> users;
+    int size = 10;
 
     @BeforeEach
     void setUp() {
-        UserRegisterRequest registerRequest = createUserRegisterRequest();
-        savedUser = userRegister.register(registerRequest);
+        users = new ArrayList<>();
+        for (int i=0; i<size; i++) {
+            UserRegisterRequest registerRequest = UserFixture.createUserRegisterRequest(i);
+            User user = userRegister.register(registerRequest);
+            users.add(user);
+        }
     }
 
     @Test
-    void findSuccess() {
-        User user = userQueryService.find(savedUser.getId());
-
-        assertThat(user.getId()).isNotNull();
+    void findWithValidId() {
+        User targetUser = users.getFirst();
+        User result = userQueryService.find(targetUser.getId());
+        assertThat(result.getId()).isNotNull();
     }
 
     @Test
-    void findFailure() {
+    void findWithInvalidId() {
         UserId invalidUserId = UserId.of(UUID.randomUUID());
 
         assertThrows(IllegalArgumentException.class, () -> {
@@ -57,10 +63,14 @@ public class UserQueryServiceTest {
 
     @Test
     void findAll() {
-        List<User> users = userQueryService.findAll();
+        List<User> result = userQueryService.findAll();
 
-        assertThat(users.size()).isEqualTo(1);
-        assertThat(users.get(0).getId()).isEqualTo(savedUser.getId());
+        assertThat(users.size()).isEqualTo(size);
+
+        List<UserId> userIds = users.stream().map(User::getId).toList();
+        List<UserId> resultIds = result.stream().map(User::getId).toList();
+
+        assertThat(resultIds).containsAll(userIds);
     }
 
 }

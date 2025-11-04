@@ -11,4 +11,4 @@ public record UserRegisterRequest(
         @NotBlank @Size(min=1, max=20) String nickname,
         @NotBlank String phoneNumber,
         String currentAddress
-        ) {}
+) {}

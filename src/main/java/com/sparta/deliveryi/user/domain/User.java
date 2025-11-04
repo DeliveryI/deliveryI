@@ -1,13 +1,15 @@
 package com.sparta.deliveryi.user.domain;
 
 import com.sparta.deliveryi.global.domain.AbstractEntity;
-import com.sparta.deliveryi.user.domain.dto.UserRegisterRequest;
 import com.sparta.deliveryi.user.domain.dto.UserInfoUpdateRequest;
+import com.sparta.deliveryi.user.domain.dto.UserRegisterRequest;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
+
+import java.util.Objects;
 
 @Table(name = "p_user")
 @Entity
@@ -40,20 +42,20 @@ public class User extends AbstractEntity {
     public static User register(UserRegisterRequest registerRequest) {
         User user = new User();
 
-        user.id = UserId.of();
-        user.keycloakId = KeycloakId.of(registerRequest.keycloakId());
-        user.username = registerRequest.username();
-        user.role = registerRequest.role();
-        user.nickname = registerRequest.nickname();
-        user.phoneNumber = PhoneNumber.of(registerRequest.phoneNumber());
+        user.id = Objects.requireNonNull(UserId.generateId(), "UserId는 필수값입니다.");
+        user.keycloakId = Objects.requireNonNull(KeycloakId.of(registerRequest.keycloakId()), "KeycloakId는 필수값입니다.");
+        user.username = Objects.requireNonNull(registerRequest.username(), "username은 필수값입니다.");
+        user.role = Objects.requireNonNull(registerRequest.role(), "role은 필수값입니다.");
+        user.nickname = Objects.requireNonNull(registerRequest.nickname(), "nickname은 필수값입니다.");
+        user.phoneNumber = Objects.requireNonNull(PhoneNumber.of(registerRequest.phoneNumber()), "phoneNumber는 필수값입니다.");
         user.currentAddress = registerRequest.currentAddress();
 
         return user;
     }
 
     public void updateInfo(UserInfoUpdateRequest updateRequest) {
-        this.nickname = updateRequest.nickname();
-        this.phoneNumber = PhoneNumber.of(updateRequest.phoneNumber());
+        this.nickname = Objects.requireNonNull(updateRequest.nickname(), "nickname은 필수값입니다.");
+        this.phoneNumber = Objects.requireNonNull(PhoneNumber.of(updateRequest.phoneNumber()), "phoneNumber는 필수값입니다.");
         this.currentAddress = updateRequest.currentAddress();
     }
 
