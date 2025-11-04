@@ -7,24 +7,24 @@ spring:
   messages:
     encoding: "UTF-8"
   security:
-    oauth2:
-      resourceserver:
-        jwt:
-          issuer-uri: https://keycloak1.sparta-project.xyz/realms/sparta
-      client:
-        registration:
-          keycloak:
-            client-id: ${KEYCLOAK_CLIENT_ID}
-            client-secret: ${KEYCLOAK_CLIENT_SECRET}
-            authorization-grant-type: authorization_code
-            redirect-uri: "http://localhost:3000/v1/users/authorization/code"
-            scope:
-              - openid
-              - profile
-              - email
-        provider:
-          keycloak:
+      oauth2:
+        resourceserver:
+          jwt:
             issuer-uri: https://keycloak1.sparta-project.xyz/realms/sparta
+        client:
+          registration:
+            keycloak:
+              client-id: ${KEYCLOAK_CLIENT_ID}
+              client-secret: ${KEYCLOAK_CLIENT_SECRET}
+              authorization-grant-type: authorization_code
+              redirect-uri: "http://localhost:3000/v1/users/authorization/code"
+              scope:
+                - openid
+                - profile
+                - email
+          provider:
+            keycloak:
+              issuer-uri: https://keycloak1.sparta-project.xyz/realms/sparta
   config:
     import: optional:file:.env[.properties]
 
@@ -40,8 +40,3 @@ keycloak:
   client-secret: ${KEYCLOAK_CLIENT_SECRET}
   admin-username: ${KEYCLOAK_ADMIN_USERNAME}
   admin-password: ${KEYCLOAK_ADMIN_PASSWORD}
-
-google:
-  ai:
-    api-key: ${GOOGLE_API_KEY}
-    endpoint: ${GOOGLE_API_URL}

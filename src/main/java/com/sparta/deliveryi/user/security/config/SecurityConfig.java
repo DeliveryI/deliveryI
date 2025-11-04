@@ -25,7 +25,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(authorize -> authorize
 //                        .requestMatchers("/v1/user/profile/**", "/v1/user/password/**", "/v1/user/role/**").hasRole("USER")
                         .anyRequest().permitAll())
-                .oauth2Login(AbstractHttpConfigurer::disable)
+                .oauth2Login(c -> c.disable())
                 .oauth2ResourceServer(c -> c
                         .jwt(jwt -> jwt.jwtAuthenticationConverter(conv))
                         .authenticationEntryPoint(new BearerTokenAuthenticationEntryPoint())
