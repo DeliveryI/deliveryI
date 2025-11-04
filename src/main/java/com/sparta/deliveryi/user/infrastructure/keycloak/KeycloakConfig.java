@@ -9,10 +9,10 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 @RequiredArgsConstructor
-@EnableConfigurationProperties(KeyclakProperties.class)
+@EnableConfigurationProperties(KeycloakProperties.class)
 public class KeycloakConfig {
 
-    private final KeyclakProperties properties;
+    private final KeycloakProperties properties;
 
     @Bean
     public Keycloak keycloak() {

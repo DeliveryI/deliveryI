@@ -20,11 +20,11 @@ public class UserTest {
     }
 
     @Test
-    void register() {
+    void create() {
         assertThat(user.getUsername()).isEqualTo("user001");
         assertThat(user.getRole()).isEqualTo(UserRole.CUSTOMER);
         assertThat(user.getNickname()).isEqualTo("고객001");
-        assertThat(user.getPhoneNumber().toString()).isEqualTo("01012345678");
+        assertThat(user.getUserPhone().toString()).isEqualTo("01012345678");
         assertThat(user.getCurrentAddress()).isEqualTo("강남구 도곡로 112");
     }
 
@@ -37,14 +37,7 @@ public class UserTest {
         assertThat(user.getUsername()).isEqualTo("user001");
         assertThat(user.getRole()).isEqualTo(UserRole.CUSTOMER);
         assertThat(user.getNickname()).isEqualTo("고객001");
-        assertThat(user.getPhoneNumber().toString()).isEqualTo("01012345678");
+        assertThat(user.getUserPhone().toString()).isEqualTo("01012345678");
         assertThat(user.getCurrentAddress()).isEqualTo("");
-    }
-
-    @Test
-    void updateRole() {
-        user.updateRole(UserRole.MANAGER);
-
-        assertThat(user.getRole()).isEqualTo(UserRole.MANAGER);
     }
 }

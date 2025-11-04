@@ -1,7 +1,7 @@
-package com.sparta.deliveryi.user.domain.service;
+package com.sparta.deliveryi.user.application.service;
 
+import com.sparta.deliveryi.user.application.dto.UserRegisterRequest;
 import com.sparta.deliveryi.user.domain.User;
-import com.sparta.deliveryi.user.domain.dto.UserRegisterRequest;
 import jakarta.validation.Valid;
 
 public interface UserRegister {

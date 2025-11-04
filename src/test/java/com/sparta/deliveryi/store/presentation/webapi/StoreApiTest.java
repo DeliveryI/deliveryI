@@ -11,23 +11,13 @@ import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
-import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configurers.CsrfConfigurer;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
-import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.test.web.servlet.assertj.MockMvcTester;
 import org.springframework.test.web.servlet.assertj.MvcTestResult;
 import org.springframework.transaction.annotation.Transactional;
@@ -286,37 +276,4 @@ class StoreApiTest {
         SecurityContextHolder.getContext().setAuthentication(auth);
     }
 
-    @TestConfiguration
-    @EnableMethodSecurity
-    static class NoSecurityConfig {
-        @Bean
-        public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-            return http.csrf(CsrfConfigurer::disable)
-                    .authorizeHttpRequests(auth ->
-                            auth
-                                    .requestMatchers("/v1/stores").authenticated()
-                                    .anyRequest().authenticated())
-                    .build();
-        }
-
-        @Bean
-        public UserDetailsService userDetailsService() {
-            UserDetails manager = User.withUsername("manager")
-                    .password("{noop}password")
-                    .roles("MANAGER")
-                    .build();
-
-            UserDetails owner = User.withUsername("owner")
-                    .password("{noop}password")
-                    .roles("OWNER")
-                    .build();
-
-            UserDetails customer = User.withUsername("customer")
-                    .password("{noop}password")
-                    .roles("CUSTOMER")
-                    .build();
-
-            return new InMemoryUserDetailsManager(manager, owner, customer);
-        }
-    }
 }
