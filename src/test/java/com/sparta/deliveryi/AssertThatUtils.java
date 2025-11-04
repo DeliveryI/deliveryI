@@ -14,4 +14,8 @@ public class AssertThatUtils {
     public static Consumer<AssertProvider<JsonPathValueAssert>> isTrue() {
         return value -> Assertions.assertThat(value).asBoolean().isTrue();
     }
+
+    public static Consumer<AssertProvider<JsonPathValueAssert>> isFalse() {
+        return value -> Assertions.assertThat(value).asBoolean().isFalse();
+    }
 }
