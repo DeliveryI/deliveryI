@@ -31,7 +31,7 @@ record StoreManagerTest(StoreRegister storeRegister, StoreManager storeManager, 
         assertThat(store.getAddress()).isEqualTo(updateRequest.address());
         assertThat(store.getPhone()).isEqualTo(updateRequest.phone());
         assertThat(store.getNotice()).isEqualTo(updateRequest.notice());
-        assertThat(store.getAvailableAddress()).containsExactlyInAnyOrderElementsOf(updateRequest.availableAddress());
+        assertThat(store.getAvailableAddress().getValues()).containsExactlyInAnyOrderElementsOf(updateRequest.availableAddress());
         assertThat(store.getOperationHours()).isEqualTo(updateRequest.operationHours());
         assertThat(store.getClosedDays()).isEqualTo(updateRequest.closedDays());
     }
@@ -45,7 +45,6 @@ record StoreManagerTest(StoreRegister storeRegister, StoreManager storeManager, 
         assertThatThrownBy(() -> storeManager.updateInfo(store.getId(), updateRequest, randomUUID()))
             .isInstanceOf(IllegalArgumentException.class);
     }
-
 
     @Test
     void forcedUpdateInfo() {
@@ -61,7 +60,7 @@ record StoreManagerTest(StoreRegister storeRegister, StoreManager storeManager, 
         assertThat(store.getAddress()).isEqualTo(updateRequest.address());
         assertThat(store.getPhone()).isEqualTo(updateRequest.phone());
         assertThat(store.getNotice()).isEqualTo(updateRequest.notice());
-        assertThat(store.getAvailableAddress()).containsExactlyInAnyOrderElementsOf(updateRequest.availableAddress());
+        assertThat(store.getAvailableAddress().getValues()).containsExactlyInAnyOrderElementsOf(updateRequest.availableAddress());
         assertThat(store.getOperationHours()).isEqualTo(updateRequest.operationHours());
         assertThat(store.getClosedDays()).isEqualTo(updateRequest.closedDays());
     }

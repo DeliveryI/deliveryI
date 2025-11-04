@@ -25,6 +25,13 @@ spring:
         provider:
           keycloak:
             issuer-uri: https://keycloak1.sparta-project.xyz/realms/sparta
+  config:
+    import: optional:file:.env[.properties]
+
+google:
+  ai:
+    api-key: ${GOOGLE_API_KEY}
+    endpoint: ${GOOGLE_API_URL}
 
 keycloak:
   server-url: https://keycloak1.sparta-project.xyz
