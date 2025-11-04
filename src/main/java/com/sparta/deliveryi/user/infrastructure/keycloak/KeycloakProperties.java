@@ -5,7 +5,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 
 @Data
 @ConfigurationProperties(prefix = "keycloak")
-public class KeyclakProperties {
+public class KeycloakProperties {
     private String serverUrl;
     private String realm;
     private String clientId;

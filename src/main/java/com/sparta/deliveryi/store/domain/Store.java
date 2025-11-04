@@ -1,14 +1,12 @@
 package com.sparta.deliveryi.store.domain;
 
 import com.sparta.deliveryi.global.domain.AbstractEntity;
-import com.sparta.deliveryi.store.infrastructure.AvailableAddressConverter;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 
-import java.util.List;
 import java.util.UUID;
 
 import static java.util.Objects.requireNonNull;
@@ -48,8 +46,7 @@ public class Store extends AbstractEntity {
     @Embedded
     private Rating rating;
 
-    @Convert(converter = AvailableAddressConverter.class)
-    private List<String> availableAddress;
+    private AvailableAddress availableAddress;
 
     private String operationHours;
 
@@ -113,7 +110,7 @@ public class Store extends AbstractEntity {
         this.address = requireNonNull(updateRequest.address());
         this.phone = requireNonNull(updateRequest.phone());
         this.notice = updateRequest.notice();
-        this.availableAddress = updateRequest.availableAddress();
+        this.availableAddress = AvailableAddress.from(updateRequest.availableAddress());
         this.operationHours = updateRequest.operationHours();
         this.closedDays = updateRequest.closedDays();
     }

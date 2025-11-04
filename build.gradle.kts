@@ -69,10 +69,3 @@ tasks.withType<Test> {
     useJUnitPlatform()
     jvmArgs("-javaagent:${mockitoAgent.asPath}")
 }
-
-tasks.test {
-    environment("KEYCLOAK_CLIENT_ID", System.getenv("KEYCLOAK_CLIENT_ID"))
-    environment("KEYCLOAK_CLIENT_SECRET", System.getenv("KEYCLOAK_CLIENT_SECRET"))
-    environment("KEYCLOAK_ADMIN_USERNAME", System.getenv("KEYCLOAK_ADMIN_USERNAME"))
-    environment("KEYCLOAK_ADMIN_PASSWORD", System.getenv("KEYCLOAK_ADMIN_PASSWORD"))
-}
