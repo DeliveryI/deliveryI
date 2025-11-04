@@ -13,7 +13,9 @@ import org.keycloak.representations.idm.UserRepresentation;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional(readOnly = true)
@@ -25,7 +27,6 @@ public class KeycloakQueryService implements AuthFinder {
 
     @Override
     public KeycloakUser find(KeycloakId keycloakId) {
-
         try {
             UserRepresentation user = keycloak.realm(properties.getRealm())
                     .users()
@@ -40,5 +41,24 @@ public class KeycloakQueryService implements AuthFinder {
         } catch (NotFoundException e) {
             throw new KeycloakException(KeycloakMessageCode.NOT_FOUND);
         }
+    }
+
+    // TODO: pagination 추가
+    @Override
+    public List<KeycloakUser> findAll() {
+        List<UserRepresentation> users = keycloak.realm(properties.getRealm())
+                .users()
+                .list();
+
+        return users.stream()
+                .map(user -> {
+                    UserRole role = UserRole.valueOf(user.getAttributes().get("role").getFirst());
+                    return KeycloakUser.builder()
+                            .id(UUID.fromString(user.getId()))
+                            .username(user.getUsername())
+                            .role(role)
+                            .build();
+                })
+                .collect(Collectors.toList());
     }
 }
