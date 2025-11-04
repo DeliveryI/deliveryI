@@ -1,6 +1,6 @@
 package com.sparta.deliveryi.ai.domain.service;
 
-import com.sparta.deliveryi.ai.presentation.AiLogQueryResponse;
+import com.sparta.deliveryi.ai.presentation.dto.AiLogQueryResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 

@@ -8,7 +8,8 @@ public enum AiMessageCode implements MessageCode {
     AI_RESPONSE_EMPTY("AI_RESPONSE_EMPTY", HttpStatus.BAD_REQUEST),
     AI_CREATED_BY_EMPTY("AI_CREATED_BY_EMPTY", HttpStatus.BAD_REQUEST),
     AI_LOG_DELETION_NOT_ALLOWED("AI_LOG_DELETION_NOT_ALLOWED", HttpStatus.BAD_REQUEST),
-    AI_LOG_MENU_NOT_FOUND("AI_LOG_MENU_NOT_FOUND", HttpStatus.NOT_FOUND);
+    AI_LOG_MENU_NOT_FOUND("AI_LOG_MENU_NOT_FOUND", HttpStatus.NOT_FOUND),
+    AI_CALL_FAILED("AI_CALL_FAILED", HttpStatus.INTERNAL_SERVER_ERROR);
 
     private final String code;
     private final HttpStatus status;

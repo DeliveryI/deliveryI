@@ -14,7 +14,7 @@ import lombok.NoArgsConstructor;
 public class AiLog extends AbstractEntity {
 
     private static final String PREFIX = "너는 지금 음식점 마케터야. 다른 설명없이 다음 질문에 대한 답만 해줘.";
-    private static final String SUFFIX = "설명을 더 잘 팔릴 수 있게 상품 설명을 70~100글자 안으로 3가지 작성해줘. 3가지는 _-_-_로 구분해 ";
+    private static final String SUFFIX = "설명을 더 잘 팔릴 수 있게, 상품 설명을 45~60자 정도 길이로 작성해줘.";
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
