@@ -1,5 +1,6 @@
 package com.sparta.deliveryi.user.service;
 
+import com.sparta.deliveryi.DeliveryITestConfiguration;
 import com.sparta.deliveryi.user.UserFixture;
 import com.sparta.deliveryi.user.domain.User;
 import com.sparta.deliveryi.user.domain.UserId;
@@ -10,6 +11,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
@@ -21,6 +23,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @SpringBootTest
 @Transactional
+@Import(DeliveryITestConfiguration.class)
 public class UserQueryServiceTest {
 
     @Autowired

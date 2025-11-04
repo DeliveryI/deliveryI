@@ -2,6 +2,7 @@ package com.sparta.deliveryi.store.presentation.webapi;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.sparta.deliveryi.DeliveryITestConfiguration;
 import com.sparta.deliveryi.store.StoreFixture;
 import com.sparta.deliveryi.store.domain.Store;
 import com.sparta.deliveryi.store.domain.StoreInfoUpdateRequest;
@@ -11,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -29,6 +31,7 @@ import static com.sparta.deliveryi.AssertThatUtils.*;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
+@Import(DeliveryITestConfiguration.class)
 @AutoConfigureMockMvc
 @Transactional
 @RequiredArgsConstructor
@@ -38,10 +41,11 @@ class StoreApiTest {
     final StoreRegisterService registerService;
 
     @Test
-    @WithMockUser
+    @WithMockUser(username = "customer", roles = "CUSTOMER")
     void register() throws JsonProcessingException {
         StoreRegisterRequest request = StoreFixture.createStoreRegisterRequest();
         String requestJson = objectMapper.writeValueAsString(request);
+        mockedToken(UUID.randomUUID().toString(), "CUSTOMER");
 
         MvcTestResult result = mvcTester.post()
                 .uri("/v1/stores")

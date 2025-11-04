@@ -1,5 +1,6 @@
 package com.sparta.deliveryi.store.domain.service;
 
+import com.sparta.deliveryi.DeliveryITestConfiguration;
 import com.sparta.deliveryi.store.StoreFixture;
 import com.sparta.deliveryi.store.domain.Store;
 import com.sparta.deliveryi.store.domain.StoreInfoUpdateRequest;
@@ -8,6 +9,7 @@ import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
 
 import static java.util.UUID.randomUUID;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -15,7 +17,13 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @SpringBootTest
 @Transactional
-record StoreManagerTest(StoreRegister storeRegister, StoreManager storeManager, StoreFinder storeFinder, EntityManager entityManager) {
+@Import(DeliveryITestConfiguration.class)
+record StoreManagerTest(
+        StoreRegister storeRegister,
+        StoreManager storeManager,
+        StoreFinder storeFinder,
+        EntityManager entityManager
+) {
 
     @Test
     void updateInfo() {
