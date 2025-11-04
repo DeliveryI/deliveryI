@@ -4,9 +4,11 @@ import com.sparta.deliveryi.ai.domain.AiLog;
 import com.sparta.deliveryi.ai.domain.AiStatus;
 import com.sparta.deliveryi.ai.domain.service.AiLogRegister;
 import com.sparta.deliveryi.menu.domain.Menu;
+import com.sparta.deliveryi.menu.domain.exception.MenuDeletedException;
 import com.sparta.deliveryi.menu.domain.exception.MenuNotFoundException;
 import com.sparta.deliveryi.menu.domain.repository.MenuRepository;
 import com.sparta.deliveryi.menu.domain.service.MenuDescriptionGenerator;
+import com.sparta.deliveryi.menu.presentation.dto.MenuRemoveResponse;
 import com.sparta.deliveryi.menu.presentation.dto.MenuRequest;
 import com.sparta.deliveryi.menu.presentation.dto.MenuResponse;
 import lombok.RequiredArgsConstructor;
@@ -54,8 +56,13 @@ public class MenuService {
     // 메뉴 수정
     public MenuResponse updateMenu(Long menuId, MenuRequest request) {
         String username = getCurrentUsername();
+
         Menu menu = menuRepository.findById(menuId)
                 .orElseThrow(MenuNotFoundException::new);
+
+        if (menu.isDeleted()) {
+            throw new MenuDeletedException();
+        }
 
         var result = descriptionGenerator.generate(
                 request.prompt(),
@@ -74,6 +81,21 @@ public class MenuService {
 
         saveAiLogIfNeeded(menu, request, result, username);
         return MenuResponse.from(menu, result.aiGenerated());
+    }
+
+
+    // 메뉴 삭제
+    @Transactional
+    public MenuRemoveResponse deleteMenu(Long menuId) {
+        Menu menu = menuRepository.findById(menuId)
+                .orElseThrow(MenuNotFoundException::new);
+
+        if (menu.isDeleted()) {
+            throw new MenuDeletedException();
+        }
+
+        menu.delete();
+        return MenuRemoveResponse.from(menu);
     }
 
     // Ai 로그 저장
