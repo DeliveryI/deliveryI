@@ -6,7 +6,7 @@ import com.sparta.deliveryi.user.domain.dto.UserCreateRequest;
 import com.sparta.deliveryi.user.domain.service.UserCreate;
 import com.sparta.deliveryi.user.infrastructure.keycloak.KeycloakUser;
 import com.sparta.deliveryi.user.infrastructure.keycloak.dto.KeycloakRegisterRequest;
-import com.sparta.deliveryi.user.infrastructure.keycloak.service.KeycloakRegister;
+import com.sparta.deliveryi.user.infrastructure.keycloak.service.AuthRegister;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -19,7 +19,7 @@ import org.springframework.validation.annotation.Validated;
 @RequiredArgsConstructor
 public class UserRegisterService implements UserRegister {
 
-    private final KeycloakRegister keycloakRegister;
+    private final AuthRegister authRegister;
     private final UserCreate userCreate;
 
     @Override
@@ -28,7 +28,7 @@ public class UserRegisterService implements UserRegister {
                 .username(request.username())
                 .password(request.password())
                 .build();
-        KeycloakUser keycloakUser = keycloakRegister.register(keycloakRegisterRequest);
+        KeycloakUser keycloakUser = authRegister.register(keycloakRegisterRequest);
 
         UserCreateRequest userCreateRequest = UserCreateRequest.builder()
                 .keycloakUser(keycloakUser)
