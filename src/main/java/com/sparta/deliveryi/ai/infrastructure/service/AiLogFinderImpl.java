@@ -1,14 +1,15 @@
 package com.sparta.deliveryi.ai.infrastructure.service;
 
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import com.sparta.deliveryi.ai.domain.AiLog;
 import com.sparta.deliveryi.ai.domain.QAiLog;
 import com.sparta.deliveryi.ai.domain.service.AiLogFinder;
-import com.sparta.deliveryi.ai.presentation.dto.AiLogQueryResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Objects;
 
 @Repository
 @RequiredArgsConstructor
@@ -18,36 +19,25 @@ public class AiLogFinderImpl implements AiLogFinder {
     private final QAiLog aiLog = QAiLog.aiLog;
 
     @Override
-    public Page<AiLogQueryResponse> findAllByMenuId(Long menuId, Pageable pageable) {
-        List<AiLogQueryResponse> contents = queryFactory
-                .select(
-                        com.querydsl.core.types.Projections.constructor(
-                                AiLogQueryResponse.class,
-                                aiLog.aiId,
-                                aiLog.menuId,
-                                aiLog.prompt,
-                                aiLog.fullPrompt,
-                                aiLog.response,
-                                aiLog.aiStatus,
-                                aiLog.createdBy,
-                                aiLog.createdAt.stringValue()
-                        )
-                )
-                .from(aiLog)
+    public Page<AiLog> findAllByMenuId(Long menuId, Pageable pageable) {
+        List<AiLog> contents = queryFactory
+                .selectFrom(aiLog)
                 .where(aiLog.menuId.eq(menuId))
                 .orderBy(aiLog.createdAt.desc())
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
                 .fetch();
 
+        long total = Objects.requireNonNullElse(
+                queryFactory
+                        .select(aiLog.count())
+                        .from(aiLog)
+                        .where(aiLog.menuId.eq(menuId))
+                        .fetchOne(),
+                0L
+        );
 
-        Long total = queryFactory
-                .select(aiLog.count())
-                .from(aiLog)
-                .where(aiLog.menuId.eq(menuId))
-                .fetchOne();
+        return new PageImpl<>(contents, pageable, total);
 
-
-        return new PageImpl<>(contents, pageable, total == null ? 0 : total);
     }
 }

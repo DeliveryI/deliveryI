@@ -1,7 +1,7 @@
 package com.sparta.deliveryi.ai.application.service;
 
 import com.sparta.deliveryi.ai.domain.exception.AiCallFailedException;
-import com.sparta.deliveryi.ai.infrastructure.GeminiClient;
+import com.sparta.deliveryi.ai.domain.service.AiClient;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -13,9 +13,9 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 public class AiLogService {
 
-    private final GeminiClient geminiClient;
+    private final AiClient aiClient;
 
     public String callGeminiApiOnly(String fullPrompt) throws AiCallFailedException {
-        return geminiClient.requestDescription(fullPrompt);
+        return aiClient.requestDescription(fullPrompt);
     }
 }

@@ -1,8 +1,6 @@
 package com.sparta.deliveryi.menu.application.service;
 
-import com.sparta.deliveryi.ai.domain.AiLog;
-import com.sparta.deliveryi.ai.domain.AiStatus;
-import com.sparta.deliveryi.ai.domain.service.AiLogRegister;
+import com.sparta.deliveryi.ai.application.service.AiApplicationService;
 import com.sparta.deliveryi.menu.application.dto.*;
 import com.sparta.deliveryi.menu.domain.Menu;
 import com.sparta.deliveryi.menu.domain.exception.*;
@@ -23,31 +21,42 @@ import java.util.UUID;
 public class MenuService {
 
     private final MenuRepository menuRepository;
-    private final AiLogRegister aiLogRegister;
+    private final AiApplicationService aiApplicationService;
     private final MenuDescriptionGenerator descriptionGenerator;
 
     public MenuResult createMenu(UUID storeId, MenuCommand command) {
         String username = getCurrentUsername();
 
-        var result = descriptionGenerator.generate(
-                command.prompt(),
-                command.menuName(),
-                command.menuDescription(),
-                command.aiGenerate()
-        );
-
         Menu menu = Menu.create(
                 storeId,
                 command.menuName(),
                 command.menuPrice(),
-                result.description(),
+                command.menuDescription(),
                 command.menuStatus(),
                 username
         );
         menuRepository.save(menu);
 
-        saveAiLogIfNeeded(menu, command, result, username);
-        return MenuResult.from(menu, result.aiGenerated());
+        if (command.aiGenerate()) {
+            String fullPrompt = descriptionGenerator.buildFullPrompt(command.prompt(), command.menuName());
+            var result = aiApplicationService.generate(
+                    menu.getMenuId(),
+                    command.menuName(),
+                    fullPrompt,
+                    true,
+                    username
+            );
+
+            menu.update(
+                    command.menuName(),
+                    command.menuPrice(),
+                    result.description(),
+                    command.menuStatus(),
+                    username
+            );
+        }
+
+        return MenuResult.from(menu, command.aiGenerate());
     }
 
     public MenuResult updateMenu(Long menuId, MenuCommand command) {
@@ -59,23 +68,37 @@ public class MenuService {
             throw new MenuDeletedException();
         }
 
-        var result = descriptionGenerator.generate(
-                command.prompt(),
-                command.menuName(),
-                command.menuDescription(),
-                command.aiGenerate()
-        );
+        String description;
+        boolean aiGenerated;
+
+        if (!command.aiGenerate()) {
+            description = command.menuDescription();
+            aiGenerated = false;
+        } else {
+            String fullPrompt = descriptionGenerator.buildFullPrompt(command.prompt(), command.menuName());
+            var result = aiApplicationService.generate(
+                    menuId,
+                    command.menuName(),
+                    fullPrompt,
+                    true,
+                    username
+            );
+
+            description = (result.description() != null && !result.description().isBlank())
+                    ? result.description()
+                    : "AI 설명 생성 실패";
+            aiGenerated = result.aiGenerated();
+        }
 
         menu.update(
                 command.menuName(),
                 command.menuPrice(),
-                result.description(),
+                description,
                 command.menuStatus(),
                 username
         );
 
-        saveAiLogIfNeeded(menu, command, result, username);
-        return MenuResult.from(menu, result.aiGenerated());
+        return MenuResult.from(menu, aiGenerated);
     }
 
     public void deleteMenu(Long menuId) {
@@ -92,20 +115,6 @@ public class MenuService {
             menu.changeStatus(cmd.status(), updatedBy);
             return menu.getMenuId();
         }).toList();
-    }
-
-    private void saveAiLogIfNeeded(Menu menu, MenuCommand command, MenuDescriptionGenerator.Result result, String username) {
-        if (result.aiGenerated() && result.fullPrompt() != null) {
-            AiLog aiLog = AiLog.create(
-                    menu.getMenuId(),
-                    command.menuName(),
-                    result.fullPrompt(),
-                    result.description(),
-                    AiStatus.SUCCESS,
-                    username
-            );
-            aiLogRegister.save(aiLog);
-        }
     }
 
     private String getCurrentUsername() {

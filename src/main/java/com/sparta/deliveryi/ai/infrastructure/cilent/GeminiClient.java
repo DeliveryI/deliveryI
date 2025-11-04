@@ -1,7 +1,8 @@
-package com.sparta.deliveryi.ai.infrastructure;
+package com.sparta.deliveryi.ai.infrastructure.cilent;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sparta.deliveryi.ai.domain.exception.AiCallFailedException;
+import com.sparta.deliveryi.ai.domain.service.AiClient;
 import com.sparta.deliveryi.ai.infrastructure.dto.GeminiRequest;
 import com.sparta.deliveryi.ai.infrastructure.dto.GeminiResponse;
 import lombok.RequiredArgsConstructor;
@@ -20,10 +21,9 @@ import java.util.stream.Collectors;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class GeminiClient {
+public class GeminiClient implements AiClient {
 
     private static final String CONTENT_TYPE = "application/json";
-
     private final ObjectMapper objectMapper;
     private final HttpClient httpClient = HttpClient.newHttpClient();
 
@@ -33,7 +33,7 @@ public class GeminiClient {
     @Value("${google.ai.endpoint}")
     private String geminiEndpoint;
 
-    /** Gemini API 호출 */
+    @Override
     public String requestDescription(String prompt) {
         try {
             String uri = geminiEndpoint + "?key=" + geminiApiKey;
@@ -46,23 +46,18 @@ public class GeminiClient {
                     .build();
 
             HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
-
             if (response.statusCode() != 200) {
                 log.warn("Gemini API 응답 오류 - status: {}", response.statusCode());
                 throw new AiCallFailedException();
             }
-
             return extractTextFromResponse(response.body());
-
         } catch (Exception e) {
             throw new AiCallFailedException();
         }
     }
 
-    /** Gemini 응답 파싱 */
     private String extractTextFromResponse(String jsonResponse) throws Exception {
         GeminiResponse geminiResponse = objectMapper.readValue(jsonResponse, GeminiResponse.class);
-
         String combinedText = geminiResponse.candidates().stream()
                 .flatMap(c -> c.content().parts().stream())
                 .map(GeminiResponse.Part::text)

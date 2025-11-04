@@ -1,13 +1,11 @@
 package com.sparta.deliveryi.ai.application.service;
 
+import com.sparta.deliveryi.ai.domain.AiLog;
+import com.sparta.deliveryi.ai.domain.exception.AiMenuNotFoundException;
 import com.sparta.deliveryi.ai.domain.service.AiLogFinder;
-import com.sparta.deliveryi.ai.presentation.dto.AiLogQueryResponse;
-import com.sparta.deliveryi.menu.domain.repository.MenuRepository;
-import com.sparta.deliveryi.menu.domain.exception.MenuNotFoundException;
+import com.sparta.deliveryi.ai.domain.service.MenuLookupClient;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -17,23 +15,20 @@ import java.util.List;
 public class AiLogQueryService {
 
     private final AiLogFinder aiLogFinder;
-    private final MenuRepository menuRepository;
+    private final MenuLookupClient menuLookupClient; // ✅ Port interface 사용
 
     private static final List<Integer> ALLOWED_PAGE_SIZES = List.of(10, 30, 50);
     private static final int DEFAULT_PAGE_SIZE = 10;
 
-    public Page<AiLogQueryResponse> getAiLogsByMenu(Long menuId, Pageable pageable) {
-
-        if (!menuRepository.existsById(menuId)) {
-            throw new MenuNotFoundException();
+    public Page<AiLog> getAiLogsByMenu(Long menuId, Pageable pageable) {
+        if (!menuLookupClient.existsMenuById(menuId)) {
+            throw new AiMenuNotFoundException();
         }
 
         Pageable validatedPageable = adjustPageSize(pageable);
-
         return aiLogFinder.findAllByMenuId(menuId, validatedPageable);
     }
 
-    // 허용된 페이지 크기(10, 30, 50) 외의 값은 기본 10으로 고정
     private Pageable adjustPageSize(Pageable pageable) {
         int requestedSize = pageable.getPageSize();
         int validatedSize = ALLOWED_PAGE_SIZES.contains(requestedSize) ? requestedSize : DEFAULT_PAGE_SIZE;
