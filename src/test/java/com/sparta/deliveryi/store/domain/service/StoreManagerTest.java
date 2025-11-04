@@ -46,7 +46,6 @@ record StoreManagerTest(StoreRegister storeRegister, StoreManager storeManager, 
             .isInstanceOf(IllegalArgumentException.class);
     }
 
-
     @Test
     void forcedUpdateInfo() {
         Store store = registerStore();

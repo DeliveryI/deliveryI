@@ -286,37 +286,4 @@ class StoreApiTest {
         SecurityContextHolder.getContext().setAuthentication(auth);
     }
 
-    @TestConfiguration
-    @EnableMethodSecurity
-    static class NoSecurityConfig {
-        @Bean
-        public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-            return http.csrf(CsrfConfigurer::disable)
-                    .authorizeHttpRequests(auth ->
-                            auth
-                                    .requestMatchers("/v1/stores").authenticated()
-                                    .anyRequest().authenticated())
-                    .build();
-        }
-
-        @Bean
-        public UserDetailsService userDetailsService() {
-            UserDetails manager = User.withUsername("manager")
-                    .password("{noop}password")
-                    .roles("MANAGER")
-                    .build();
-
-            UserDetails owner = User.withUsername("owner")
-                    .password("{noop}password")
-                    .roles("OWNER")
-                    .build();
-
-            UserDetails customer = User.withUsername("customer")
-                    .password("{noop}password")
-                    .roles("CUSTOMER")
-                    .build();
-
-            return new InMemoryUserDetailsManager(manager, owner, customer);
-        }
-    }
 }
