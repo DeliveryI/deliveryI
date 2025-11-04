@@ -40,6 +40,8 @@ public class KeycloakQueryService implements AuthFinder {
                     .build();
         } catch (NotFoundException e) {
             throw new KeycloakException(KeycloakMessageCode.NOT_FOUND);
+        } catch (Exception e) {
+            throw new RuntimeException(e.getMessage(), e);
         }
     }
 
