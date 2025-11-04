@@ -4,7 +4,6 @@ import com.sparta.deliveryi.ai.domain.AiLog;
 import com.sparta.deliveryi.ai.domain.AiStatus;
 import com.sparta.deliveryi.ai.domain.service.AiLogRegister;
 import com.sparta.deliveryi.menu.domain.Menu;
-import com.sparta.deliveryi.menu.domain.MenuStatus;
 import com.sparta.deliveryi.menu.domain.exception.MenuDeletedException;
 import com.sparta.deliveryi.menu.domain.exception.MenuNotFoundException;
 import com.sparta.deliveryi.menu.domain.repository.MenuRepository;

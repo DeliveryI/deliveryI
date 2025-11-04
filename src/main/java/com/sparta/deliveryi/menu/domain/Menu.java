@@ -26,13 +26,13 @@ public class Menu extends AbstractEntity {
     @Column(name = "store_id", nullable = false)
     private UUID storeId;
 
-    @Column(name = "menu_name", nullable = false, length = 255)
+    @Column(name = "menu_name", nullable = false)
     private String menuName;
 
     @Column(name = "menu_price", nullable = false)
     private Integer menuPrice;
 
-    @Column(name = "menu_description", nullable = false, length = 255)
+    @Column(name = "menu_description", nullable = false)
     private String menuDescription;
 
     @Enumerated(EnumType.STRING)
