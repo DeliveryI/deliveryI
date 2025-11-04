@@ -20,12 +20,12 @@ import static org.springframework.http.ResponseEntity.ok;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/v1/users")
-@Tag(name="회원 API", description = "")
+@Tag(name = "회원 API", description = "")
 public class UserApi {
 
     private final UserRegister userService;
 
-    @Operation(summary = "회원가입", description = "신규 사용자를 등록합니다. 가입 시 기본 권한은 'CUSTOMER' 입니다.")
+    @Operation(summary = "회원가입", description = "신규 회원을 등록합니다. 가입 시 기본 권한은 'CUSTOMER' 입니다.")
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping("signup")
     public ResponseEntity<ApiResponse<Void>> signup(@Valid @RequestBody SignupReqeust request) {
@@ -45,4 +45,6 @@ public class UserApi {
 
         return ok(success());
     }
+
+
 }
