@@ -5,11 +5,15 @@ import com.sparta.deliveryi.user.domain.User;
 import com.sparta.deliveryi.user.domain.UserId;
 import com.sparta.deliveryi.user.domain.dto.UserCreateRequest;
 import com.sparta.deliveryi.user.domain.service.UserCreate;
-import com.sparta.deliveryi.user.domain.service.UserFinderService;
+import com.sparta.deliveryi.user.domain.service.UserFinder;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
@@ -27,7 +31,7 @@ public class UserFinderServiceTest {
     private UserCreate userCreate;
 
     @Autowired
-    private UserFinderService userFinderService;
+    private UserFinder userFinder;
 
     List<User> users;
     int size = 10;
@@ -45,7 +49,8 @@ public class UserFinderServiceTest {
     @Test
     void findWithValidId() {
         User targetUser = users.getFirst();
-        User result = userFinderService.find(targetUser.getId());
+        User result = userFinder.find(targetUser.getId())
+                .orElseThrow(AssertionError::new);
         assertThat(result.getId()).isNotNull();
     }
 
@@ -54,15 +59,17 @@ public class UserFinderServiceTest {
         UserId invalidUserId = UserId.of(UUID.randomUUID());
 
         assertThrows(IllegalArgumentException.class, () -> {
-           userFinderService.find(invalidUserId);
+           userFinder.find(invalidUserId);
         });
     }
 
     @Test
     void findAll() {
-        List<User> result = userFinderService.findAll();
+        Pageable pageable = PageRequest.of(0, 10, Sort.by("createdAt").descending());
 
-        assertThat(users.size()).isEqualTo(size);
+        Page<User> result = userFinder.findAll(pageable);
+
+        assertThat(result.getTotalElements()).isEqualTo(users.size());
 
         List<UserId> userIds = users.stream().map(User::getId).toList();
         List<UserId> resultIds = result.stream().map(User::getId).toList();
