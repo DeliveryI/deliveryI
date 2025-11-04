@@ -101,7 +101,7 @@ public abstract class AbstractEntity {
      * 논리 삭제를 수행합니다.
      * <ul>
      *     <li>isDeleted를 true로 설정</li>
-     *     <li>deleteDateTime을 현재 시각으로 설정</li>
+     *     <li>deletedAt을 현재 시각으로 설정</li>
      *     <li>deleteId를 현재 인증된 회원 이름 또는 "anonymousUser"로 설정</li>
      * </ul>
      */
