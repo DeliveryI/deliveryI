@@ -26,13 +26,13 @@ public class Menu extends AbstractEntity {
     @Column(name = "store_id", nullable = false)
     private UUID storeId;
 
-    @Column(name = "menu_name", nullable = false, length = 255)
+    @Column(name = "menu_name", nullable = false)
     private String menuName;
 
     @Column(name = "menu_price", nullable = false)
     private Integer menuPrice;
 
-    @Column(name = "menu_description", nullable = false, length = 255)
+    @Column(name = "menu_description", nullable = false)
     private String menuDescription;
 
     @Enumerated(EnumType.STRING)
@@ -70,6 +70,18 @@ public class Menu extends AbstractEntity {
         this.menuDescription = menuDescription;
         this.menuStatus = menuStatus;
 
+        updateBy(updatedBy);
+    }
+
+    // 메뉴 상태 변경
+    public void changeStatus(MenuStatus newStatus, String updatedBy) {
+        if (this.isDeleted()) {
+            throw new MenuDeletedException();
+        }
+        if (this.menuStatus == newStatus) {
+            return;
+        }
+        this.menuStatus = newStatus;
         updateBy(updatedBy);
     }
 

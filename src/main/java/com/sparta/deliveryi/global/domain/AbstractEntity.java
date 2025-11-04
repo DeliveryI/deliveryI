@@ -54,7 +54,7 @@ public abstract class AbstractEntity {
     /**
      * 수정 일시
      */
-    @Column(name = "upated_at")
+    @Column(name = "updated_at")
     @LastModifiedDate
     private LocalDateTime updatedAt;
 
