@@ -10,7 +10,7 @@ import java.util.List;
 @Service
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
-public class UserQueryService implements UserFinder {
+public class UserFinderService implements UserFinder {
 
     private final UserRepository userRepository;
 

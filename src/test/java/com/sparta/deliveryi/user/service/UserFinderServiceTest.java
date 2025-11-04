@@ -5,7 +5,7 @@ import com.sparta.deliveryi.user.domain.User;
 import com.sparta.deliveryi.user.domain.UserId;
 import com.sparta.deliveryi.user.domain.dto.UserCreateRequest;
 import com.sparta.deliveryi.user.domain.service.UserCreate;
-import com.sparta.deliveryi.user.domain.service.UserQueryService;
+import com.sparta.deliveryi.user.domain.service.UserFinderService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,13 +21,13 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @SpringBootTest
 @Transactional
-public class UserQueryServiceTest {
+public class UserFinderServiceTest {
 
     @Autowired
     private UserCreate userCreate;
 
     @Autowired
-    private UserQueryService userQueryService;
+    private UserFinderService userFinderService;
 
     List<User> users;
     int size = 10;
@@ -45,7 +45,7 @@ public class UserQueryServiceTest {
     @Test
     void findWithValidId() {
         User targetUser = users.getFirst();
-        User result = userQueryService.find(targetUser.getId());
+        User result = userFinderService.find(targetUser.getId());
         assertThat(result.getId()).isNotNull();
     }
 
@@ -54,13 +54,13 @@ public class UserQueryServiceTest {
         UserId invalidUserId = UserId.of(UUID.randomUUID());
 
         assertThrows(IllegalArgumentException.class, () -> {
-           userQueryService.find(invalidUserId);
+           userFinderService.find(invalidUserId);
         });
     }
 
     @Test
     void findAll() {
-        List<User> result = userQueryService.findAll();
+        List<User> result = userFinderService.findAll();
 
         assertThat(users.size()).isEqualTo(size);
 
