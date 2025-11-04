@@ -29,4 +29,8 @@ public class KeycloakId {
     public static KeycloakId of(String id) {
         return new KeycloakId(UUID.fromString(id));
     }
+
+    public String toString() {
+        return id.toString();
+    }
 }
