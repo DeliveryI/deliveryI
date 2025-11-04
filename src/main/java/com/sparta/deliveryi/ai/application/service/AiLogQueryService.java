@@ -15,7 +15,7 @@ import java.util.List;
 public class AiLogQueryService {
 
     private final AiLogFinder aiLogFinder;
-    private final MenuLookupClient menuLookupClient; // ✅ Port interface 사용
+    private final MenuLookupClient menuLookupClient;
 
     private static final List<Integer> ALLOWED_PAGE_SIZES = List.of(10, 30, 50);
     private static final int DEFAULT_PAGE_SIZE = 10;
