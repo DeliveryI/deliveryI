@@ -10,7 +10,7 @@ import org.springframework.data.domain.Pageable;
 import java.util.UUID;
 
 public interface UserQuery {
-    MyInfoResponse getMyInfo(UUID keycloakId, UUID userId);
+    MyInfoResponse getMyInfo(UUID keycloakId);
     UserResponse getUserById(UUID userId);
 
     AdminUserResponse getUserForAdminById(UUID keycloakId, UUID userId);

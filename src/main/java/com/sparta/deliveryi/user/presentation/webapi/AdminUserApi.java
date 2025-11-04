@@ -15,6 +15,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -39,8 +40,20 @@ public class AdminUserApi {
             UserSearchRequest searchRequest,
             @PageableDefault Pageable pageable
     ) {
-        Page<AdminUserResponse> users = userQuery.searchUsersForAdminById(UUID.fromString(jwt.getSubject()), searchRequest, pageable);
+        Page<AdminUserResponse> response = userQuery.searchUsersForAdminById(UUID.fromString(jwt.getSubject()), searchRequest, pageable);
 
-        return ok(successWithDataOnly(users));
+        return ok(successWithDataOnly(response));
+    }
+
+    @PreAuthorize("hasAnyRole('MANAGER', 'MASTER')")
+    @Operation(summary = "특정 회원 정보 조회(관리자용)", description = "UserId로 다른 회원의 모든 정보를 조회합니다.")
+    @GetMapping("/{userId}")
+    public ResponseEntity<ApiResponse<AdminUserResponse>> getMyInfo(
+            @AuthenticationPrincipal Jwt jwt,
+            @PathVariable UUID userId
+    ) {
+        AdminUserResponse response = userQuery.getUserForAdminById(UUID.fromString(jwt.getSubject()), userId);
+
+        return ok(successWithDataOnly(response));
     }
 }

@@ -23,13 +23,9 @@ public class UserQueryService implements UserQuery {
     private UserFinder userFinder;
 
     @Override
-    public MyInfoResponse getMyInfo(UUID keycloakId, UUID userId) {
-        User user = userFinder.find(UserId.of(userId))
+    public MyInfoResponse getMyInfo(UUID keycloakId) {
+        User user = userFinder.findByKeycloakId(KeycloakId.of(keycloakId))
                 .orElseThrow(() -> new UserException(UserMessageCode.USER_NOT_FOUND));
-
-        if (!user.getKeycloakId().toUuid().equals(keycloakId)) {
-            throw new UserException(UserMessageCode.READ_FORBIDDEN);
-        }
 
         return MyInfoResponse.builder()
                 .userId(user.getId().toUuid())
