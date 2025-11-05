@@ -19,6 +19,7 @@ class LayeredArchitectureTest {
     private static final String[] DOMAIN_PACKAGES = {
             "com.sparta.deliveryi.ai.domain..",
             "com.sparta.deliveryi.menu.domain..",
+            "com.sparta.deliveryi.order.domain..",
             "com.sparta.deliveryi.store.domain..",
             "com.sparta.deliveryi.user.domain.."
     };
