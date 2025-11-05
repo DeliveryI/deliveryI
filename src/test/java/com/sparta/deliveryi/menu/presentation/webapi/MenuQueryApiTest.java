@@ -30,11 +30,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @WebMvcTest(MenuQueryApi.class)
 @AutoConfigureMockMvc(addFilters = false)
 @Import(MenuQueryApiTest.TestConfig.class)
-@DisplayName("MenuQueryApi 단위 테스트")
+@DisplayName("MenuQueryApi 테스트")
 class MenuQueryApiTest {
 
     @Autowired MockMvc mockMvc;
-    @Autowired ObjectMapper objectMapper;
     @Autowired MenuQueryService menuQueryService;
 
     @TestConfiguration

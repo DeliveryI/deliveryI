@@ -20,7 +20,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @DataJpaTest
 @Import({com.sparta.deliveryi.global.infrastructure.config.QueryDslConfig.class,
         com.sparta.deliveryi.menu.infrastructure.service.MenuFinderImpl.class})
-@DisplayName("MenuFinderImpl 단위 테스트")
+@DisplayName("MenuFinderImpl 통합 테스트")
 class MenuFinderImplTest {
 
     @Autowired
