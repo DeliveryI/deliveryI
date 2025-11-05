@@ -28,7 +28,7 @@ public class KeycloakService implements AuthService {
         } catch (NotFoundException e) {
             throw new KeycloakException(KeycloakMessageCode.NOT_FOUND);
         } catch (Exception e) {
-            // throw new KeycloakException(KeycloakMessageCode.INTERNAL_FAILED, e);
+            throw new KeycloakException(KeycloakMessageCode.INTERNAL_FAILED, e);
         }
     }
 
@@ -40,7 +40,7 @@ public class KeycloakService implements AuthService {
         } catch (NotFoundException e) {
             throw new KeycloakException(KeycloakMessageCode.NOT_FOUND);
         } catch (Exception e) {
-            // throw new KeycloakException(KeycloakMessageCode.INTERNAL_FAILED, e);
+            throw new KeycloakException(KeycloakMessageCode.INTERNAL_FAILED, e);
         }
     }
 
