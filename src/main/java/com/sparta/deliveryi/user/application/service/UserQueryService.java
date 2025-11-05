@@ -19,7 +19,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class UserQueryService implements UserQuery {
 
-    private UserRoleService userRoleService;
+    private UserRolePolicy userRolePolicy;
     private UserFinder userFinder;
 
     @Override
@@ -59,7 +59,7 @@ public class UserQueryService implements UserQuery {
         User loginUser = userFinder.findByKeycloakId(KeycloakId.of(keycloakId))
                 .orElseThrow(() -> new UserException(UserMessageCode.USER_NOT_FOUND));
 
-        if (!userRoleService.isAdmin(loginUser.getId().toUuid())) {
+        if (!userRolePolicy.isAdmin(loginUser.getId().toUuid())) {
             throw new UserException(UserMessageCode.ACCESS_FORBIDDEN);
         }
 
@@ -86,7 +86,7 @@ public class UserQueryService implements UserQuery {
         User loginUser = userFinder.findByKeycloakId(KeycloakId.of(keycloakId))
                 .orElseThrow(() -> new UserException(UserMessageCode.USER_NOT_FOUND));
 
-        if (!userRoleService.isAdmin(loginUser.getId().toUuid())) {
+        if (!userRolePolicy.isAdmin(loginUser.getId().toUuid())) {
             throw new UserException(UserMessageCode.ACCESS_FORBIDDEN);
         }
 
