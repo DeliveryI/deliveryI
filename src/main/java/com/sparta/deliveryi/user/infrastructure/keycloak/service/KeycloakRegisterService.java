@@ -1,6 +1,8 @@
 package com.sparta.deliveryi.user.infrastructure.keycloak.service;
 
 import com.sparta.deliveryi.user.domain.UserRole;
+import com.sparta.deliveryi.user.infrastructure.keycloak.KeycloakException;
+import com.sparta.deliveryi.user.infrastructure.keycloak.KeycloakMessageCode;
 import com.sparta.deliveryi.user.infrastructure.keycloak.KeycloakProperties;
 import com.sparta.deliveryi.user.infrastructure.keycloak.KeycloakUser;
 import com.sparta.deliveryi.user.infrastructure.keycloak.dto.KeycloakRegisterRequest;
@@ -14,12 +16,9 @@ import org.keycloak.representations.idm.CredentialRepresentation;
 import org.keycloak.representations.idm.RoleRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.client.HttpClientErrorException;
 
-import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.UUID;
 
@@ -41,11 +40,13 @@ public class KeycloakRegisterService implements AuthRegister {
         String keycloakId;
         try (Response response = createUser(resource, request)) {
             if (response.getStatus() != Response.Status.CREATED.getStatusCode()) {
-                throw new HttpClientErrorException(
-                        HttpStatus.valueOf(response.getStatus()),
-                        response.getStatusInfo().getReasonPhrase(),
-                        response.readEntity(String.class).getBytes(StandardCharsets.UTF_8),
-                        StandardCharsets.UTF_8
+                String body = response.hasEntity() ? response.readEntity(String.class) : null;
+                int status = response.getStatus();
+                String reason = response.getStatusInfo().getReasonPhrase();
+
+                throw new KeycloakException(
+                        KeycloakMessageCode.INTERNAL_FAILED,
+                        String.format("Keycloak 요청 실패 (%d %s): %s", status, reason, body)
                 );
             }
 
@@ -93,7 +94,7 @@ public class KeycloakRegisterService implements AuthRegister {
 
 
         if (role == null) {
-            throw new IllegalStateException(defaultRole + "가 Keycloak에 존재하지 않습니다.");
+            throw new KeycloakException(KeycloakMessageCode.INTERNAL_FAILED, defaultRole + "이(가) Keycloak에 존재하지 않습니다.", new IllegalStateException());
         }
 
         resource.get(userId).roles().realmLevel().add(List.of(role));

@@ -39,13 +39,12 @@ public class KeycloakQueryService implements AuthFinder {
                     .role(UserRole.valueOf(user.getAttributes().get("role").getFirst()))
                     .build();
         } catch (NotFoundException e) {
-            throw new KeycloakException(KeycloakMessageCode.NOT_FOUND);
+            throw new KeycloakException(KeycloakMessageCode.USER_NOT_FOUND);
         } catch (Exception e) {
-            throw new RuntimeException(e.getMessage(), e);
+            throw new KeycloakException(KeycloakMessageCode.INTERNAL_FAILED, e);
         }
     }
 
-    // TODO: pagination 추가
     @Override
     public List<KeycloakUser> findAll() {
         List<UserRepresentation> users = keycloak.realm(properties.getRealm())
