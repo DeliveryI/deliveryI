@@ -39,7 +39,7 @@ public class UserApi {
     @PostMapping("signup")
     public ResponseEntity<ApiResponse<Void>> signup(@Valid @RequestBody SignupReqeust request) {
         if (!request.password().equals(request.confirmPassword())) {
-            throw new UserException(UserMessageCode.PASSWORD_MISMATCH);
+            throw new UserException(UserMessageCode.CONFIRM_PASSWORD_MISMATCH);
         }
 
         UserRegisterRequest registerRequest = UserRegisterRequest.builder()
