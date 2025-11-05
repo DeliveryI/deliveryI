@@ -56,8 +56,10 @@ public class StoreApi {
 
     @PreAuthorize("hasAnyRole('MANAGER', 'MASTER')")
     @PostMapping("/v1/stores/{storeId}/accept")
-    public ResponseEntity<ApiResponse<Void>> acceptRegister(@PathVariable UUID storeId) {
-        storeRegister.acceptRegisterRequest(storeId);
+    public ResponseEntity<ApiResponse<Void>> acceptRegister(@AuthenticationPrincipal Jwt jwt, @PathVariable UUID storeId) {
+        UUID requestId = UUID.fromString(jwt.getSubject());
+
+        storeRegister.acceptRegisterRequest(storeId, requestId);
 
         return ok(success());
     }

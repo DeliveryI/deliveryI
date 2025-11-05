@@ -10,7 +10,7 @@ import java.util.UUID;
 public interface StoreRegister {
     Store register(@Valid StoreRegisterRequest registerRequest);
 
-    void acceptRegisterRequest(@NotNull UUID storeId);
+    void acceptRegisterRequest(@NotNull UUID storeId, @NotNull UUID requestId);
 
     void rejectRegisterRequest(@NotNull UUID storeId);
 }

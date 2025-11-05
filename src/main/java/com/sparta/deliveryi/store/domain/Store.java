@@ -2,7 +2,6 @@ package com.sparta.deliveryi.store.domain;
 
 import com.sparta.deliveryi.global.domain.AbstractEntity;
 import com.sparta.deliveryi.global.infrastructure.event.Events;
-import com.sparta.deliveryi.store.domain.event.StoreRegisterAcceptEvent;
 import com.sparta.deliveryi.store.domain.event.StoreRemoveEvent;
 import com.sparta.deliveryi.store.domain.event.StoreTransferEvent;
 import jakarta.persistence.*;
@@ -87,8 +86,6 @@ public class Store extends AbstractEntity {
         state(this.status == StoreStatus.PENDING, "등록 대기 상태가 아닙니다.");
 
         this.status = StoreStatus.READY;
-
-        Events.trigger(new StoreRegisterAcceptEvent(owner.getId()));
     }
 
     public void open() {
