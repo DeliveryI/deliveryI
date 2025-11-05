@@ -1,6 +1,7 @@
 package com.sparta.deliveryi.user.service;
 
 import com.sparta.deliveryi.user.UserFixture;
+import com.sparta.deliveryi.user.application.dto.UserSearchRequest;
 import com.sparta.deliveryi.user.domain.User;
 import com.sparta.deliveryi.user.domain.UserId;
 import com.sparta.deliveryi.user.domain.dto.UserCreateRequest;
@@ -64,10 +65,11 @@ public class UserFinderServiceTest {
     }
 
     @Test
-    void findAll() {
+    void search() {
+        UserSearchRequest search = new UserSearchRequest(null, null, null);
         Pageable pageable = PageRequest.of(0, 10, Sort.by("createdAt").descending());
 
-        Page<User> result = userFinder.findAll(pageable);
+        Page<User> result = userFinder.search(search, pageable);
 
         assertThat(result.getTotalElements()).isEqualTo(users.size());
 
