@@ -5,6 +5,8 @@ import com.sparta.deliveryi.user.domain.UserRole;
 import com.sparta.deliveryi.user.application.dto.AuthUser;
 import jakarta.ws.rs.core.Response;
 import lombok.RequiredArgsConstructor;
+import org.keycloak.admin.client.resource.RoleScopeResource;
+import org.keycloak.representations.idm.RoleRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,7 +18,7 @@ import java.util.stream.Collectors;
 @Service
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
-public class KeycloakQueryService implements AuthApplication {
+public class KeycloakService implements AuthApplication {
 
     private final KeycloakProvider provider;
 
@@ -46,6 +48,19 @@ public class KeycloakQueryService implements AuthApplication {
                             .build();
                 })
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public void updateRole(UUID keycloakId, UserRole role) {
+        RoleScopeResource resource = provider.getRoleById(keycloakId.toString());
+
+        // 기존 Role 제거
+        resource.remove(resource.listAll());
+
+        // 새 Role 추가
+        RoleRepresentation roleRepresentation = provider.toRoleRepresentation(role);
+
+        resource.add(List.of(roleRepresentation));
     }
 
     @Override

@@ -4,8 +4,6 @@ import com.sparta.deliveryi.global.presentation.dto.ApiResponse;
 import com.sparta.deliveryi.user.application.dto.AdminUserResponse;
 import com.sparta.deliveryi.user.application.dto.UserSearchRequest;
 import com.sparta.deliveryi.user.application.service.UserApplication;
-import com.sparta.deliveryi.user.application.service.UserModify;
-import com.sparta.deliveryi.user.application.service.UserQuery;
 import com.sparta.deliveryi.user.presentation.dto.UserRoleChangeRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

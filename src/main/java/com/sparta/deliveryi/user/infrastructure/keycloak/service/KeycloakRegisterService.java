@@ -1,5 +1,6 @@
 package com.sparta.deliveryi.user.infrastructure.keycloak.service;
 
+import com.sparta.deliveryi.user.application.service.AdminApplication;
 import com.sparta.deliveryi.user.application.service.AuthRegister;
 import com.sparta.deliveryi.user.domain.UserRole;
 import com.sparta.deliveryi.user.infrastructure.keycloak.KeycloakProperties;

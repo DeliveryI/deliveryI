@@ -1,15 +1,12 @@
 package com.sparta.deliveryi.user.presentation.webapi;
 
 import com.sparta.deliveryi.global.presentation.dto.ApiResponse;
-import com.sparta.deliveryi.user.application.dto.MyInfoResponse;
+import com.sparta.deliveryi.user.application.dto.LoginUserInfoResponse;
 import com.sparta.deliveryi.user.application.dto.TokenInfo;
 import com.sparta.deliveryi.user.application.dto.UserRegisterRequest;
-import com.sparta.deliveryi.user.application.dto.UserResponse;
-import com.sparta.deliveryi.user.application.service.TokenGenerateService;
+import com.sparta.deliveryi.user.application.dto.UserInfoResponse;
+import com.sparta.deliveryi.user.application.service.AdminApplication;
 import com.sparta.deliveryi.user.application.service.UserApplication;
-import com.sparta.deliveryi.user.application.service.UserModify;
-import com.sparta.deliveryi.user.application.service.UserQuery;
-import com.sparta.deliveryi.user.application.service.UserRegister;
 import com.sparta.deliveryi.user.domain.UserException;
 import com.sparta.deliveryi.user.domain.UserMessageCode;
 import com.sparta.deliveryi.user.domain.dto.UserInfoUpdateRequest;
@@ -39,7 +36,7 @@ import static org.springframework.http.ResponseEntity.ok;
 @Tag(name = "회원 API", description = "")
 public class UserApi {
 
-    private final TokenGenerateService tokenService;
+    private final AdminApplication.TokenGenerateService tokenService;
     private final UserApplication userService;
     private final UserRegister userRegister;
     private final UserQuery userQuery;
@@ -91,16 +88,16 @@ public class UserApi {
 
     @Operation(summary = "로그인한 회원 정보 조회", description = "로그인한 회원의 정보를 조회합니다.")
     @GetMapping()
-    public ResponseEntity<ApiResponse<MyInfoResponse>> getMyInfo(@AuthenticationPrincipal Jwt jwt) {
-        MyInfoResponse response = userQuery.getMyInfo(UUID.fromString(jwt.getSubject()));
+    public ResponseEntity<ApiResponse<LoginUserInfoResponse>> getMyInfo(@AuthenticationPrincipal Jwt jwt) {
+        LoginUserInfoResponse response = userQuery.getMyInfo(UUID.fromString(jwt.getSubject()));
 
         return ok(successWithDataOnly(response));
     }
 
     @Operation(summary = "특정 회원 정보 조회", description = "UserId로 다른 회원의 정보를 조회합니다.")
     @GetMapping("/{userId}")
-    public ResponseEntity<ApiResponse<UserResponse>> getUserInfo(@PathVariable UUID userId) {
-        UserResponse response = userQuery.getUserById(userId);
+    public ResponseEntity<ApiResponse<UserInfoResponse>> getUserInfo(@PathVariable UUID userId) {
+        UserInfoResponse response = userQuery.getUserById(userId);
 
         return ok(successWithDataOnly(response));
     }
