@@ -51,7 +51,7 @@ class MenuFinderImplTest {
     void findMenusByStore_success() {
         Page<Menu> result = menuFinder.findMenusByStore(
                 storeId,
-                storeId.toString(),
+                storeId,
                 "OWNER",
                 null,
                 PageRequest.of(0, 10)
@@ -69,7 +69,7 @@ class MenuFinderImplTest {
     void findMenusByStore_withMenuNameFilter() {
         Page<Menu> result = menuFinder.findMenusByStore(
                 storeId,
-                storeId.toString(),
+                storeId,
                 "OWNER",
                 "비빔",
                 PageRequest.of(0, 10)

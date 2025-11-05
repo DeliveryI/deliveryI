@@ -9,7 +9,7 @@ import java.util.UUID;
 public interface MenuFinder {
 
     Page<Menu> findMenusByStore(UUID targetStoreId,
-                                String currentStoreId,
+                                UUID currentStoreId,
                                 String role,
                                 String menuName,
                                 Pageable pageable);

@@ -52,10 +52,17 @@ class MenuQueryApiTest {
         Page<Menu> page = new PageImpl<>(list, PageRequest.of(0, 10), list.size());
 
         Mockito.when(menuQueryService.getMenusByStore(
-                anyString(), any(), anyString(), any(), anyInt(), anyInt(), anyString(), anyString()
+                any(UUID.class),
+                nullable(UUID.class),
+                anyString(),
+                any(),
+                anyInt(),
+                anyInt(),
+                anyString(),
+                anyString()
         )).thenReturn(page);
 
-        mockMvc.perform(get("/v1/stores/{storeId}/menus", "1234")
+        mockMvc.perform(get("/v1/stores/{storeId}/menus", UUID.randomUUID().toString())
                         .param("role", "CUSTOMER")
                         .param("page", "0")
                         .param("size", "10")

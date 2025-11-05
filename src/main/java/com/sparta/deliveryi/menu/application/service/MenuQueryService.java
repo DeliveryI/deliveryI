@@ -17,8 +17,8 @@ public class MenuQueryService {
     private final MenuFinder menuFinder;
 
     public Page<Menu> getMenusByStore(
-            String targetStoreId,
-            String currentStoreId,
+            UUID targetStoreId,
+            UUID currentStoreId,
             String role,
             String menuName,
             int page,
@@ -27,8 +27,7 @@ public class MenuQueryService {
             String direction
     ) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.fromString(direction), sortBy));
-        UUID storeUuid = UUID.fromString(targetStoreId);
-        return menuFinder.findMenusByStore(storeUuid, currentStoreId, role, menuName, pageable);
+        return menuFinder.findMenusByStore(targetStoreId, currentStoreId, role, menuName, pageable);
     }
 
     public Menu getMenu(Long menuId) {
