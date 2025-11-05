@@ -1,4 +1,6 @@
 package com.sparta.deliveryi.order.domain;
 
-public record OrderRejectEvent(OrderId orderId, int totalPrice) {
+import java.util.UUID;
+
+public record OrderRejectEvent(UUID orderId, int totalPrice) {
 }
