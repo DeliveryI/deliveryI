@@ -1,7 +1,7 @@
 package com.sparta.deliveryi.user.infrastructure.keycloak.service;
 
 import com.sparta.deliveryi.user.domain.KeycloakId;
-import com.sparta.deliveryi.user.infrastructure.keycloak.KeycloakUser;
+import com.sparta.deliveryi.user.infrastructure.keycloak.dto.KeycloakUser;
 
 import java.util.List;
 

@@ -4,7 +4,7 @@ import com.sparta.deliveryi.user.application.dto.UserRegisterRequest;
 import com.sparta.deliveryi.user.domain.User;
 import com.sparta.deliveryi.user.domain.dto.UserCreateRequest;
 import com.sparta.deliveryi.user.domain.service.UserCreate;
-import com.sparta.deliveryi.user.infrastructure.keycloak.KeycloakUser;
+import com.sparta.deliveryi.user.infrastructure.keycloak.dto.KeycloakUser;
 import com.sparta.deliveryi.user.infrastructure.keycloak.dto.KeycloakRegisterRequest;
 import com.sparta.deliveryi.user.infrastructure.keycloak.service.AuthRegister;
 import jakarta.validation.Valid;

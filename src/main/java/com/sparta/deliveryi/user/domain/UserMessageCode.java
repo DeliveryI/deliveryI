@@ -12,7 +12,7 @@ public enum UserMessageCode implements MessageCode {
     UPDATE_FORBIDDEN("USER.UPDATE_FORBIDDEN", HttpStatus.FORBIDDEN),
     ACCESS_FORBIDDEN("USER.ACCESS_FORBIDDEN", HttpStatus.FORBIDDEN),
     USER_NOT_FOUND("USER.USER_NOT_FOUND", HttpStatus.NOT_FOUND),
-    PASSWORD_MISMATCH("USER.PASSWORD_MISMATCH", HttpStatus.BAD_REQUEST);
+    CONFIRM_PASSWORD_MISMATCH("USER.CONFIRM_PASSWORD_MISMATCH", HttpStatus.BAD_REQUEST);
 
     private final String code;
     private final HttpStatus status;
