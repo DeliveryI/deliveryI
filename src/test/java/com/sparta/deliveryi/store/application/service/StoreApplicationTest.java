@@ -148,7 +148,7 @@ record StoreApplicationTest(
         entityManager.flush();
         entityManager.clear();
 
-        storeRegister.acceptRegisterRequest(store.getId().toUuid());
+        storeRegister.acceptRegisterRequest(store.getId().toUuid(), UUID.randomUUID());
 
         return store;
     }

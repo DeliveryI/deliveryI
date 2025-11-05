@@ -10,6 +10,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 
+import java.util.UUID;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
@@ -30,7 +32,7 @@ record StoreRegisterTest(StoreRegister storeRegister, StoreFinder storeFinder, E
     void acceptRegisterRequest() {
         Store store = registerStore();
 
-        storeRegister.acceptRegisterRequest(store.getId().toUuid());
+        storeRegister.acceptRegisterRequest(store.getId().toUuid(), UUID.randomUUID());
         entityManager.flush();
         entityManager.clear();
         store = storeFinder.find(store.getId());

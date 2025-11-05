@@ -1,9 +1,11 @@
 package com.sparta.deliveryi.store.domain.service;
 
+import com.sparta.deliveryi.global.infrastructure.event.Events;
 import com.sparta.deliveryi.store.domain.Store;
 import com.sparta.deliveryi.store.domain.StoreId;
 import com.sparta.deliveryi.store.domain.StoreRegisterRequest;
 import com.sparta.deliveryi.store.domain.StoreRepository;
+import com.sparta.deliveryi.store.domain.event.StoreRegisterAcceptEvent;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -31,12 +33,14 @@ public class StoreRegisterService implements StoreRegister {
     }
 
     @Override
-    public void acceptRegisterRequest(UUID storeId) {
+    public void acceptRegisterRequest(UUID storeId, UUID requestId) {
         Store store = storeFinder.find(StoreId.of(storeId));
 
         store.acceptRegisterRequest();
 
         storeRepository.save(store);
+
+        Events.trigger(new StoreRegisterAcceptEvent(store.getOwner().getId(), requestId));
     }
 
     @Override
