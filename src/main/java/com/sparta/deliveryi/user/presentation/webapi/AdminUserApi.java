@@ -3,6 +3,7 @@ package com.sparta.deliveryi.user.presentation.webapi;
 import com.sparta.deliveryi.global.presentation.dto.ApiResponse;
 import com.sparta.deliveryi.user.application.dto.AdminUserResponse;
 import com.sparta.deliveryi.user.application.dto.UserSearchRequest;
+import com.sparta.deliveryi.user.application.service.UserApplication;
 import com.sparta.deliveryi.user.application.service.UserModify;
 import com.sparta.deliveryi.user.application.service.UserQuery;
 import com.sparta.deliveryi.user.presentation.dto.UserRoleChangeRequest;
@@ -31,6 +32,7 @@ import static org.springframework.http.ResponseEntity.ok;
 @Tag(name = "회원 API(관리자용)", description = "관리자용 API로, 회원 정보 조회 시 모든 항목을 확인할 수 있습니다.")
 public class AdminUserApi {
 
+    private final UserApplication userService;
     private final UserQuery userQuery;
     private final UserModify userModify;
 
@@ -69,6 +71,18 @@ public class AdminUserApi {
             @Valid @RequestBody UserRoleChangeRequest request
     ) {
         userModify.modifyUserRole(UUID.fromString(jwt.getSubject()), userId, request.role());
+
+        return ok(success());
+    }
+
+    @PreAuthorize("hasAnyRole('MANAGER', 'MASTER')")
+    @Operation(summary = "회원탈퇴", description = "등록된 회원을 강제로 삭제합니다.")
+    @DeleteMapping("/{userId}")
+    public ResponseEntity<ApiResponse<Void>> unsubscribe(
+            @AuthenticationPrincipal Jwt jwt,
+            @PathVariable UUID userId
+    ) {
+        userService.deleteForce(UUID.fromString(jwt.getSubject()), userId);
 
         return ok(success());
     }
