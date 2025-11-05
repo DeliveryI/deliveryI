@@ -13,12 +13,12 @@ import org.springframework.validation.annotation.Validated;
 @Transactional
 @Validated
 @RequiredArgsConstructor
-public class UserCreateService implements UserCreate {
+public class UserRegisterService implements UserRegister {
 
     private final UserRepository userRepository;
 
     @Override
-    public User create(@Valid UserCreateRequest request) {
+    public User register(@Valid UserCreateRequest request) {
         User user = User.create(request);
 
         userRepository.save(user);

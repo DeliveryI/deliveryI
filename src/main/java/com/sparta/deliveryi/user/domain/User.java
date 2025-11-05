@@ -42,10 +42,10 @@ public class User extends AbstractEntity {
     public static User create(UserCreateRequest request) {
         User user = new User();
 
-        Objects.requireNonNull(request.keycloakUser());
-        user.keycloakId = KeycloakId.of(request.keycloakUser().id());
-        user.username = request.keycloakUser().username();
-        user.role = request.keycloakUser().role();
+        Objects.requireNonNull(request.authUser());
+        user.keycloakId = KeycloakId.of(request.authUser().id());
+        user.username = request.authUser().username();
+        user.role = request.authUser().role();
 
         user.id = Objects.requireNonNull(UserId.generateId());
         user.nickname = Objects.requireNonNull(request.nickname());

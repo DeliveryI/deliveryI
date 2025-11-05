@@ -11,12 +11,12 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
-public class UserFinderService implements UserFinder {
+public class UserQueryService implements UserQuery {
 
     private final UserRepository userRepository;
 
     @Override
-    public User getById(UserId userId) {
+    public User getUserById(UserId userId) {
         return userRepository.findById(userId).orElseThrow(() -> new UserException(UserMessageCode.USER_NOT_FOUND));
 
     }
@@ -27,7 +27,7 @@ public class UserFinderService implements UserFinder {
     }
 
     @Override
-    public User getByKeycloakId(KeycloakId keycloakId) {
+    public User getUserByKeycloakId(KeycloakId keycloakId) {
         return userRepository.findByKeycloakId(keycloakId).orElseThrow(() -> new UserException(UserMessageCode.USER_NOT_FOUND));
     }
 }
