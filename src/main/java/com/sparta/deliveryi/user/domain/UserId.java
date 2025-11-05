@@ -21,5 +21,7 @@ public class UserId {
 
     public static UserId of(UUID id) { return new UserId(id); }
 
+    public UUID toUuid() { return id; }
+
     public String toString() { return id.toString(); }
 }
