@@ -45,7 +45,6 @@ class StoreApiTest {
     void register() throws JsonProcessingException {
         StoreRegisterRequest request = StoreFixture.createStoreRegisterRequest();
         String requestJson = objectMapper.writeValueAsString(request);
-        mockedToken(UUID.randomUUID().toString(), "CUSTOMER");
 
         MvcTestResult result = mvcTester.post()
                 .uri("/v1/stores")
