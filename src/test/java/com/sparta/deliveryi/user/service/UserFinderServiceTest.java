@@ -1,5 +1,6 @@
 package com.sparta.deliveryi.user.service;
 
+import com.sparta.deliveryi.DeliveryITestConfiguration;
 import com.sparta.deliveryi.user.UserFixture;
 import com.sparta.deliveryi.user.domain.User;
 import com.sparta.deliveryi.user.domain.UserId;
@@ -14,6 +15,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.context.annotation.Import;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
@@ -25,6 +27,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @SpringBootTest
 @Transactional
+@Import(DeliveryITestConfiguration.class)
 public class UserFinderServiceTest {
 
     @Autowired

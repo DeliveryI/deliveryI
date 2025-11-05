@@ -79,7 +79,7 @@ class StoreTest {
         store.open();
 
         assertThatThrownBy(() -> store.open())
-        .isInstanceOf(StoreException.class);
+                .isInstanceOf(StoreException.class);
     }
 
     @Test
@@ -122,7 +122,7 @@ class StoreTest {
         StoreInfoUpdateRequest updateRequest = createStoreInfoUpdateRequest();
 
         assertThatThrownBy(() -> store.updateInfo(updateRequest))
-            .isInstanceOf(IllegalStateException.class);
+                .isInstanceOf(IllegalStateException.class);
     }
 
     @Test
@@ -165,7 +165,7 @@ class StoreTest {
         store.acceptRegisterRequest();
 
         assertThatThrownBy(() -> store.transferOwnership(null))
-            .isInstanceOf(NullPointerException.class);
+                .isInstanceOf(NullPointerException.class);
     }
 
     @Test
