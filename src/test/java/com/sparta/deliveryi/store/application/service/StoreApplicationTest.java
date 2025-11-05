@@ -2,10 +2,7 @@ package com.sparta.deliveryi.store.application.service;
 
 import com.sparta.deliveryi.DeliveryITestConfiguration;
 import com.sparta.deliveryi.store.StoreFixture;
-import com.sparta.deliveryi.store.domain.Store;
-import com.sparta.deliveryi.store.domain.StoreInfoUpdateRequest;
-import com.sparta.deliveryi.store.domain.StoreRegisterRequest;
-import com.sparta.deliveryi.store.domain.StoreStatus;
+import com.sparta.deliveryi.store.domain.*;
 import com.sparta.deliveryi.store.domain.service.StoreFinder;
 import com.sparta.deliveryi.store.domain.service.StoreRegister;
 import jakarta.persistence.EntityManager;
@@ -135,6 +132,21 @@ record StoreApplicationTest(
         store = storeFinder.find(store.getId());
 
         assertThat(store.getStatus()).isEqualTo(StoreStatus.READY);
+    }
+
+    @Test
+    void transfer() {
+        Store store = registerStore();
+        UUID newOwnerId = UUID.randomUUID();
+
+        storeApplication.transfer(store.getId().toUuid(), newOwnerId, store.getOwner().getId());
+
+        entityManager.flush();
+        entityManager.clear();
+
+        store = storeFinder.find(store.getId());
+
+        assertThat(store.getOwner()).isEqualTo(Owner.of(newOwnerId));
     }
 
     private Store registerStore() {

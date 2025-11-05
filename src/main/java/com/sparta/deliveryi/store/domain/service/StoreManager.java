@@ -24,4 +24,6 @@ public interface StoreManager {
     void close(@NotNull StoreId storeId, @NotNull UUID requestId);
 
     void forcedClose(@NotNull StoreId storeId);
+
+    void transfer(@NotNull StoreId storeId, @NotNull UUID newOwnerId, @NotNull UUID requestId);
 }

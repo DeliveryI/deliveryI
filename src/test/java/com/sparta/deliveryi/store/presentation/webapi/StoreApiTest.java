@@ -267,6 +267,52 @@ class StoreApiTest {
                 .hasPathSatisfying("$.success", isFalse());
     }
 
+    @Test
+    @WithMockUser(username = "owner", roles = "OWNER")
+    void transfer() throws JsonProcessingException {
+        Store store = registerService.register(StoreFixture.createStoreRegisterRequest());
+        registerService.acceptRegisterRequest(store.getId().toUuid());
+
+        StoreTransferRequest request = new StoreTransferRequest(store.getOwner().getId());
+        String requestJson = objectMapper.writeValueAsString(request);
+
+        mockedToken(store.getOwner().getId().toString(), "OWNER");
+
+        MvcTestResult result = mvcTester.post()
+                .uri("/v1/stores/{storeId}/transfer", store.getId().toString())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(requestJson)
+                .exchange();
+
+        assertThat(result)
+                .hasStatusOk()
+                .bodyJson()
+                .hasPathSatisfying("$.success", isTrue());
+    }
+
+    @Test
+    @WithMockUser(username = "customer", roles = "CUSTOMER")
+    void transferIfUnauthorized() throws JsonProcessingException {
+        Store store = registerService.register(StoreFixture.createStoreRegisterRequest());
+        registerService.acceptRegisterRequest(store.getId().toUuid());
+
+        StoreTransferRequest request = new StoreTransferRequest(UUID.randomUUID());
+        String requestJson = objectMapper.writeValueAsString(request);
+
+        mockedToken(UUID.randomUUID().toString(), "CUSTOMER");
+
+        MvcTestResult result = mvcTester.post()
+                .uri("/v1/stores/{storeId}/transfer", store.getId().toString())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(requestJson)
+                .exchange();
+
+        assertThat(result)
+                .hasStatus(HttpStatus.FORBIDDEN)
+                .bodyJson()
+                .hasPathSatisfying("$.success", isFalse());
+    }
+
     private static void mockedToken(String subject, String role) {
         Jwt jwt = Jwt.withTokenValue("dummy-token")
                 .header("alg", "none")

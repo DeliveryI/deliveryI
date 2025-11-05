@@ -16,4 +16,6 @@ public interface StoreApplication {
     void open(UUID storeId, UUID requestId);
 
     void close(UUID storeId, UUID requestId);
+
+    void transfer(UUID storeId, UUID newOwnerId, UUID requestId);
 }

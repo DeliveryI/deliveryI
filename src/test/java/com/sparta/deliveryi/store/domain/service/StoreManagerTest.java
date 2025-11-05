@@ -2,6 +2,7 @@ package com.sparta.deliveryi.store.domain.service;
 
 import com.sparta.deliveryi.DeliveryITestConfiguration;
 import com.sparta.deliveryi.store.StoreFixture;
+import com.sparta.deliveryi.store.domain.Owner;
 import com.sparta.deliveryi.store.domain.Store;
 import com.sparta.deliveryi.store.domain.StoreInfoUpdateRequest;
 import com.sparta.deliveryi.store.domain.StoreStatus;
@@ -10,6 +11,8 @@ import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
+
+import java.util.UUID;
 
 import static java.util.UUID.randomUUID;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -174,6 +177,28 @@ record StoreManagerTest(
         store = storeFinder.find(store.getId());
 
         assertThat(store.getStatus()).isEqualTo(StoreStatus.READY);
+    }
+
+    @Test
+    void transfer() {
+        Store store = registerStore();
+        UUID newOwnerId = randomUUID();
+
+        storeManager.transfer(store.getId(), newOwnerId, store.getOwner().getId());
+        entityManager.flush();
+        entityManager.clear();
+
+        store = storeFinder.find(store.getId());
+
+        assertThat(store.getOwner()).isEqualTo(Owner.of(newOwnerId));
+    }
+
+    @Test
+    void transferIfNotOwner() {
+        Store store = registerStore();
+
+        assertThatThrownBy(() -> storeManager.transfer(store.getId(), randomUUID(), randomUUID()))
+                .isInstanceOf(IllegalArgumentException.class);
     }
 
     private Store registerStore() {
