@@ -4,7 +4,7 @@ import com.sparta.deliveryi.user.domain.User;
 import com.sparta.deliveryi.user.domain.UserRole;
 import com.sparta.deliveryi.user.domain.dto.UserCreateRequest;
 import com.sparta.deliveryi.user.domain.dto.UserInfoUpdateRequest;
-import com.sparta.deliveryi.user.infrastructure.keycloak.KeycloakUser;
+import com.sparta.deliveryi.user.infrastructure.keycloak.dto.KeycloakUser;
 
 import java.util.UUID;
 

@@ -4,7 +4,7 @@ import com.sparta.deliveryi.user.domain.UserRole;
 import com.sparta.deliveryi.user.infrastructure.keycloak.KeycloakException;
 import com.sparta.deliveryi.user.infrastructure.keycloak.KeycloakMessageCode;
 import com.sparta.deliveryi.user.infrastructure.keycloak.KeycloakProperties;
-import com.sparta.deliveryi.user.infrastructure.keycloak.KeycloakUser;
+import com.sparta.deliveryi.user.infrastructure.keycloak.dto.KeycloakUser;
 import com.sparta.deliveryi.user.infrastructure.keycloak.dto.KeycloakRegisterRequest;
 import jakarta.validation.Valid;
 import jakarta.ws.rs.core.Response;

@@ -1,6 +1,6 @@
 package com.sparta.deliveryi.user.domain.dto;
 
-import com.sparta.deliveryi.user.infrastructure.keycloak.KeycloakUser;
+import com.sparta.deliveryi.user.infrastructure.keycloak.dto.KeycloakUser;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
