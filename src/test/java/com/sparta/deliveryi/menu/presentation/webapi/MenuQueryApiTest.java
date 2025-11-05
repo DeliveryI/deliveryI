@@ -1,6 +1,5 @@
 package com.sparta.deliveryi.menu.presentation.webapi;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sparta.deliveryi.menu.application.service.MenuQueryService;
 import com.sparta.deliveryi.menu.domain.Menu;
 import com.sparta.deliveryi.menu.domain.MenuStatus;
@@ -30,11 +29,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @WebMvcTest(MenuQueryApi.class)
 @AutoConfigureMockMvc(addFilters = false)
 @Import(MenuQueryApiTest.TestConfig.class)
-@DisplayName("MenuQueryApi 단위 테스트")
+@DisplayName("MenuQueryApi 테스트")
 class MenuQueryApiTest {
 
     @Autowired MockMvc mockMvc;
-    @Autowired ObjectMapper objectMapper;
     @Autowired MenuQueryService menuQueryService;
 
     @TestConfiguration
