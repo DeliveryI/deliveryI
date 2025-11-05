@@ -17,7 +17,7 @@ public class UserUpdateService implements UserUpdate {
     private final UserRepository userRepository;
 
     @Override
-    public User updateUserInfo(UserId userId, @Valid UserInfoUpdateRequest updateRequest) {
+    public User updateInfo(UserId userId, @Valid UserInfoUpdateRequest updateRequest) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new UserException(UserMessageCode.USER_NOT_FOUND));
 
@@ -27,7 +27,14 @@ public class UserUpdateService implements UserUpdate {
     }
 
     @Override
-    public User updateUserRole(UserId userId, UserRole userRole, String updatedBy) {
+    public User updateRole(UserId userId, UserRole role) {
+        String SYSTEM_USERNAME = "SYSTEM";
+
+        return updateRole(userId, role, SYSTEM_USERNAME);
+    }
+
+    @Override
+    public User updateRole(UserId userId, UserRole userRole, String updatedBy) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new UserException(UserMessageCode.USER_NOT_FOUND));
 
