@@ -1,6 +1,5 @@
 package com.sparta.deliveryi.menu.presentation.webapi;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sparta.deliveryi.menu.application.service.MenuQueryService;
 import com.sparta.deliveryi.menu.domain.Menu;
 import com.sparta.deliveryi.menu.domain.MenuStatus;
