@@ -4,11 +4,14 @@ import com.sparta.deliveryi.global.presentation.dto.ApiResponse;
 import com.sparta.deliveryi.user.application.dto.MyInfoResponse;
 import com.sparta.deliveryi.user.application.dto.UserRegisterRequest;
 import com.sparta.deliveryi.user.application.dto.UserResponse;
+import com.sparta.deliveryi.user.application.service.UserModify;
 import com.sparta.deliveryi.user.application.service.UserQuery;
 import com.sparta.deliveryi.user.application.service.UserRegister;
 import com.sparta.deliveryi.user.domain.UserException;
 import com.sparta.deliveryi.user.domain.UserMessageCode;
+import com.sparta.deliveryi.user.domain.dto.UserInfoUpdateRequest;
 import com.sparta.deliveryi.user.presentation.dto.SignupReqeust;
+import com.sparta.deliveryi.user.presentation.dto.UserInfoChangeRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.eclipse.microprofile.openapi.annotations.Operation;
@@ -33,6 +36,7 @@ public class UserApi {
 
     private final UserRegister userRegister;
     private final UserQuery userQuery;
+    private final UserModify userModify;
 
     @Operation(summary = "회원가입", description = "신규 회원을 등록합니다. 가입 시 기본 권한은 'CUSTOMER' 입니다.")
     @ResponseStatus(HttpStatus.CREATED)
@@ -69,5 +73,22 @@ public class UserApi {
         UserResponse response = userQuery.getUserById(userId);
 
         return ok(successWithDataOnly(response));
+    }
+
+    @Operation(summary = "회원 정보 수정", description = "로그인한 회원의 정보를 수정합니다.")
+    @PutMapping()
+    public ResponseEntity<ApiResponse<Void>> changeMyInfo(
+            @AuthenticationPrincipal Jwt jwt,
+            @Valid @RequestBody UserInfoChangeRequest request
+    ) {
+        UserInfoUpdateRequest updateRequest = UserInfoUpdateRequest.builder()
+                .nickname(request.nickname())
+                .userPhone(request.userPhone())
+                .currentAddress(request.currentAddress())
+                .build();
+
+        userModify.modifyUserInfo(UUID.fromString(jwt.getSubject()), updateRequest);
+
+        return ok(success());
     }
 }
