@@ -2,22 +2,19 @@ package com.sparta.deliveryi.user.domain.service;
 
 import com.sparta.deliveryi.user.domain.*;
 import com.sparta.deliveryi.user.domain.dto.UserInfoUpdateRequest;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.validation.annotation.Validated;
 
 @Service
 @Transactional
-@Validated
 @RequiredArgsConstructor
 public class UserUpdateService implements UserUpdate {
 
     private final UserRepository userRepository;
 
     @Override
-    public User updateUserInfo(UserId userId, @Valid UserInfoUpdateRequest updateRequest) {
+    public User updateUserInfo(UserId userId, UserInfoUpdateRequest updateRequest) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new UserException(UserMessageCode.USER_NOT_FOUND));
 
@@ -27,11 +24,11 @@ public class UserUpdateService implements UserUpdate {
     }
 
     @Override
-    public User updateUserRole(UserId userId, UserRole userRole) {
+    public User updateUserRole(UserId userId, UserRole userRole, String updatedBy) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new UserException(UserMessageCode.USER_NOT_FOUND));
 
-        user.updateRole(userRole);
+        user.updateRole(userRole, updatedBy);
 
         return user;
     }

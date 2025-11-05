@@ -38,7 +38,7 @@ public class UserRolePolicyService implements UserRolePolicy {
 
     private boolean isUserRole(UUID userId, List<UserRole> roles) {
         // 로그인한 회원정보 DB에서 조회
-        KeycloakId keycloakId = userFinder.get(UserId.of(userId)).getKeycloakId();
+        KeycloakId keycloakId = userFinder.getById(UserId.of(userId)).getKeycloakId();
         // Keycloak 서버에 저장된 역할 조회
         KeycloakUser user = authFinder.find(keycloakId);
 

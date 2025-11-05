@@ -4,6 +4,7 @@ import com.sparta.deliveryi.user.domain.*;
 import com.sparta.deliveryi.user.domain.dto.UserInfoUpdateRequest;
 import com.sparta.deliveryi.user.domain.service.UserFinder;
 import com.sparta.deliveryi.user.domain.service.UserUpdate;
+import com.sparta.deliveryi.user.infrastructure.keycloak.service.AuthUpdate;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -20,6 +21,7 @@ public class UserModifyService implements UserModify {
 
     private final UserFinder userFinder;
     private final UserUpdate userUpdate;
+    private final AuthUpdate authUpdate;
     private final UserRolePolicy userRolePolicy;
 
     @Override
@@ -37,8 +39,11 @@ public class UserModifyService implements UserModify {
             throw new UserException(UserMessageCode.ACCESS_FORBIDDEN);
         }
 
-        User user = userFinder.get(UserId.of(userId));
+        User user = userFinder.getById(UserId.of(userId));
 
-        userUpdate.updateUserRole(user.getId(), role);
+        // Keycloak Role 변경
+        authUpdate.updateUserRole(user.getKeycloakId(), role);
+        // Application DB Role 변경
+        userUpdate.updateUserRole(user.getId(), role, loginUser.getUsername());
     }
 }

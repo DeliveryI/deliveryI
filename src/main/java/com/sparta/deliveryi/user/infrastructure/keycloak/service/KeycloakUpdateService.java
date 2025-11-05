@@ -20,7 +20,7 @@ import java.util.List;
 @Transactional
 @RequiredArgsConstructor
 @EnableConfigurationProperties(KeycloakProperties.class)
-public class KeycloakUpdateService implements AuthUpdateService {
+public class KeycloakUpdateService implements AuthUpdate {
 
     private final KeycloakProperties properties;
     private final Keycloak keycloak;

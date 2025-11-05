@@ -61,7 +61,10 @@ public class User extends AbstractEntity {
         this.currentAddress = updateRequest.currentAddress();
     }
 
-    public void updateRole(UserRole role) {
+    public void updateRole(UserRole role, String updatedBy) {
         this.role = Objects.requireNonNull(role);
+
+        Objects.requireNonNull(updatedBy);
+        this.updateBy(updatedBy);
     }
 }

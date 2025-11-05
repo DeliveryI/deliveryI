@@ -8,8 +8,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Optional;
-
 @Service
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
@@ -18,8 +16,9 @@ public class UserFinderService implements UserFinder {
     private final UserRepository userRepository;
 
     @Override
-    public Optional<User> find(UserId userId) {
-        return userRepository.findById(userId);
+    public User getById(UserId userId) {
+        return userRepository.findById(userId).orElseThrow(() -> new UserException(UserMessageCode.USER_NOT_FOUND));
+
     }
 
     @Override
@@ -28,18 +27,7 @@ public class UserFinderService implements UserFinder {
     }
 
     @Override
-    public Optional<User> findByKeycloakId(KeycloakId keycloakId) {
-        return userRepository.findByKeycloakId(keycloakId);
-    }
-
-    @Override
-    public User get(UserId userId) {
-        return find(userId).orElseThrow(() -> new UserException(UserMessageCode.USER_NOT_FOUND));
-
-    }
-
-    @Override
     public User getByKeycloakId(KeycloakId keycloakId) {
-        return findByKeycloakId(keycloakId).orElseThrow(() -> new UserException(UserMessageCode.USER_NOT_FOUND));
+        return userRepository.findByKeycloakId(keycloakId).orElseThrow(() -> new UserException(UserMessageCode.USER_NOT_FOUND));
     }
 }

@@ -8,5 +8,5 @@ import jakarta.validation.Valid;
 
 public interface UserUpdate {
     User updateUserInfo(UserId userId, @Valid UserInfoUpdateRequest updateRequest);
-    User updateUserRole(UserId userId, UserRole userRole);
+    User updateUserRole(UserId userId, UserRole userRole, String updatedBy);
 }

@@ -24,8 +24,7 @@ public class UserQueryService implements UserQuery {
 
     @Override
     public MyInfoResponse getMyInfo(UUID keycloakId) {
-        User user = userFinder.findByKeycloakId(KeycloakId.of(keycloakId))
-                .orElseThrow(() -> new UserException(UserMessageCode.USER_NOT_FOUND));
+        User user = userFinder.getByKeycloakId(KeycloakId.of(keycloakId));
 
         return MyInfoResponse.builder()
                 .userId(user.getId().toUuid())
@@ -41,8 +40,7 @@ public class UserQueryService implements UserQuery {
 
     @Override
     public UserResponse getUserById(UUID userId) {
-        User user = userFinder.find(UserId.of(userId))
-                .orElseThrow(() -> new UserException(UserMessageCode.USER_NOT_FOUND));
+        User user = userFinder.getById(UserId.of(userId));
 
         return UserResponse.builder()
                 .userId(user.getId().toUuid())
@@ -56,15 +54,13 @@ public class UserQueryService implements UserQuery {
 
     @Override
     public AdminUserResponse getUserForAdminById(UUID keycloakId, UUID userId) {
-        User loginUser = userFinder.findByKeycloakId(KeycloakId.of(keycloakId))
-                .orElseThrow(() -> new UserException(UserMessageCode.USER_NOT_FOUND));
+        User loginUser = userFinder.getByKeycloakId(KeycloakId.of(keycloakId));
 
         if (!userRolePolicy.isAdmin(loginUser.getId().toUuid())) {
             throw new UserException(UserMessageCode.ACCESS_FORBIDDEN);
         }
 
-        User user = userFinder.find(UserId.of(userId))
-                .orElseThrow(() -> new UserException(UserMessageCode.USER_NOT_FOUND));
+        User user = userFinder.getById(UserId.of(userId));
 
         return AdminUserResponse.builder()
                 .userId(user.getId().toUuid())
@@ -83,8 +79,7 @@ public class UserQueryService implements UserQuery {
 
     @Override
     public Page<AdminUserResponse> searchUsersForAdminById(UUID keycloakId, UserSearchRequest search, Pageable pageable) {
-        User loginUser = userFinder.findByKeycloakId(KeycloakId.of(keycloakId))
-                .orElseThrow(() -> new UserException(UserMessageCode.USER_NOT_FOUND));
+        User loginUser = userFinder.getByKeycloakId(KeycloakId.of(keycloakId));
 
         if (!userRolePolicy.isAdmin(loginUser.getId().toUuid())) {
             throw new UserException(UserMessageCode.ACCESS_FORBIDDEN);
