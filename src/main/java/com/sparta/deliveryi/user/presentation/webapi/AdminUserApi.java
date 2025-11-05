@@ -75,6 +75,7 @@ public class AdminUserApi {
         return ok(success());
     }
 
+    @PreAuthorize("hasAnyRole('MANAGER', 'MASTER')")
     @Operation(summary = "회원탈퇴", description = "등록된 회원을 강제로 삭제합니다.")
     @DeleteMapping("/{userId}")
     public ResponseEntity<ApiResponse<Void>> unsubscribe(
