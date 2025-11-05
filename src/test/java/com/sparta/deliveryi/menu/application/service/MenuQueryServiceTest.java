@@ -35,20 +35,25 @@ class MenuQueryServiceTest {
     void getMenusByStore_success() {
         // given
         UUID storeId = UUID.randomUUID();
-        String currentStoreId = storeId.toString();
+        UUID ownerStoreId = storeId;
         String role = "OWNER";
         String menuName = "라면";
 
         Menu menu = Menu.create(storeId, "라면", 6000, "간단한 식사", MenuStatus.FORSALE, "tester");
         Page<Menu> expectedPage = new PageImpl<>(List.of(menu));
 
-        given(menuFinder.findMenusByStore(eq(storeId), eq(currentStoreId), eq(role), eq(menuName), any(Pageable.class)))
-                .willReturn(expectedPage);
+        given(menuFinder.findMenusByStore(
+                eq(storeId),
+                eq(ownerStoreId),
+                eq(role),
+                eq(menuName),
+                any(Pageable.class)
+        )).willReturn(expectedPage);
 
         // when
         Page<Menu> result = menuQueryService.getMenusByStore(
-                storeId.toString(),
-                currentStoreId,
+                storeId,
+                ownerStoreId,
                 role,
                 menuName,
                 0,
@@ -59,8 +64,9 @@ class MenuQueryServiceTest {
 
         // then
         assertThat(result).hasSize(1);
-        assertThat(result.getContent().getFirst().getMenuName()).isEqualTo("라면");
-        assertThat(result.getContent().getFirst().getMenuPrice()).isEqualTo(6000);
+        Menu found = result.getContent().getFirst();
+        assertThat(found.getMenuName()).isEqualTo("라면");
+        assertThat(found.getMenuPrice()).isEqualTo(6000);
     }
 
     @Test
