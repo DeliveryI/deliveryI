@@ -27,13 +27,6 @@ public class UserUpdateService implements UserUpdate {
     }
 
     @Override
-    public User updateRole(UserId userId, UserRole role) {
-        String SYSTEM_USERNAME = "SYSTEM";
-
-        return updateRole(userId, role, SYSTEM_USERNAME);
-    }
-
-    @Override
     public User updateRole(UserId userId, UserRole userRole, String updatedBy) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new UserException(UserMessageCode.USER_NOT_FOUND));
