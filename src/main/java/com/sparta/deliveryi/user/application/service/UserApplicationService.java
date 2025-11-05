@@ -1,14 +1,10 @@
 package com.sparta.deliveryi.user.application.service;
 
-import com.sparta.deliveryi.user.domain.KeycloakId;
-import com.sparta.deliveryi.user.domain.UserException;
-import com.sparta.deliveryi.user.domain.UserId;
-import com.sparta.deliveryi.user.domain.UserMessageCode;
+import com.sparta.deliveryi.user.domain.*;
 import com.sparta.deliveryi.user.domain.service.UserFinder;
 import com.sparta.deliveryi.user.infrastructure.keycloak.service.AuthService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.apache.catalina.User;
 import org.springframework.stereotype.Service;
 
 import java.util.UUID;
@@ -50,10 +46,15 @@ public class UserApplicationService implements UserApplication {
     }
 
     private void deleteUser(User user) {
+        KeycloakId keycloakId = user.getKeycloakId();
+
+        // Token 무효화
+        keycloakService.logout(keycloakId);
+
         // Application DB Soft 삭제
         user.delete();
 
         // Keycloak 삭제
-        keycloakService.delete(KeycloakId.of(keycloakId));
+        keycloakService.delete(keycloakId);
     }
 }
