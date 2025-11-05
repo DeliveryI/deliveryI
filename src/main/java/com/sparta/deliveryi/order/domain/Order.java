@@ -1,6 +1,7 @@
 package com.sparta.deliveryi.order.domain;
 
 import com.sparta.deliveryi.global.domain.AbstractEntity;
+import io.micrometer.common.util.StringUtils;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -60,6 +61,12 @@ public class Order extends AbstractEntity {
         order.totalPrice = order.calculateTotalPrice();
 
         return order;
+    }
+
+    public void changeDeliveryAddress(String address) {
+        validateChangeable(address);
+
+        this.deliveryAddress = address;
     }
 
     public void failPayment() {
@@ -167,6 +174,28 @@ public class Order extends AbstractEntity {
         if (isAcceptedOrLater()) {
             throw new OrderException(OrderMessageCode.CANNOT_CANCEL_STATUS);
         }
+    }
+
+    private void validateChangeable(String address) {
+        validateValidAddress(address);
+        validateBeforeDelivering();
+    }
+
+    private void validateValidAddress(String address) {
+        if (StringUtils.isBlank(address)) {
+            throw new OrderException(OrderMessageCode.INVALID_ADDRESS);
+        }
+    }
+
+    private void validateBeforeDelivering() {
+        if (isDeliveringOrLater()) {
+            throw new OrderException(OrderMessageCode.DELIVERING_OR_COMPLETED_STATUS);
+        }
+    }
+
+    private boolean isDeliveringOrLater() {
+        return this.status == OrderStatus.DELIVERING
+                || this.status == OrderStatus.ORDER_COMPLETED;
     }
 
     private boolean isPaymentComplete() {

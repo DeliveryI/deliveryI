@@ -10,6 +10,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import static com.sparta.deliveryi.order.OrderFixture.createOrderCreateRequest;
+import static org.assertj.core.api.Assertions.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
@@ -37,6 +38,32 @@ class OrderTest {
         assertThat(order.getDeliveryAddress()).isEqualTo(request.deliveryAddress());
         assertThat(order.getStatus()).isEqualTo(OrderStatus.ORDER_REQUESTED);
         assertThat(order.getOrderDetails().size()).isEqualTo(orderItems.size());
+    }
+
+    @Test
+    void changeDeliveryAddress() {
+        String address = "변경된 주소";
+
+        order.changeDeliveryAddress(address);
+
+        assertThat(order.getDeliveryAddress()).isEqualTo(address);
+    }
+
+    @Test
+    void changeDeliveryAddressIfDelivering() {
+        order.successPayment();
+        order.accept();
+        order.completeCooking();
+        order.delivery();
+
+        assertThatThrownBy(() -> order.changeDeliveryAddress("변경된 주소"))
+            .isInstanceOf(OrderException.class);
+    }
+
+    @Test
+    void changeDeliveryAddressInvalidAddress() {
+        assertThatThrownBy(() -> order.changeDeliveryAddress("  "))
+                .isInstanceOf(OrderException.class);
     }
 
     @Test
