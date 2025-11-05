@@ -7,6 +7,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -61,10 +62,129 @@ public class Order extends AbstractEntity {
         return order;
     }
 
+    public void failPayment() {
+        validatePaymentAvailable();
+
+        this.status = OrderStatus.PAYMENT_FAILED;
+    }
+
+    public void successPayment() {
+        validatePaymentAvailable();
+
+        this.status = OrderStatus.PAYMENT_COMPLETED;
+    }
+
+    public void accept() {
+        validateProcessable();
+
+        this.status = OrderStatus.ORDER_ACCEPTED;
+    }
+
+    public void reject() {
+        validateProcessable();
+
+        this.status = OrderStatus.ORDER_REJECTED;
+    }
+
+    public void cancel() {
+        validateCancelable();
+
+        this.status = OrderStatus.ORDER_CANCELED;
+    }
+
+    public void completeCooking() {
+        validateAccepted();
+
+        this.status = OrderStatus.READY_TO_SERVED;
+    }
+
+    public void delivery() {
+        validateReadyToServed();
+
+        this.status = OrderStatus.DELIVERING;
+    }
+
+    public void complete() {
+        validateDelivering();
+
+        this.status = OrderStatus.ORDER_COMPLETED;
+    }
+
     public Integer calculateTotalPrice() {
         return this.orderDetails.stream()
                 .map(OrderDetail::getOrderItem)
                 .mapToInt(OrderItem::totalPrice)
                 .sum();
+    }
+
+    private void validateDelivering() {
+        if (status != OrderStatus.DELIVERING) {
+            throw new OrderException(OrderMessageCode.NOT_READY_TO_SERVED_STATUS);
+        }
+    }
+
+    private void validateReadyToServed() {
+        if (status != OrderStatus.READY_TO_SERVED) {
+            throw new OrderException(OrderMessageCode.NOT_READY_TO_SERVED_STATUS);
+        }
+    }
+
+    private void validateAccepted() {
+        if (this.status != OrderStatus.ORDER_ACCEPTED) {
+            throw new OrderException(OrderMessageCode.NOT_ACCEPTED_STATUS);
+        }
+    }
+
+    private void validateNotCanceled() {
+        if (status == OrderStatus.ORDER_CANCELED) {
+            throw new OrderException(OrderMessageCode.ORDER_ALREADY_CANCELED);
+        }
+    }
+
+    private void validatePaymentAvailable() {
+        validateNotCanceled();
+
+        if (isPaymentComplete()) {
+            throw new OrderException(OrderMessageCode.PAYMENT_ALREADY_COMPLETED);
+        }
+    }
+
+    private void validateProcessable() {
+        validateNotCanceled();
+
+        if (status != OrderStatus.PAYMENT_COMPLETED) {
+            throw new OrderException(OrderMessageCode.BEFORE_PAYMENT);
+        }
+    }
+
+    private void validateCancelable() {
+        validateNotCanceled();
+
+        if (isCancelTimeout()) {
+            throw new OrderException(OrderMessageCode.CANCEL_TIMEOUT);
+        }
+
+        if (isAcceptedOrLater()) {
+            throw new OrderException(OrderMessageCode.CANNOT_CANCEL_STATUS);
+        }
+    }
+
+    private boolean isPaymentComplete() {
+        return this.status == OrderStatus.PAYMENT_COMPLETED
+                || this.status == OrderStatus.ORDER_ACCEPTED
+                || this.status == OrderStatus.READY_TO_SERVED
+                || this.status == OrderStatus.DELIVERING
+                || this.status == OrderStatus.ORDER_COMPLETED;
+    }
+
+    private boolean isCancelTimeout() {
+        return LocalDateTime.now().isAfter(getCreatedAt().plusMinutes(5L));
+    }
+
+    private boolean isAcceptedOrLater() {
+        return this.status == OrderStatus.ORDER_ACCEPTED
+                || this.status == OrderStatus.READY_TO_SERVED
+                || this.status == OrderStatus.DELIVERING
+                || this.status == OrderStatus.ORDER_COMPLETED;
     }
 }

@@ -3,14 +3,21 @@ package com.sparta.deliveryi.order;
 import com.sparta.deliveryi.order.domain.Order;
 import com.sparta.deliveryi.order.domain.OrderCreateRequest;
 import com.sparta.deliveryi.order.domain.OrderItem;
+import com.sparta.deliveryi.store.domain.Category;
+import org.springframework.test.util.ReflectionTestUtils;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
 public class OrderFixture {
 
     public static Order createOrder(OrderCreateRequest request) {
-        return Order.create(request);
+        Order order = Order.create(request);
+        ReflectionTestUtils.setField(order, "id", 1L);
+        ReflectionTestUtils.setField(order, "createdAt", LocalDateTime.now());
+
+        return order;
     }
 
     public static OrderCreateRequest createOrderCreateRequest() {
