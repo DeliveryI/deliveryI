@@ -1,4 +1,4 @@
-package com.sparta.deliveryi.user.infrastructure.keycloak;
+package com.sparta.deliveryi.user.infrastructure.keycloak.dto;
 
 import com.sparta.deliveryi.user.domain.UserRole;
 import jakarta.validation.constraints.NotBlank;

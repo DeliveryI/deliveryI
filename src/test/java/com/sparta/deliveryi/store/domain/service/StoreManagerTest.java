@@ -1,6 +1,8 @@
 package com.sparta.deliveryi.store.domain.service;
 
+import com.sparta.deliveryi.DeliveryITestConfiguration;
 import com.sparta.deliveryi.store.StoreFixture;
+import com.sparta.deliveryi.store.domain.Owner;
 import com.sparta.deliveryi.store.domain.Store;
 import com.sparta.deliveryi.store.domain.StoreInfoUpdateRequest;
 import com.sparta.deliveryi.store.domain.StoreStatus;
@@ -8,6 +10,9 @@ import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
+
+import java.util.UUID;
 
 import static java.util.UUID.randomUUID;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -15,7 +20,13 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @SpringBootTest
 @Transactional
-record StoreManagerTest(StoreRegister storeRegister, StoreManager storeManager, StoreFinder storeFinder, EntityManager entityManager) {
+@Import(DeliveryITestConfiguration.class)
+record StoreManagerTest(
+        StoreRegister storeRegister,
+        StoreManager storeManager,
+        StoreFinder storeFinder,
+        EntityManager entityManager
+) {
 
     @Test
     void updateInfo() {
@@ -43,7 +54,7 @@ record StoreManagerTest(StoreRegister storeRegister, StoreManager storeManager, 
         StoreInfoUpdateRequest updateRequest = StoreFixture.createStoreUpdateRequest();
 
         assertThatThrownBy(() -> storeManager.updateInfo(store.getId(), updateRequest, randomUUID()))
-            .isInstanceOf(IllegalArgumentException.class);
+                .isInstanceOf(IllegalArgumentException.class);
     }
 
     @Test
@@ -116,7 +127,7 @@ record StoreManagerTest(StoreRegister storeRegister, StoreManager storeManager, 
         Store store = registerStore();
 
         assertThatThrownBy(() -> storeManager.open(store.getId(), randomUUID()))
-            .isInstanceOf(IllegalArgumentException.class);
+                .isInstanceOf(IllegalArgumentException.class);
     }
 
     @Test
@@ -166,6 +177,28 @@ record StoreManagerTest(StoreRegister storeRegister, StoreManager storeManager, 
         store = storeFinder.find(store.getId());
 
         assertThat(store.getStatus()).isEqualTo(StoreStatus.READY);
+    }
+
+    @Test
+    void transfer() {
+        Store store = registerStore();
+        UUID newOwnerId = randomUUID();
+
+        storeManager.transfer(store.getId(), newOwnerId, store.getOwner().getId());
+        entityManager.flush();
+        entityManager.clear();
+
+        store = storeFinder.find(store.getId());
+
+        assertThat(store.getOwner()).isEqualTo(Owner.of(newOwnerId));
+    }
+
+    @Test
+    void transferIfNotOwner() {
+        Store store = registerStore();
+
+        assertThatThrownBy(() -> storeManager.transfer(store.getId(), randomUUID(), randomUUID()))
+                .isInstanceOf(IllegalArgumentException.class);
     }
 
     private Store registerStore() {

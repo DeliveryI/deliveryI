@@ -3,7 +3,10 @@ package com.sparta.deliveryi.store.application.service;
 import com.sparta.deliveryi.store.domain.Store;
 import com.sparta.deliveryi.store.domain.StoreId;
 import com.sparta.deliveryi.store.domain.StoreInfoUpdateRequest;
+import com.sparta.deliveryi.store.domain.service.StoreFinder;
 import com.sparta.deliveryi.store.domain.service.StoreManager;
+import com.sparta.deliveryi.store.domain.service.StoreRegister;
+import com.sparta.deliveryi.user.application.service.UserRoleService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -13,61 +16,83 @@ import java.util.UUID;
 @Service
 @Transactional
 @RequiredArgsConstructor
-public class StoreApplicationService implements StoreApplication{
+public class StoreApplicationService implements StoreApplication {
+
+    private final StoreRegister storeRegister;
 
     private final StoreManager storeManager;
 
+    private final StoreFinder storeFinder;
+
+    private final UserRoleService userRoleService;
+
     @Override
     public Store updateInfo(UUID storeId, StoreInfoUpdateRequest updateRequest, UUID requestId) {
-        //        TODO 권한 확인 후 다른 메서드 호출
-//        ex)
-//        User user = userFinder.find(requestId);
-//
-//        if(user.isManager()){
-//            storeManager.forcedUpdateInfo((StoreId.of(storeId));
-//            return;
-//        }
-        return storeManager.updateInfo(StoreId.of(storeId), updateRequest, requestId);
+        StoreId id = StoreId.of(storeId);
+
+        if (isAdmin(requestId)) {
+            return storeManager.forcedUpdateInfo(id, updateRequest);
+        }
+
+        return storeManager.updateInfo(id, updateRequest, requestId);
     }
 
     @Override
     public Store remove(UUID storeId, UUID requestId) {
-//        TODO 권한 확인 후 다른 메서드 호출
-//        ex)
-//        User user = userFinder.find(requestId);
-//
-//        if(user.isManager()){
-//            storeManager.forcedRemove((StoreId.of(storeId));
-//            return;
-//        }
-        return storeManager.remove((StoreId.of(storeId)), requestId);
+        return removeStore(StoreId.of(storeId), requestId);
     }
 
     @Override
     public void open(UUID storeId, UUID requestId) {
-//        TODO 권한 확인 후 다른 메서드 호출
-//        ex)
-//        User user = userFinder.find(requestId);
-//
-//        if(user.isManager()){
-//            storeManager.forcedOpen((StoreId.of(storeId));
-//            return;
-//        }
+        StoreId id = StoreId.of(storeId);
+
+        if (isAdmin(requestId)) {
+            storeManager.forcedOpen(id);
+            return;
+        }
 
         storeManager.open((StoreId.of(storeId)), requestId);
     }
 
     @Override
     public void close(UUID storeId, UUID requestId) {
-//        TODO 권한 확인 후 다른 메서드 호출
-//        ex)
-//        User user = userFinder.find(requestId);
-//
-//        if(user.isManager()){
-//            storeManager.forcedClose((StoreId.of(storeId));
-//            return;
-//        }
+        StoreId id = StoreId.of(storeId);
+
+        if (isAdmin(requestId)) {
+            storeManager.forcedClose(id);
+            return;
+        }
 
         storeManager.close((StoreId.of(storeId)), requestId);
     }
+
+    @Override
+    public void transfer(UUID storeId, UUID newOwnerId, UUID requestId) {
+        StoreId id = StoreId.of(storeId);
+        UUID oldOwnerId = resolveOldOwnerId(id, requestId);
+
+        storeManager.transfer(id, newOwnerId, oldOwnerId);
+    }
+
+    private boolean isAdmin(UUID requestId) {
+        return userRoleService.isAdmin(requestId);
+    }
+
+    private Store removeStore(StoreId storeId, UUID requestId) {
+        if (isAdmin(requestId)) {
+            return storeManager.forcedRemove(storeId);
+        }
+
+        return storeManager.remove(storeId, requestId);
+    }
+
+    private UUID resolveOldOwnerId(StoreId storeId, UUID requestId) {
+        if (isAdmin(requestId)) {
+            Store store = storeFinder.find(storeId);
+            return store.getOwner().getId();
+        }
+
+        return requestId;
+    }
+
 }

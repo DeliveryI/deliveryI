@@ -90,4 +90,14 @@ public class StoreApi {
         return ok(success());
     }
 
+    @PreAuthorize("hasAnyRole('OWNER', 'MANAGER', 'MASTER')")
+    @PostMapping("/v1/stores/{storeId}/transfer")
+    public ResponseEntity<ApiResponse<Void>> transfer(@AuthenticationPrincipal Jwt jwt, @PathVariable UUID storeId, @RequestBody @Valid StoreTransferRequest transferRequest) {
+        UUID requestId = UUID.fromString(jwt.getSubject());
+
+        storeApplication.transfer(storeId, transferRequest.newOwnerId(), requestId);
+
+        return ok(success());
+    }
+
 }
