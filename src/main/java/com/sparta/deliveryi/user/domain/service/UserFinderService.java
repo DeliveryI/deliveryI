@@ -1,10 +1,7 @@
 package com.sparta.deliveryi.user.domain.service;
 
 import com.sparta.deliveryi.user.application.dto.UserSearchRequest;
-import com.sparta.deliveryi.user.domain.KeycloakId;
-import com.sparta.deliveryi.user.domain.User;
-import com.sparta.deliveryi.user.domain.UserId;
-import com.sparta.deliveryi.user.domain.UserRepository;
+import com.sparta.deliveryi.user.domain.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -26,12 +23,23 @@ public class UserFinderService implements UserFinder {
     }
 
     @Override
+    public Page<User> search(UserSearchRequest search, Pageable pageable) {
+        return userRepository.search(search, pageable);
+    }
+
+    @Override
     public Optional<User> findByKeycloakId(KeycloakId keycloakId) {
         return userRepository.findByKeycloakId(keycloakId);
     }
 
     @Override
-    public Page<User> search(UserSearchRequest search, Pageable pageable) {
-        return userRepository.search(search, pageable);
+    public User get(UserId userId) {
+        return find(userId).orElseThrow(() -> new UserException(UserMessageCode.USER_NOT_FOUND));
+
+    }
+
+    @Override
+    public User getByKeycloakId(KeycloakId keycloakId) {
+        return findByKeycloakId(keycloakId).orElseThrow(() -> new UserException(UserMessageCode.USER_NOT_FOUND));
     }
 }

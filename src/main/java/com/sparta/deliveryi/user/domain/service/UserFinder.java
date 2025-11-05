@@ -11,6 +11,11 @@ import java.util.Optional;
 
 public interface UserFinder {
     Optional<User> find(UserId userId);
-    Optional<User> findByKeycloakId(KeycloakId keycloakId);
     Page<User> search(UserSearchRequest search,  Pageable pageable);
+
+    // 로그인한 회원의 정보를 가져옵니다.
+    Optional<User> findByKeycloakId(KeycloakId keycloakId);
+
+    User get(UserId userId);
+    User getByKeycloakId(KeycloakId keycloakId);
 }
