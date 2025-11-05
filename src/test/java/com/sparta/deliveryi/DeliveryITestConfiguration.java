@@ -19,9 +19,21 @@ public class DeliveryITestConfiguration {
             }
 
             @Override
+            public boolean isCustomer(UUID userId) {
+                return !(isAdmin(userId) || isOwner(userId));
+            }
+
+            @Override
+            public boolean isOwner(UUID userId) {
+                return "11111111-1111-1111-1111-111111111111"
+                        .equals(userId.toString());
+            }
+
+            @Override
             public void updateUserRole(UUID userId, UserRole role) {
 
             }
         };
     }
+
 }

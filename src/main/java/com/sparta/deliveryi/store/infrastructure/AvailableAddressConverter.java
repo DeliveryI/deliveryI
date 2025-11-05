@@ -6,7 +6,6 @@ import jakarta.persistence.Converter;
 import org.springframework.util.ObjectUtils;
 
 import java.util.Arrays;
-import java.util.List;
 
 @Converter(autoApply = true)
 public class AvailableAddressConverter implements AttributeConverter<AvailableAddress, String> {

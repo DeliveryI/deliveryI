@@ -29,8 +29,10 @@ public class StoreApi {
     private final StoreApplication storeApplication;
 
     @PostMapping("/v1/stores")
-    public ResponseEntity<ApiResponse<StoreRegisterResponse>> register(@RequestBody @Valid StoreRegisterRequest registerRequest) {
-        Store store = storeRegister.register(registerRequest);
+    public ResponseEntity<ApiResponse<StoreRegisterResponse>> register(@AuthenticationPrincipal Jwt jwt, @RequestBody @Valid StoreRegisterRequest registerRequest) {
+        UUID requestId = UUID.fromString(jwt.getSubject());
+
+        Store store = storeApplication.register(registerRequest, requestId);
 
         return ok(successWithDataOnly(StoreRegisterResponse.from(store)));
     }

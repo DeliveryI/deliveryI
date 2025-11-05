@@ -51,7 +51,7 @@ record StoreManagerTest(
         StoreInfoUpdateRequest updateRequest = StoreFixture.createStoreUpdateRequest();
 
         assertThatThrownBy(() -> storeManager.updateInfo(store.getId(), updateRequest, randomUUID()))
-            .isInstanceOf(IllegalArgumentException.class);
+                .isInstanceOf(IllegalArgumentException.class);
     }
 
     @Test
@@ -124,7 +124,7 @@ record StoreManagerTest(
         Store store = registerStore();
 
         assertThatThrownBy(() -> storeManager.open(store.getId(), randomUUID()))
-            .isInstanceOf(IllegalArgumentException.class);
+                .isInstanceOf(IllegalArgumentException.class);
     }
 
     @Test
