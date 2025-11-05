@@ -76,7 +76,7 @@ public class AdminUserApi {
     }
 
     @Operation(summary = "회원탈퇴", description = "등록된 회원을 강제로 삭제합니다.")
-    @GetMapping("/{userId}")
+    @DeleteMapping("/{userId}")
     public ResponseEntity<ApiResponse<Void>> unsubscribe(
             @AuthenticationPrincipal Jwt jwt,
             @PathVariable UUID userId

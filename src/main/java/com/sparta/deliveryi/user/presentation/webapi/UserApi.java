@@ -123,7 +123,7 @@ public class UserApi {
     }
 
     @Operation(summary = "회원탈퇴", description = "로그인한 회원을 삭제합니다.")
-    @GetMapping("/{userId}")
+    @DeleteMapping("/{userId}")
     public ResponseEntity<ApiResponse<Void>> unsubscribe(@AuthenticationPrincipal Jwt jwt) {
         userService.delete(UUID.fromString(jwt.getSubject()));
 
