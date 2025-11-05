@@ -10,7 +10,6 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import static com.sparta.deliveryi.order.OrderFixture.createOrderCreateRequest;
-import static org.assertj.core.api.Assertions.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
@@ -57,7 +56,7 @@ class OrderTest {
         order.delivery();
 
         assertThatThrownBy(() -> order.changeDeliveryAddress("변경된 주소"))
-            .isInstanceOf(OrderException.class);
+                .isInstanceOf(OrderException.class);
     }
 
     @Test

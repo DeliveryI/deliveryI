@@ -3,7 +3,6 @@ package com.sparta.deliveryi.order;
 import com.sparta.deliveryi.order.domain.Order;
 import com.sparta.deliveryi.order.domain.OrderCreateRequest;
 import com.sparta.deliveryi.order.domain.OrderItem;
-import com.sparta.deliveryi.store.domain.Category;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import java.time.LocalDateTime;
