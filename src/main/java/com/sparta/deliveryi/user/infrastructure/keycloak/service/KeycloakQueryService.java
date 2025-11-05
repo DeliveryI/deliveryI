@@ -1,14 +1,10 @@
 package com.sparta.deliveryi.user.infrastructure.keycloak.service;
 
-import com.sparta.deliveryi.user.domain.KeycloakId;
+import com.sparta.deliveryi.user.application.service.AuthApplication;
 import com.sparta.deliveryi.user.domain.UserRole;
-import com.sparta.deliveryi.user.infrastructure.keycloak.KeycloakException;
-import com.sparta.deliveryi.user.infrastructure.keycloak.KeycloakMessageCode;
-import com.sparta.deliveryi.user.infrastructure.keycloak.KeycloakProperties;
-import com.sparta.deliveryi.user.infrastructure.keycloak.dto.KeycloakUser;
-import jakarta.ws.rs.NotFoundException;
+import com.sparta.deliveryi.user.application.dto.AuthUser;
+import jakarta.ws.rs.core.Response;
 import lombok.RequiredArgsConstructor;
-import org.keycloak.admin.client.Keycloak;
 import org.keycloak.representations.idm.UserRepresentation;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,41 +16,30 @@ import java.util.stream.Collectors;
 @Service
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
-public class KeycloakQueryService implements AuthFinder {
+public class KeycloakQueryService implements AuthApplication {
 
-    private final KeycloakProperties properties;
-    private final Keycloak keycloak;
+    private final KeycloakProvider provider;
+
 
     @Override
-    public KeycloakUser find(KeycloakId keycloakId) {
-        try {
-            UserRepresentation user = keycloak.realm(properties.getRealm())
-                    .users()
-                    .get(keycloakId.toString())
-                    .toRepresentation();
+    public AuthUser getUserById(UUID keycloakId) {
+        UserRepresentation user = provider.getUserById(keycloakId.toString());
 
-            return KeycloakUser.builder()
-                    .id(UUID.fromString(user.getId()))
-                    .username(user.getUsername())
-                    .role(UserRole.valueOf(user.getAttributes().get("role").getFirst()))
-                    .build();
-        } catch (NotFoundException e) {
-            throw new KeycloakException(KeycloakMessageCode.USER_NOT_FOUND);
-        } catch (Exception e) {
-            throw new KeycloakException(KeycloakMessageCode.INTERNAL_FAILED, e);
-        }
+        return AuthUser.builder()
+                .id(UUID.fromString(user.getId()))
+                .username(user.getUsername())
+                .role(provider.toUserRole(user))
+                .build();
     }
 
     @Override
-    public List<KeycloakUser> findAll() {
-        List<UserRepresentation> users = keycloak.realm(properties.getRealm())
-                .users()
-                .list();
+    public List<AuthUser> getUsers() {
+        List<UserRepresentation> users = provider.findUsers();
 
         return users.stream()
                 .map(user -> {
-                    UserRole role = UserRole.valueOf(user.getAttributes().get("role").getFirst());
-                    return KeycloakUser.builder()
+                    UserRole role = provider.toUserRole(user);
+                    return AuthUser.builder()
                             .id(UUID.fromString(user.getId()))
                             .username(user.getUsername())
                             .role(role)
@@ -62,4 +47,18 @@ public class KeycloakQueryService implements AuthFinder {
                 })
                 .collect(Collectors.toList());
     }
+
+    @Override
+    public void logout(UUID keycloakId) {
+        provider.getUserResourceById(keycloakId.toString()).logout();
+    }
+
+    @Override
+    public void delete(UUID keycloakId) {
+        try(Response response = provider.getUsersResource().delete(keycloakId.toString())) {
+            provider.checkResponse(response, Response.Status.NO_CONTENT.getStatusCode(), "회원 삭제에 실패하였습니다.");
+        }
+
+    }
 }
+
