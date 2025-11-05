@@ -17,10 +17,10 @@ import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.noClasses;
 class LayeredArchitectureTest {
 
     private static final String[] DOMAIN_PACKAGES = {
-            "com.sparta.deliveryi.ai..",
-            "com.sparta.deliveryi.menu..",
-            "com.sparta.deliveryi.store..",
-            "com.sparta.deliveryi.user.."
+            "com.sparta.deliveryi.ai.domain..",
+            "com.sparta.deliveryi.menu.domain..",
+            "com.sparta.deliveryi.store.domain..",
+            "com.sparta.deliveryi.user.domain.."
     };
 
     @ArchTest

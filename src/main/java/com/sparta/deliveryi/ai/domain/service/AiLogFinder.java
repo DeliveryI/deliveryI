@@ -1,10 +1,9 @@
 package com.sparta.deliveryi.ai.domain.service;
 
-import com.sparta.deliveryi.ai.presentation.dto.AiLogQueryResponse;
+import com.sparta.deliveryi.ai.domain.AiLog;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
-
 public interface AiLogFinder {
-    Page<AiLogQueryResponse> findAllByMenuId(Long menuId, Pageable pageable);
+    Page<AiLog> findAllByMenuId(Long menuId, Pageable pageable);
 }

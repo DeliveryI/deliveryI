@@ -1,14 +1,11 @@
 package com.sparta.deliveryi.menu.application.service;
 
-import com.sparta.deliveryi.ai.domain.AiLog;
-import com.sparta.deliveryi.ai.domain.AiStatus;
-import com.sparta.deliveryi.ai.domain.service.AiLogRegister;
+import com.sparta.deliveryi.ai.application.service.AiApplicationService;
+import com.sparta.deliveryi.menu.application.dto.*;
 import com.sparta.deliveryi.menu.domain.Menu;
-import com.sparta.deliveryi.menu.domain.exception.MenuDeletedException;
-import com.sparta.deliveryi.menu.domain.exception.MenuNotFoundException;
+import com.sparta.deliveryi.menu.domain.exception.*;
 import com.sparta.deliveryi.menu.domain.repository.MenuRepository;
 import com.sparta.deliveryi.menu.domain.service.MenuDescriptionGenerator;
-import com.sparta.deliveryi.menu.presentation.dto.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -24,38 +21,46 @@ import java.util.UUID;
 public class MenuService {
 
     private final MenuRepository menuRepository;
-    private final AiLogRegister aiLogRegister;
+    private final AiApplicationService aiApplicationService;
     private final MenuDescriptionGenerator descriptionGenerator;
 
-    // 메뉴 생성
-    public MenuResponse createMenu(UUID storeId, MenuRequest request) {
+    public MenuResult createMenu(UUID storeId, MenuCommand command) {
         String username = getCurrentUsername();
-
-        var result = descriptionGenerator.generate(
-                request.prompt(),
-                request.menuName(),
-                request.menuDescription(),
-                request.aiGenerate()
-        );
 
         Menu menu = Menu.create(
                 storeId,
-                request.menuName(),
-                request.menuPrice(),
-                result.description(),
-                request.menuStatus(),
+                command.menuName(),
+                command.menuPrice(),
+                command.menuDescription(),
+                command.menuStatus(),
                 username
         );
         menuRepository.save(menu);
 
-        saveAiLogIfNeeded(menu, request, result, username);
-        return MenuResponse.from(menu, result.aiGenerated());
+        if (command.aiGenerate()) {
+            String fullPrompt = descriptionGenerator.buildFullPrompt(command.prompt(), command.menuName());
+            var result = aiApplicationService.generate(
+                    menu.getMenuId(),
+                    command.menuName(),
+                    fullPrompt,
+                    true,
+                    username
+            );
+
+            menu.update(
+                    command.menuName(),
+                    command.menuPrice(),
+                    result.description(),
+                    command.menuStatus(),
+                    username
+            );
+        }
+
+        return MenuResult.from(menu, command.aiGenerate());
     }
 
-    // 메뉴 수정
-    public MenuResponse updateMenu(Long menuId, MenuRequest request) {
+    public MenuResult updateMenu(Long menuId, MenuCommand command) {
         String username = getCurrentUsername();
-
         Menu menu = menuRepository.findById(menuId)
                 .orElseThrow(MenuNotFoundException::new);
 
@@ -63,70 +68,55 @@ public class MenuService {
             throw new MenuDeletedException();
         }
 
-        var result = descriptionGenerator.generate(
-                request.prompt(),
-                request.menuName(),
-                request.menuDescription(),
-                request.aiGenerate()
-        );
+        String description;
+        boolean aiGenerated;
+
+        if (!command.aiGenerate()) {
+            description = command.menuDescription();
+            aiGenerated = false;
+        } else {
+            String fullPrompt = descriptionGenerator.buildFullPrompt(command.prompt(), command.menuName());
+            var result = aiApplicationService.generate(
+                    menuId,
+                    command.menuName(),
+                    fullPrompt,
+                    true,
+                    username
+            );
+
+            description = (result.description() != null && !result.description().isBlank())
+                    ? result.description()
+                    : "AI 설명 생성 실패";
+            aiGenerated = result.aiGenerated();
+        }
 
         menu.update(
-                request.menuName(),
-                request.menuPrice(),
-                result.description(),
-                request.menuStatus(),
+                command.menuName(),
+                command.menuPrice(),
+                description,
+                command.menuStatus(),
                 username
         );
 
-        saveAiLogIfNeeded(menu, request, result, username);
-        return MenuResponse.from(menu, result.aiGenerated());
+        return MenuResult.from(menu, aiGenerated);
     }
 
-
-    // 메뉴 삭제
-    @Transactional
-    public MenuRemoveResponse deleteMenu(Long menuId) {
+    public void deleteMenu(Long menuId) {
         Menu menu = menuRepository.findById(menuId)
                 .orElseThrow(MenuNotFoundException::new);
-
-        if (menu.isDeleted()) {
-            throw new MenuDeletedException();
-        }
-
+        if (menu.isDeleted()) throw new MenuDeletedException();
         menu.delete();
-        return MenuRemoveResponse.from(menu);
     }
 
-    // 메뉴 상태 변경
-    @Transactional
-    public MenuStatusResponse changeMenuStatus(List<MenuStatusRequest.MenuStatusChangeItem> items, String updatedBy) {
-        List<Long> updatedIds = items.stream().map(item -> {
-            Menu menu = menuRepository.findById(item.menuId())
+    public List<Long> changeMenuStatus(List<MenuStatusChangeCommand> commands, String updatedBy) {
+        return commands.stream().map(cmd -> {
+            Menu menu = menuRepository.findById(cmd.menuId())
                     .orElseThrow(MenuNotFoundException::new);
-
-            menu.changeStatus(item.status(), updatedBy);
+            menu.changeStatus(cmd.status(), updatedBy);
             return menu.getMenuId();
         }).toList();
-
-        return MenuStatusResponse.of(updatedIds);
     }
 
-    // Ai 로그 저장
-    private void saveAiLogIfNeeded(Menu menu, MenuRequest request, MenuDescriptionGenerator.Result result, String username) {
-        if (result.aiGenerated() && result.fullPrompt() != null) {
-            AiLog aiLog = AiLog.create(
-                    menu.getMenuId(),
-                    request.menuName(),
-                    result.fullPrompt(),
-                    result.description(),
-                    AiStatus.SUCCESS,
-                    username
-            );
-            aiLogRegister.save(aiLog);
-        }
-    }
-
-    // 로그인 사용자 가져오기
     private String getCurrentUsername() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         return (auth != null && auth.isAuthenticated() && !"anonymousUser".equals(auth.getName()))

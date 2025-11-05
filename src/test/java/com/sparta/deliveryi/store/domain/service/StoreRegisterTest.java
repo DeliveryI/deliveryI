@@ -1,5 +1,6 @@
 package com.sparta.deliveryi.store.domain.service;
 
+import com.sparta.deliveryi.DeliveryITestConfiguration;
 import com.sparta.deliveryi.store.StoreFixture;
 import com.sparta.deliveryi.store.domain.Store;
 import com.sparta.deliveryi.store.domain.StoreStatus;
@@ -7,11 +8,13 @@ import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
 @Transactional
+@Import(DeliveryITestConfiguration.class)
 record StoreRegisterTest(StoreRegister storeRegister, StoreFinder storeFinder, EntityManager entityManager) {
 
     @Test

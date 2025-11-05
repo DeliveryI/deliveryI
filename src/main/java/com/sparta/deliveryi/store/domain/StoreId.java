@@ -32,7 +32,7 @@ public class StoreId {
         return id;
     }
 
-    public String toString(){
+    public String toString() {
         return id.toString();
     }
 }

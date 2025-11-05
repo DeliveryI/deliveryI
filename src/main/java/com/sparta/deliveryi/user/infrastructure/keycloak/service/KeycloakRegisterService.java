@@ -27,7 +27,7 @@ import java.util.UUID;
 @Validated
 @RequiredArgsConstructor
 @EnableConfigurationProperties(KeycloakProperties.class)
-public class KeycloakRegisterService implements KeycloakRegister {
+public class KeycloakRegisterService implements AuthRegister {
 
     private final KeycloakProperties properties;
     private final Keycloak keycloak;
