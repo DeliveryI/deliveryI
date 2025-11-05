@@ -1,7 +1,6 @@
 package com.sparta.deliveryi.user.infrastructure.keycloak.api;
 
 import com.sparta.deliveryi.user.application.dto.TokenInfo;
-import com.sparta.deliveryi.user.application.service.AdminApplication;
 import com.sparta.deliveryi.user.application.service.TokenGenerateService;
 import com.sparta.deliveryi.user.infrastructure.keycloak.KeycloakProperties;
 import lombok.RequiredArgsConstructor;
@@ -30,6 +29,7 @@ public class KeycloakTokenProperties implements TokenGenerateService {
         form.add("username", username);
         form.add("password", password);
         form.add("scope", "openid profile email");
+
         RestClient client = RestClient.create();
         ResponseEntity<TokenInfo> res = client.post()
                 .uri(String.format("%s/realms/%s/protocol/openid-connect/token", properties.getServerUrl(), properties.getRealm()))
