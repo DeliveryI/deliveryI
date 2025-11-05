@@ -4,6 +4,7 @@ import java.util.UUID;
 
 public interface UserRolePolicy {
     boolean isAdmin(UUID userId);
+    boolean isMaster(UUID userId);
     boolean isCustomer(UUID userId);
     boolean isOwner(UUID userId);
 }

@@ -27,6 +27,9 @@ public class UserRolePolicyService implements UserRolePolicy {
     }
 
     @Override
+    public boolean isMaster(UUID userId) { return isUserRole(userId, List.of(UserRole.MASTER)); }
+
+    @Override
     public boolean isCustomer(UUID userId) {
         return isUserRole(userId, List.of(UserRole.CUSTOMER));
     }

@@ -35,7 +35,7 @@ public class UserModifyService implements UserModify {
     public void modifyUserRole(UUID keycloakId, UUID userId, UserRole role) {
         User loginUser = userFinder.getByKeycloakId(KeycloakId.of(keycloakId));
 
-        if (!userRolePolicy.isAdmin(loginUser.getId().toUuid())) {
+        if (!userRolePolicy.isMaster(loginUser.getId().toUuid())) {
             throw new UserException(UserMessageCode.ACCESS_FORBIDDEN);
         }
 
