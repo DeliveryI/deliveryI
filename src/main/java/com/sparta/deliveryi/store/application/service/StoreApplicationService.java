@@ -1,10 +1,8 @@
 package com.sparta.deliveryi.store.application.service;
 
-import com.sparta.deliveryi.global.infrastructure.event.Events;
-import com.sparta.deliveryi.store.domain.*;
-import com.sparta.deliveryi.store.domain.event.StoreRegisterEvent;
-import com.sparta.deliveryi.store.domain.event.StoreRemoveEvent;
-import com.sparta.deliveryi.store.domain.event.StoreTransferEvent;
+import com.sparta.deliveryi.store.domain.Store;
+import com.sparta.deliveryi.store.domain.StoreId;
+import com.sparta.deliveryi.store.domain.StoreInfoUpdateRequest;
 import com.sparta.deliveryi.store.domain.service.StoreFinder;
 import com.sparta.deliveryi.store.domain.service.StoreManager;
 import com.sparta.deliveryi.store.domain.service.StoreRegister;
@@ -13,7 +11,6 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -30,17 +27,6 @@ public class StoreApplicationService implements StoreApplication {
     private final UserRoleService userRoleService;
 
     @Override
-    public Store register(StoreRegisterRequest registerRequest, UUID requestId) {
-        Store store = storeRegister.register(registerRequest);
-
-        if (userRoleService.isCustomer(requestId)) {
-            Events.trigger(new StoreRegisterEvent(requestId));
-        }
-
-        return store;
-    }
-
-    @Override
     public Store updateInfo(UUID storeId, StoreInfoUpdateRequest updateRequest, UUID requestId) {
         StoreId id = StoreId.of(storeId);
 
@@ -53,15 +39,7 @@ public class StoreApplicationService implements StoreApplication {
 
     @Override
     public Store remove(UUID storeId, UUID requestId) {
-        StoreId id = StoreId.of(storeId);
-
-        Store store = isAdmin(requestId)
-                ? removeStoreAsAdmin(id)
-                : removeStoreAsOwner(id, requestId);
-
-        triggerRemoveEvent(store.getOwner(), requestId);
-
-        return store;
+        return removeStore(StoreId.of(storeId), requestId);
     }
 
     @Override
@@ -94,19 +72,17 @@ public class StoreApplicationService implements StoreApplication {
         UUID oldOwnerId = resolveOldOwnerId(id, requestId);
 
         storeManager.transfer(id, newOwnerId, oldOwnerId);
-
-        triggerTransferEvent(Owner.of(requestId), newOwnerId);
     }
 
     private boolean isAdmin(UUID requestId) {
         return userRoleService.isAdmin(requestId);
     }
 
-    private Store removeStoreAsAdmin(StoreId storeId) {
-        return storeManager.forcedRemove(storeId);
-    }
+    private Store removeStore(StoreId storeId, UUID requestId) {
+        if (isAdmin(requestId)) {
+            return storeManager.forcedRemove(storeId);
+        }
 
-    private Store removeStoreAsOwner(StoreId storeId, UUID requestId) {
         return storeManager.remove(storeId, requestId);
     }
 
@@ -115,22 +91,8 @@ public class StoreApplicationService implements StoreApplication {
             Store store = storeFinder.find(storeId);
             return store.getOwner().getId();
         }
+
         return requestId;
     }
 
-    private void triggerRemoveEvent(Owner owner, UUID requestId) {
-        List<Store> remainingStores = storeFinder.findByOwner(owner);
-
-        if (remainingStores.isEmpty()) {
-            Events.trigger(new StoreRemoveEvent(requestId));
-        }
-    }
-
-    private void triggerTransferEvent(Owner owner, UUID newOwnerId) {
-        List<Store> remainingStores = storeFinder.findByOwner(owner);
-
-        if (remainingStores.isEmpty()) {
-            Events.trigger(new StoreTransferEvent(owner.getId(), newOwnerId));
-        }
-    }
 }

@@ -3,7 +3,11 @@ package com.sparta.deliveryi.user.presentation.webapi;
 import com.sparta.deliveryi.global.presentation.dto.ApiResponse;
 import com.sparta.deliveryi.user.application.dto.AdminUserResponse;
 import com.sparta.deliveryi.user.application.dto.UserSearchRequest;
+import com.sparta.deliveryi.user.application.service.UserApplication;
+import com.sparta.deliveryi.user.application.service.UserModify;
 import com.sparta.deliveryi.user.application.service.UserQuery;
+import com.sparta.deliveryi.user.presentation.dto.UserRoleChangeRequest;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.eclipse.microprofile.openapi.annotations.Operation;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
@@ -14,13 +18,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
 
+import static com.sparta.deliveryi.global.presentation.dto.ApiResponse.success;
 import static com.sparta.deliveryi.global.presentation.dto.ApiResponse.successWithDataOnly;
 import static org.springframework.http.ResponseEntity.ok;
 
@@ -30,7 +32,10 @@ import static org.springframework.http.ResponseEntity.ok;
 @Tag(name = "회원 API(관리자용)", description = "관리자용 API로, 회원 정보 조회 시 모든 항목을 확인할 수 있습니다.")
 public class AdminUserApi {
 
+    private final UserApplication userService;
     private final UserQuery userQuery;
+    private final UserModify userModify;
+
 
     @PreAuthorize("hasAnyRole('MANAGER', 'MASTER')")
     @Operation(summary = "회원 목록 조회", description = "등록된 모든 회원 정보를 조회합니다.")
@@ -46,7 +51,7 @@ public class AdminUserApi {
     }
 
     @PreAuthorize("hasAnyRole('MANAGER', 'MASTER')")
-    @Operation(summary = "특정 회원 정보 조회(관리자용)", description = "UserId로 다른 회원의 모든 정보를 조회합니다.")
+    @Operation(summary = "특정 회원 정보 조회", description = "userId로 등록된 회원의 모든 정보를 조회합니다.")
     @GetMapping("/{userId}")
     public ResponseEntity<ApiResponse<AdminUserResponse>> getMyInfo(
             @AuthenticationPrincipal Jwt jwt,
@@ -55,5 +60,30 @@ public class AdminUserApi {
         AdminUserResponse response = userQuery.getUserForAdminById(UUID.fromString(jwt.getSubject()), userId);
 
         return ok(successWithDataOnly(response));
+    }
+
+    @PreAuthorize("hasRole('MASTER')")
+    @Operation(summary = "특정 회원 역할 수정", description = "userId로 등록된 회원의 역할을 수정합니다.")
+    @PutMapping("/{userId}/role")
+    public ResponseEntity<ApiResponse<Void>> changeUserRole(
+            @AuthenticationPrincipal Jwt jwt,
+            @PathVariable UUID userId,
+            @Valid @RequestBody UserRoleChangeRequest request
+    ) {
+        userModify.modifyUserRole(UUID.fromString(jwt.getSubject()), userId, request.role());
+
+        return ok(success());
+    }
+
+    @PreAuthorize("hasAnyRole('MANAGER', 'MASTER')")
+    @Operation(summary = "회원탈퇴", description = "등록된 회원을 강제로 삭제합니다.")
+    @DeleteMapping("/{userId}")
+    public ResponseEntity<ApiResponse<Void>> unsubscribe(
+            @AuthenticationPrincipal Jwt jwt,
+            @PathVariable UUID userId
+    ) {
+        userService.deleteForce(UUID.fromString(jwt.getSubject()), userId);
+
+        return ok(success());
     }
 }

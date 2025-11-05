@@ -8,7 +8,8 @@ import org.springframework.http.HttpStatus;
 @Getter
 @RequiredArgsConstructor
 public enum KeycloakMessageCode implements MessageCode {
-    NOT_FOUND("KEYCLOAK.NOT_FOUND", HttpStatus.NOT_FOUND);
+    INTERNAL_FAILED("KEYCLOAK.INTERNAL_FAILED", HttpStatus.INTERNAL_SERVER_ERROR),
+    USER_NOT_FOUND("KEYCLOAK.USER_NOT_FOUND", HttpStatus.NOT_FOUND);
 
     private final String code;
     private final HttpStatus status;

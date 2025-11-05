@@ -21,7 +21,7 @@ public class MenuFinderImpl implements MenuFinder {
     @Override
     public Page<Menu> findMenusByStore(
             UUID targetStoreId,
-            String currentStoreId,
+            UUID currentStoreId,
             String role,
             String menuName,
             Pageable pageable
@@ -33,7 +33,7 @@ public class MenuFinderImpl implements MenuFinder {
             builder.and(m.menuName.containsIgnoreCase(menuName));
         }
 
-        boolean isSameStore = Objects.equals(targetStoreId.toString(), currentStoreId);
+        boolean isSameStore = Objects.equals(targetStoreId, currentStoreId);
         MenuVisibilityPolicy policy = getPolicyByRole(role);
         policy.apply(builder, new MenuVisibilityPolicy.VisibilityContext(m, isSameStore));
 

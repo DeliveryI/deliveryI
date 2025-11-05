@@ -1,6 +1,9 @@
 package com.sparta.deliveryi.store.domain;
 
 import com.sparta.deliveryi.global.domain.AbstractEntity;
+import com.sparta.deliveryi.global.infrastructure.event.Events;
+import com.sparta.deliveryi.store.domain.event.StoreRemoveEvent;
+import com.sparta.deliveryi.store.domain.event.StoreTransferEvent;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -118,7 +121,11 @@ public class Store extends AbstractEntity {
     public void transferOwnership(UUID ownerId) {
         state(this.status != StoreStatus.PENDING, "등록 대기 상태에서는 인수인계할 수 없습니다.");
 
+        UUID oldOwnerId = owner.getId();
+
         owner = Owner.of(requireNonNull(ownerId));
+
+        Events.trigger(new StoreTransferEvent(oldOwnerId, ownerId));
     }
 
     public void updateRating(Rating rating) {
@@ -130,5 +137,7 @@ public class Store extends AbstractEntity {
     public void remove() {
         super.delete();
         this.status = StoreStatus.REMOVED;
+
+        Events.trigger(new StoreRemoveEvent(owner.getId()));
     }
 }

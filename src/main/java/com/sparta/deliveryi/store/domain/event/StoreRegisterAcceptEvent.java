@@ -2,5 +2,5 @@ package com.sparta.deliveryi.store.domain.event;
 
 import java.util.UUID;
 
-public record StoreRegisterEvent(UUID userId) {
+public record StoreRegisterAcceptEvent(UUID userId, UUID updatedBy) {
 }

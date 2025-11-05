@@ -2,7 +2,10 @@ package com.sparta.deliveryi.store.application.service;
 
 import com.sparta.deliveryi.DeliveryITestConfiguration;
 import com.sparta.deliveryi.store.StoreFixture;
-import com.sparta.deliveryi.store.domain.*;
+import com.sparta.deliveryi.store.domain.Owner;
+import com.sparta.deliveryi.store.domain.Store;
+import com.sparta.deliveryi.store.domain.StoreInfoUpdateRequest;
+import com.sparta.deliveryi.store.domain.StoreStatus;
 import com.sparta.deliveryi.store.domain.service.StoreFinder;
 import com.sparta.deliveryi.store.domain.service.StoreRegister;
 import jakarta.persistence.EntityManager;
@@ -24,15 +27,6 @@ record StoreApplicationTest(
         StoreFinder storeFinder,
         EntityManager entityManager
 ) {
-    @Test
-    void register() {
-        StoreRegisterRequest request = StoreFixture.createStoreRegisterRequest();
-
-        Store store = storeApplication.register(request, UUID.randomUUID());
-
-        assertThat(store.getId()).isNotNull();
-    }
-
     @Test
     void updateInfo() {
         Store store = registerStore();
@@ -154,7 +148,7 @@ record StoreApplicationTest(
         entityManager.flush();
         entityManager.clear();
 
-        storeRegister.acceptRegisterRequest(store.getId().toUuid());
+        storeRegister.acceptRegisterRequest(store.getId().toUuid(), UUID.randomUUID());
 
         return store;
     }

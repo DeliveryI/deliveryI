@@ -45,7 +45,6 @@ class StoreApiTest {
     void register() throws JsonProcessingException {
         StoreRegisterRequest request = StoreFixture.createStoreRegisterRequest();
         String requestJson = objectMapper.writeValueAsString(request);
-        mockedToken(UUID.randomUUID().toString(), "CUSTOMER");
 
         MvcTestResult result = mvcTester.post()
                 .uri("/v1/stores")
@@ -64,7 +63,7 @@ class StoreApiTest {
     @WithMockUser(username = "owner", roles = "OWNER")
     void updateInfo() throws JsonProcessingException {
         Store store = registerService.register(StoreFixture.createStoreRegisterRequest());
-        registerService.acceptRegisterRequest(store.getId().toUuid());
+        registerService.acceptRegisterRequest(store.getId().toUuid(), UUID.randomUUID());
         StoreInfoUpdateRequest request = StoreFixture.createStoreUpdateRequest();
         String requestJson = objectMapper.writeValueAsString(request);
         mockedToken(store.getOwner().getId().toString(), "OWNER");
@@ -86,7 +85,7 @@ class StoreApiTest {
     @WithMockUser(username = "customer", roles = "CUSTOMER")
     void updateInfoIfUnauthorized() throws JsonProcessingException {
         Store store = registerService.register(StoreFixture.createStoreRegisterRequest());
-        registerService.acceptRegisterRequest(store.getId().toUuid());
+        registerService.acceptRegisterRequest(store.getId().toUuid(), UUID.randomUUID());
         StoreInfoUpdateRequest request = StoreFixture.createStoreUpdateRequest();
         String requestJson = objectMapper.writeValueAsString(request);
         mockedToken(store.getOwner().getId().toString(), "CUSTOMER");
@@ -108,7 +107,7 @@ class StoreApiTest {
     @WithMockUser(username = "owner", roles = "OWNER")
     void remove() {
         Store store = registerService.register(StoreFixture.createStoreRegisterRequest());
-        registerService.acceptRegisterRequest(store.getId().toUuid());
+        registerService.acceptRegisterRequest(store.getId().toUuid(), UUID.randomUUID());
         mockedToken(store.getOwner().getId().toString(), "OWNER");
 
         MvcTestResult result = mvcTester.delete()
@@ -126,7 +125,7 @@ class StoreApiTest {
     @WithMockUser(username = "customer", roles = "CUSTOMER")
     void removeIfUnauthorized() {
         Store store = registerService.register(StoreFixture.createStoreRegisterRequest());
-        registerService.acceptRegisterRequest(store.getId().toUuid());
+        registerService.acceptRegisterRequest(store.getId().toUuid(), UUID.randomUUID());
         mockedToken(UUID.randomUUID().toString(), "CUSTOMER");
 
         MvcTestResult result = mvcTester.delete()
@@ -143,6 +142,7 @@ class StoreApiTest {
     @WithMockUser(username = "manager", roles = "MANAGER")
     void acceptRegisterRequest() {
         Store store = registerService.register(StoreFixture.createStoreRegisterRequest());
+        mockedToken(UUID.randomUUID().toString(), "MANAGER");
 
         MvcTestResult result = mvcTester.post()
                 .uri("/v1/stores/{storeId}/accept", store.getId().toString())
@@ -203,7 +203,7 @@ class StoreApiTest {
     @WithMockUser(username = "owner", roles = "OWNER")
     void open() {
         Store store = registerService.register(StoreFixture.createStoreRegisterRequest());
-        registerService.acceptRegisterRequest(store.getId().toUuid());
+        registerService.acceptRegisterRequest(store.getId().toUuid(), UUID.randomUUID());
         mockedToken(store.getOwner().getId().toString(), "OWNER");
 
         MvcTestResult result = mvcTester.post()
@@ -220,7 +220,7 @@ class StoreApiTest {
     @WithMockUser(username = "customer", roles = "CUSTOMER")
     void openIfUnauthorized() {
         Store store = registerService.register(StoreFixture.createStoreRegisterRequest());
-        registerService.acceptRegisterRequest(store.getId().toUuid());
+        registerService.acceptRegisterRequest(store.getId().toUuid(), UUID.randomUUID());
         mockedToken(UUID.randomUUID().toString(), "CUSTOMER");
 
         MvcTestResult result = mvcTester.post()
@@ -237,7 +237,7 @@ class StoreApiTest {
     @WithMockUser(username = "owner", roles = "OWNER")
     void close() {
         Store store = registerService.register(StoreFixture.createStoreRegisterRequest());
-        registerService.acceptRegisterRequest(store.getId().toUuid());
+        registerService.acceptRegisterRequest(store.getId().toUuid(), UUID.randomUUID());
         mockedToken(store.getOwner().getId().toString(), "OWNER");
 
         MvcTestResult result = mvcTester.post()
@@ -254,7 +254,7 @@ class StoreApiTest {
     @WithMockUser(username = "customer", roles = "CUSTOMER")
     void closeIfUnauthorized() {
         Store store = registerService.register(StoreFixture.createStoreRegisterRequest());
-        registerService.acceptRegisterRequest(store.getId().toUuid());
+        registerService.acceptRegisterRequest(store.getId().toUuid(), UUID.randomUUID());
         mockedToken(UUID.randomUUID().toString(), "CUSTOMER");
 
         MvcTestResult result = mvcTester.post()
@@ -271,7 +271,7 @@ class StoreApiTest {
     @WithMockUser(username = "owner", roles = "OWNER")
     void transfer() throws JsonProcessingException {
         Store store = registerService.register(StoreFixture.createStoreRegisterRequest());
-        registerService.acceptRegisterRequest(store.getId().toUuid());
+        registerService.acceptRegisterRequest(store.getId().toUuid(), UUID.randomUUID());
 
         StoreTransferRequest request = new StoreTransferRequest(store.getOwner().getId());
         String requestJson = objectMapper.writeValueAsString(request);
@@ -294,7 +294,7 @@ class StoreApiTest {
     @WithMockUser(username = "customer", roles = "CUSTOMER")
     void transferIfUnauthorized() throws JsonProcessingException {
         Store store = registerService.register(StoreFixture.createStoreRegisterRequest());
-        registerService.acceptRegisterRequest(store.getId().toUuid());
+        registerService.acceptRegisterRequest(store.getId().toUuid(), UUID.randomUUID());
 
         StoreTransferRequest request = new StoreTransferRequest(UUID.randomUUID());
         String requestJson = objectMapper.writeValueAsString(request);

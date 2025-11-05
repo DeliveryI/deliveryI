@@ -29,10 +29,8 @@ public class StoreApi {
     private final StoreApplication storeApplication;
 
     @PostMapping("/v1/stores")
-    public ResponseEntity<ApiResponse<StoreRegisterResponse>> register(@AuthenticationPrincipal Jwt jwt, @RequestBody @Valid StoreRegisterRequest registerRequest) {
-        UUID requestId = UUID.fromString(jwt.getSubject());
-
-        Store store = storeApplication.register(registerRequest, requestId);
+    public ResponseEntity<ApiResponse<StoreRegisterResponse>> register(@RequestBody @Valid StoreRegisterRequest registerRequest) {
+        Store store = storeRegister.register(registerRequest);
 
         return ok(successWithDataOnly(StoreRegisterResponse.from(store)));
     }
@@ -58,8 +56,10 @@ public class StoreApi {
 
     @PreAuthorize("hasAnyRole('MANAGER', 'MASTER')")
     @PostMapping("/v1/stores/{storeId}/accept")
-    public ResponseEntity<ApiResponse<Void>> acceptRegister(@PathVariable UUID storeId) {
-        storeRegister.acceptRegisterRequest(storeId);
+    public ResponseEntity<ApiResponse<Void>> acceptRegister(@AuthenticationPrincipal Jwt jwt, @PathVariable UUID storeId) {
+        UUID requestId = UUID.fromString(jwt.getSubject());
+
+        storeRegister.acceptRegisterRequest(storeId, requestId);
 
         return ok(success());
     }
