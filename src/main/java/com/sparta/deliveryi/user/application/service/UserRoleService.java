@@ -8,5 +8,6 @@ public interface UserRoleService {
     boolean isAdmin(UUID userId);
     boolean isCustomer(UUID userId);
     boolean isOwner(UUID userId);
+
     void updateUserRole(UUID userId, UserRole role);
 }

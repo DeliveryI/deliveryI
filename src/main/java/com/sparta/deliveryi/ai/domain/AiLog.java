@@ -13,9 +13,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class AiLog extends AbstractEntity {
 
-    private static final String PREFIX = "너는 지금 음식점 마케터야. 다른 설명없이 다음 질문에 대한 답만 해줘.";
-    private static final String SUFFIX = "설명을 더 잘 팔릴 수 있게, 상품 설명을 45~60자 정도 길이로 작성해줘.";
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "ai_id")
@@ -53,10 +50,6 @@ public class AiLog extends AbstractEntity {
         aiLog.aiStatus = aiStatus != null ? aiStatus : AiStatus.SUCCESS;
         aiLog.createBy(createdBy);
         return aiLog;
-    }
-
-    public static String appendPrefixAndSuffix(String prompt) {
-        return PREFIX + " " + prompt + " " + SUFFIX;
     }
 
     private static void validatePromptNotEmpty(String prompt) {
