@@ -6,6 +6,7 @@ import com.sparta.deliveryi.menu.application.MenuVisibilityPolicy;
 import com.sparta.deliveryi.menu.domain.Menu;
 import com.sparta.deliveryi.menu.domain.QMenu;
 import com.sparta.deliveryi.menu.domain.service.MenuFinder;
+import com.sparta.deliveryi.menu.domain.exception.MenuNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Repository;
@@ -58,6 +59,33 @@ public class MenuFinderImpl implements MenuFinder {
         return queryFactory.selectFrom(m)
                 .where(m.menuId.eq(menuId))
                 .fetchOne();
+    }
+
+    @Override
+    public Menu findMenuByIdWithVisibility(
+            Long menuId,
+            UUID targetStoreId,
+            UUID currentStoreId,
+            String role
+    ) {
+        QMenu m = QMenu.menu;
+        BooleanBuilder builder = new BooleanBuilder()
+                .and(m.menuId.eq(menuId))
+                .and(m.storeId.eq(targetStoreId));
+
+        boolean isSameStore = Objects.equals(targetStoreId, currentStoreId);
+        MenuVisibilityPolicy policy = getPolicyByRole(role);
+        policy.apply(builder, new MenuVisibilityPolicy.VisibilityContext(m, isSameStore));
+
+        Menu menu = queryFactory
+                .selectFrom(m)
+                .where(builder)
+                .fetchOne();
+
+        if (menu == null) {
+            throw new MenuNotFoundException();
+        }
+        return menu;
     }
 
     private MenuVisibilityPolicy getPolicyByRole(String role) {

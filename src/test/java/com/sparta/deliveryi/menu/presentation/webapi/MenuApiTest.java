@@ -45,18 +45,19 @@ class MenuApiTest {
         }
     }
 
-
     @Test
     @DisplayName("POST /v1/menus - 메뉴 등록 성공")
     void createMenu_success() throws Exception {
         UUID storeId = UUID.randomUUID();
+        UUID requestId = UUID.randomUUID();
+
         MenuRequest request = new MenuRequest(
                 "김치찌개", 9000, MenuStatus.FORSALE,
                 "매운 김치찌개", true, "프롬프트"
         );
 
         var result = new MenuResult(1L, "김치찌개", 9000, "AI설명", "FORSALE", true);
-        Mockito.when(menuService.createMenu(eq(storeId), any(MenuCommand.class))).thenReturn(result);
+        Mockito.when(menuService.createMenu(eq(storeId), any(MenuCommand.class), any(UUID.class))).thenReturn(result);
 
         mockMvc.perform(post("/v1/menus")
                         .param("storeId", storeId.toString())
@@ -66,20 +67,24 @@ class MenuApiTest {
                 .andExpect(jsonPath("$.data.menuName").value("김치찌개"));
     }
 
-
     @Test
     @DisplayName("PUT /v1/menus/{menuId} - 메뉴 수정 성공")
     void updateMenu_success() throws Exception {
         Long menuId = 10L;
+        UUID storeId = UUID.randomUUID();
+        UUID requestId = UUID.randomUUID();
+
         MenuRequest request = new MenuRequest(
                 "된장찌개", 8000, MenuStatus.FORSALE,
                 "구수한 된장찌개", false, null
         );
 
         var result = new MenuResult(menuId, "된장찌개", 8000, "구수한 된장찌개", "FORSALE", false);
-        Mockito.when(menuService.updateMenu(eq(menuId), any(MenuCommand.class))).thenReturn(result);
+        Mockito.when(menuService.updateMenu(eq(menuId), any(MenuCommand.class), eq(storeId), any(UUID.class)))
+                .thenReturn(result);
 
         mockMvc.perform(put("/v1/menus/{menuId}", menuId)
+                        .param("storeId", storeId.toString())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
@@ -91,25 +96,34 @@ class MenuApiTest {
     @DisplayName("DELETE /v1/menus/{menuId} - 메뉴 삭제 성공")
     void deleteMenu_success() throws Exception {
         Long menuId = 10L;
-        Mockito.doNothing().when(menuService).deleteMenu(menuId);
+        UUID storeId = UUID.randomUUID();
+        UUID requestId = UUID.randomUUID();
 
-        mockMvc.perform(delete("/v1/menus/{menuId}", menuId))
+        Mockito.doNothing().when(menuService).deleteMenu(eq(menuId), eq(storeId), any(UUID.class));
+
+        mockMvc.perform(delete("/v1/menus/{menuId}", menuId)
+                        .param("storeId", storeId.toString()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true));
     }
 
-
     @Test
-    @DisplayName("POST /v1/menus/status - 메뉴 상태 변경")
+    @DisplayName("POST /v1/menus/status - 메뉴 상태 변경 성공")
     void changeMenuStatus_success() throws Exception {
+        UUID storeId = UUID.randomUUID();
+        UUID requestId = UUID.randomUUID();
+
         var items = List.of(
                 new MenuStatusRequest.MenuStatusChangeItem(1L, MenuStatus.HIDING),
                 new MenuStatusRequest.MenuStatusChangeItem(2L, MenuStatus.FORSALE)
         );
         MenuStatusRequest request = new MenuStatusRequest(items);
-        Mockito.when(menuService.changeMenuStatus(anyList(), anyString())).thenReturn(List.of(1L, 2L));
+
+        Mockito.when(menuService.changeMenuStatus(anyList(), eq(storeId), any(UUID.class)))
+                .thenReturn(List.of(1L, 2L));
 
         mockMvc.perform(post("/v1/menus/status")
+                        .param("storeId", storeId.toString())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())

@@ -1,4 +1,4 @@
-package com.sparta.deliveryi.user.infrastructure.keycloak.dto;
+package com.sparta.deliveryi.user.application.dto;
 
 import com.sparta.deliveryi.user.domain.UserRole;
 import jakarta.validation.constraints.NotBlank;
@@ -9,7 +9,7 @@ import lombok.Builder;
 import java.util.UUID;
 
 @Builder
-public record KeycloakUser(
+public record AuthUser(
         @NotNull UUID id,
         @NotBlank @Size(min=4, max=10) String username,
         @NotNull UserRole role
