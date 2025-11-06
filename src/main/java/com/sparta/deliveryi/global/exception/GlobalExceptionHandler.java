@@ -1,6 +1,8 @@
 package com.sparta.deliveryi.global.exception;
 
 import com.sparta.deliveryi.global.presentation.dto.ApiResponse;
+import com.sparta.deliveryi.payment.infrastructure.TossException;
+import com.sparta.deliveryi.payment.infrastructure.TossMessageCode;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authorization.AuthorizationDeniedException;
@@ -53,6 +55,19 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         ApiResponse<Void> failure = ApiResponse.failure(GlobalMessageCode.UNAUTHORIZED.getCode());
         log.error("[{}] {}", e.getClass().getSimpleName(), e.getMessage());
         return new ResponseEntity<>(failure, GlobalMessageCode.UNAUTHORIZED.getStatus());
+    }
+
+    /**
+     * TossException을 처리하여 실패 응답을 반환한다.
+     *
+     * @param e 처리할 TossException
+     * @Return ApiResponse<Void> 실패 응답
+     */
+    @ExceptionHandler(TossException.class)
+    public ResponseEntity<ApiResponse<Void>> tossException(TossException e) {
+        ApiResponse<Void> failure = ApiResponse.failureWithMessageArguments(TossMessageCode.INTERNAL_FAILED.getCode(), e.getMessage());
+        log.error("[{}] code={}, message={}", e.getClass().getSimpleName(), e.getCode(), e.getMessage());
+        return new ResponseEntity<>(failure, e.getStatus());
     }
 
     /**
