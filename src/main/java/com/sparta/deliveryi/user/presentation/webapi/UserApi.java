@@ -1,15 +1,12 @@
 package com.sparta.deliveryi.user.presentation.webapi;
 
 import com.sparta.deliveryi.global.presentation.dto.ApiResponse;
-import com.sparta.deliveryi.user.application.dto.MyInfoResponse;
+import com.sparta.deliveryi.user.application.dto.LoginUserInfoResponse;
 import com.sparta.deliveryi.user.application.dto.TokenInfo;
 import com.sparta.deliveryi.user.application.dto.UserRegisterRequest;
-import com.sparta.deliveryi.user.application.dto.UserResponse;
+import com.sparta.deliveryi.user.application.dto.UserInfoResponse;
 import com.sparta.deliveryi.user.application.service.TokenGenerateService;
 import com.sparta.deliveryi.user.application.service.UserApplication;
-import com.sparta.deliveryi.user.application.service.UserModify;
-import com.sparta.deliveryi.user.application.service.UserQuery;
-import com.sparta.deliveryi.user.application.service.UserRegister;
 import com.sparta.deliveryi.user.domain.UserException;
 import com.sparta.deliveryi.user.domain.UserMessageCode;
 import com.sparta.deliveryi.user.domain.dto.UserInfoUpdateRequest;
@@ -17,10 +14,10 @@ import com.sparta.deliveryi.user.presentation.dto.SignupReqeust;
 import com.sparta.deliveryi.user.presentation.dto.UserInfoChangeRequest;
 import com.sparta.deliveryi.user.presentation.dto.TokenRequest;
 import com.sparta.deliveryi.user.presentation.dto.TokenResponse;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.eclipse.microprofile.openapi.annotations.Operation;
-import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -40,10 +37,7 @@ import static org.springframework.http.ResponseEntity.ok;
 public class UserApi {
 
     private final TokenGenerateService tokenService;
-    private final UserApplication userService;
-    private final UserRegister userRegister;
-    private final UserQuery userQuery;
-    private final UserModify userModify;
+    private final UserApplication userApplication;
 
     @Operation(summary = "회원가입", description = "신규 회원을 등록합니다. 가입 시 기본 권한은 'CUSTOMER' 입니다.")
     @ResponseStatus(HttpStatus.CREATED)
@@ -61,7 +55,7 @@ public class UserApi {
                 .currentAddress(request.currentAddress())
                 .build();
 
-        userRegister.register(registerRequest);
+        userApplication.register(registerRequest);
 
         return ok(success());
     }
@@ -84,23 +78,23 @@ public class UserApi {
     @Operation(summary = "로그아웃", description = "발급된 토큰을 무효화. 즉, 로그아웃합니다.")
     @PostMapping("logout")
     public ResponseEntity<ApiResponse<Void>> logout(@AuthenticationPrincipal Jwt jwt) {
-        userService.logout(UUID.fromString(jwt.getSubject()));
+        userApplication.logout(UUID.fromString(jwt.getSubject()));
 
         return ok(success());
     }
 
     @Operation(summary = "로그인한 회원 정보 조회", description = "로그인한 회원의 정보를 조회합니다.")
     @GetMapping()
-    public ResponseEntity<ApiResponse<MyInfoResponse>> getMyInfo(@AuthenticationPrincipal Jwt jwt) {
-        MyInfoResponse response = userQuery.getMyInfo(UUID.fromString(jwt.getSubject()));
+    public ResponseEntity<ApiResponse<LoginUserInfoResponse>> getMyInfo(@AuthenticationPrincipal Jwt jwt) {
+        LoginUserInfoResponse response = userApplication.getMyInfo(UUID.fromString(jwt.getSubject()));
 
         return ok(successWithDataOnly(response));
     }
 
     @Operation(summary = "특정 회원 정보 조회", description = "UserId로 다른 회원의 정보를 조회합니다.")
     @GetMapping("/{userId}")
-    public ResponseEntity<ApiResponse<UserResponse>> getUserInfo(@PathVariable UUID userId) {
-        UserResponse response = userQuery.getUserById(userId);
+    public ResponseEntity<ApiResponse<UserInfoResponse>> getUserInfo(@PathVariable UUID userId) {
+        UserInfoResponse response = userApplication.getUserById(userId);
 
         return ok(successWithDataOnly(response));
     }
@@ -117,7 +111,7 @@ public class UserApi {
                 .currentAddress(request.currentAddress())
                 .build();
 
-        userModify.modifyUserInfo(UUID.fromString(jwt.getSubject()), updateRequest);
+        userApplication.updateInfo(UUID.fromString(jwt.getSubject()), updateRequest);
 
         return ok(success());
     }
@@ -125,7 +119,7 @@ public class UserApi {
     @Operation(summary = "회원탈퇴", description = "로그인한 회원을 삭제합니다.")
     @DeleteMapping("/{userId}")
     public ResponseEntity<ApiResponse<Void>> unsubscribe(@AuthenticationPrincipal Jwt jwt) {
-        userService.delete(UUID.fromString(jwt.getSubject()));
+        userApplication.delete(UUID.fromString(jwt.getSubject()));
 
         return ok(success());
     }

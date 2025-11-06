@@ -3,14 +3,12 @@ package com.sparta.deliveryi.user.presentation.webapi;
 import com.sparta.deliveryi.global.presentation.dto.ApiResponse;
 import com.sparta.deliveryi.user.application.dto.AdminUserResponse;
 import com.sparta.deliveryi.user.application.dto.UserSearchRequest;
-import com.sparta.deliveryi.user.application.service.UserApplication;
-import com.sparta.deliveryi.user.application.service.UserModify;
-import com.sparta.deliveryi.user.application.service.UserQuery;
+import com.sparta.deliveryi.user.application.service.AdminApplication;
 import com.sparta.deliveryi.user.presentation.dto.UserRoleChangeRequest;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.eclipse.microprofile.openapi.annotations.Operation;
-import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
@@ -32,10 +30,7 @@ import static org.springframework.http.ResponseEntity.ok;
 @Tag(name = "회원 API(관리자용)", description = "관리자용 API로, 회원 정보 조회 시 모든 항목을 확인할 수 있습니다.")
 public class AdminUserApi {
 
-    private final UserApplication userService;
-    private final UserQuery userQuery;
-    private final UserModify userModify;
-
+    private final AdminApplication adminApplication;
 
     @PreAuthorize("hasAnyRole('MANAGER', 'MASTER')")
     @Operation(summary = "회원 목록 조회", description = "등록된 모든 회원 정보를 조회합니다.")
@@ -45,7 +40,7 @@ public class AdminUserApi {
             UserSearchRequest searchRequest,
             @PageableDefault Pageable pageable
     ) {
-        Page<AdminUserResponse> response = userQuery.searchUsersForAdminById(UUID.fromString(jwt.getSubject()), searchRequest, pageable);
+        Page<AdminUserResponse> response =  adminApplication.searchUsers(UUID.fromString(jwt.getSubject()), searchRequest, pageable);
 
         return ok(successWithDataOnly(response));
     }
@@ -57,7 +52,7 @@ public class AdminUserApi {
             @AuthenticationPrincipal Jwt jwt,
             @PathVariable UUID userId
     ) {
-        AdminUserResponse response = userQuery.getUserForAdminById(UUID.fromString(jwt.getSubject()), userId);
+        AdminUserResponse response = adminApplication.getUserById(UUID.fromString(jwt.getSubject()), userId);
 
         return ok(successWithDataOnly(response));
     }
@@ -70,7 +65,7 @@ public class AdminUserApi {
             @PathVariable UUID userId,
             @Valid @RequestBody UserRoleChangeRequest request
     ) {
-        userModify.modifyUserRole(UUID.fromString(jwt.getSubject()), userId, request.role());
+        adminApplication.updateRole(UUID.fromString(jwt.getSubject()), userId, request.role());
 
         return ok(success());
     }
@@ -82,7 +77,7 @@ public class AdminUserApi {
             @AuthenticationPrincipal Jwt jwt,
             @PathVariable UUID userId
     ) {
-        userService.deleteForce(UUID.fromString(jwt.getSubject()), userId);
+        adminApplication.delete(UUID.fromString(jwt.getSubject()), userId);
 
         return ok(success());
     }

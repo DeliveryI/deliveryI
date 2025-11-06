@@ -1,8 +1,15 @@
 package com.sparta.deliveryi.user.application.service;
 
+import com.sparta.deliveryi.user.application.dto.AuthUser;
+import com.sparta.deliveryi.user.application.dto.LoginUserInfoResponse;
+import com.sparta.deliveryi.user.application.dto.UserInfoResponse;
+import com.sparta.deliveryi.user.application.dto.UserRegisterRequest;
 import com.sparta.deliveryi.user.domain.*;
-import com.sparta.deliveryi.user.domain.service.UserFinder;
-import com.sparta.deliveryi.user.infrastructure.keycloak.service.AuthService;
+import com.sparta.deliveryi.user.domain.dto.UserCreateRequest;
+import com.sparta.deliveryi.user.domain.dto.UserInfoUpdateRequest;
+import com.sparta.deliveryi.user.domain.service.UserQuery;
+import com.sparta.deliveryi.user.domain.service.UserRegister;
+import com.sparta.deliveryi.user.domain.service.UserUpdate;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -14,47 +21,55 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class UserApplicationService implements UserApplication {
 
-    private final AuthService keycloakService;
-    private final UserFinder userFinder;
-    private final UserRolePolicy userRolePolicy;
+    private final AuthApplication authApplication;
+    private final AuthRegister authRegister;
+    private final UserQuery userQuery;
+    private final UserUpdate userUpdate;
+    private final UserRegister userRegister;
+
+    @Override
+    public User register(UserRegisterRequest request) {
+        AuthUser authUser = authRegister.register(request.username(), request.password());
+
+        UserCreateRequest createRequest = UserCreateRequest.builder()
+                .authUser(authUser)
+                .nickname(request.nickname())
+                .userPhone(request.userPhone())
+                .currentAddress(request.currentAddress())
+                .build();
+
+        return userRegister.register(createRequest);
+    }
+
+    @Override
+    public UserInfoResponse getUserById(UUID userId) {
+        User user = userQuery.getUserById(UserId.of(userId));
+        return UserInfoResponse.from(user);
+    }
+
+    @Override
+    public LoginUserInfoResponse getMyInfo(UUID keycloakId) {
+        User user = userQuery.getUserByKeycloakId(KeycloakId.of(keycloakId));
+        return LoginUserInfoResponse.from(user);
+    }
+
+    @Override
+    public void updateInfo(UUID keycloakId, UserInfoUpdateRequest request) {
+        User user = userQuery.getUserByKeycloakId(KeycloakId.of(keycloakId));
+        userUpdate.updateInfo(user.getId(), request);
+    }
 
     @Override
     public void logout(UUID keycloakId) {
-        keycloakService.logout(KeycloakId.of(keycloakId));
+        authApplication.logout(keycloakId);
     }
 
     @Override
     public void delete(UUID keycloakId) {
-        // UserId 조회
-        User user = userFinder.getByKeycloakId(KeycloakId.of(keycloakId));
+        authApplication.logout(keycloakId);
+        authApplication.delete(keycloakId);
 
-        deleteUser(user);
-    }
-
-    @Override
-    public void deleteForce(UUID keycloakId, UUID userId) {
-        // loginUser 조회 및 역할 검증
-        User loginUser = userFinder.getByKeycloakId(KeycloakId.of(keycloakId));
-        if (!userRolePolicy.isAdmin(loginUser.getId().toUuid())) {
-            throw new UserException(UserMessageCode.ACCESS_FORBIDDEN);
-        }
-
-        // UserId 조회
-        User user = userFinder.getById(UserId.of(userId));
-
-        deleteUser(user);
-    }
-
-    private void deleteUser(User user) {
-        KeycloakId keycloakId = user.getKeycloakId();
-
-        // Token 무효화
-        keycloakService.logout(keycloakId);
-
-        // Application DB Soft 삭제
+        User user = userQuery.getUserByKeycloakId(KeycloakId.of(keycloakId));
         user.delete();
-
-        // Keycloak 삭제
-        keycloakService.delete(keycloakId);
     }
 }

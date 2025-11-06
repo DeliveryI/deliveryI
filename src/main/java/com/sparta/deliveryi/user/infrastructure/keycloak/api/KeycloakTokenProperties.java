@@ -29,6 +29,7 @@ public class KeycloakTokenProperties implements TokenGenerateService {
         form.add("username", username);
         form.add("password", password);
         form.add("scope", "openid profile email");
+
         RestClient client = RestClient.create();
         ResponseEntity<TokenInfo> res = client.post()
                 .uri(String.format("%s/realms/%s/protocol/openid-connect/token", properties.getServerUrl(), properties.getRealm()))

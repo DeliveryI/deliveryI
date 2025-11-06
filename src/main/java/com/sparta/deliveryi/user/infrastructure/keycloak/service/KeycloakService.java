@@ -1,47 +1,80 @@
 package com.sparta.deliveryi.user.infrastructure.keycloak.service;
 
-import com.sparta.deliveryi.user.domain.KeycloakId;
-import com.sparta.deliveryi.user.infrastructure.keycloak.KeycloakException;
-import com.sparta.deliveryi.user.infrastructure.keycloak.KeycloakMessageCode;
-import com.sparta.deliveryi.user.infrastructure.keycloak.KeycloakProperties;
-import jakarta.transaction.Transactional;
-import jakarta.ws.rs.NotFoundException;
+import com.sparta.deliveryi.user.application.service.AuthApplication;
+import com.sparta.deliveryi.user.domain.UserRole;
+import com.sparta.deliveryi.user.application.dto.AuthUser;
+import jakarta.ws.rs.core.Response;
 import lombok.RequiredArgsConstructor;
-import org.keycloak.admin.client.Keycloak;
-import org.keycloak.admin.client.resource.UsersResource;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.keycloak.admin.client.resource.RoleScopeResource;
+import org.keycloak.representations.idm.RoleRepresentation;
+import org.keycloak.representations.idm.UserRepresentation;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
-@Transactional
+@Transactional(readOnly = true)
 @RequiredArgsConstructor
-@EnableConfigurationProperties(KeycloakProperties.class)
-public class KeycloakService implements AuthService {
+public class KeycloakService implements AuthApplication {
 
-    private final KeycloakProperties properties;
-    private final Keycloak keycloak;
+    private final KeycloakProvider provider;
 
-    public void logout(KeycloakId keycloakId) {
-        try {
-            UsersResource resource = keycloak.realm(properties.getRealm()).users();
-            resource.get(keycloakId.getId().toString()).logout();
-        } catch (NotFoundException e) {
-            throw new KeycloakException(KeycloakMessageCode.NOT_FOUND);
-        } catch (Exception e) {
-            throw new KeycloakException(KeycloakMessageCode.INTERNAL_FAILED, e);
-        }
+
+    @Override
+    public AuthUser getUserById(UUID keycloakId) {
+        UserRepresentation user = provider.getUserById(keycloakId.toString());
+        UserRole role = provider.getRoleById(keycloakId.toString());
+
+        return AuthUser.builder()
+                .id(UUID.fromString(user.getId()))
+                .username(user.getUsername())
+                .role(role)
+                .build();
     }
 
     @Override
-    public void delete(KeycloakId keycloakId) {
-        try {
-            UsersResource resource = keycloak.realm(properties.getRealm()).users();
-            resource.delete(keycloakId.getId().toString());
-        } catch (NotFoundException e) {
-            throw new KeycloakException(KeycloakMessageCode.NOT_FOUND);
-        } catch (Exception e) {
-            throw new KeycloakException(KeycloakMessageCode.INTERNAL_FAILED, e);
-        }
+    public List<AuthUser> getUsers() {
+        List<UserRepresentation> users = provider.getUsersResource().list();
+
+        return users.stream()
+                .map(user -> {
+                    UserRole role = provider.getRoleById(user.getId());
+                    return AuthUser.builder()
+                            .id(UUID.fromString(user.getId()))
+                            .username(user.getUsername())
+                            .role(role)
+                            .build();
+                })
+                .collect(Collectors.toList());
     }
 
+    @Override
+    public void updateRole(UUID keycloakId, UserRole role) {
+        RoleScopeResource resource = provider.getRoleScopeResourceById(keycloakId.toString());
+
+        // 기존 Role 제거
+        resource.remove(resource.listAll());
+
+        // 새 Role 추가
+        RoleRepresentation roleRepresentation = provider.toRoleRepresentation(role);
+
+        resource.add(List.of(roleRepresentation));
+    }
+
+    @Override
+    public void logout(UUID keycloakId) {
+        provider.getUserResourceById(keycloakId.toString()).logout();
+    }
+
+    @Override
+    public void delete(UUID keycloakId) {
+        try(Response response = provider.getUsersResource().delete(keycloakId.toString())) {
+            provider.checkResponse(response, Response.Status.NO_CONTENT.getStatusCode(), "회원 삭제에 실패하였습니다.");
+        }
+
+    }
 }
+
