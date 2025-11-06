@@ -2,6 +2,7 @@ package com.sparta.deliveryi.order;
 
 import com.sparta.deliveryi.order.domain.Order;
 import com.sparta.deliveryi.order.domain.OrderCreateRequest;
+import com.sparta.deliveryi.order.domain.OrderId;
 import com.sparta.deliveryi.order.domain.OrderItem;
 import org.springframework.test.util.ReflectionTestUtils;
 
@@ -13,7 +14,6 @@ public class OrderFixture {
 
     public static Order createOrder(OrderCreateRequest request) {
         Order order = Order.create(request);
-        ReflectionTestUtils.setField(order, "id", 1L);
         ReflectionTestUtils.setField(order, "createdAt", LocalDateTime.now());
 
         return order;
