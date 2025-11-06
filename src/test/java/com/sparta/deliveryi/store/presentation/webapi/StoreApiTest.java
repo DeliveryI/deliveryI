@@ -4,12 +4,14 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sparta.deliveryi.DeliveryITestConfiguration;
 import com.sparta.deliveryi.store.StoreFixture;
+import com.sparta.deliveryi.store.application.service.StoreApplication;
 import com.sparta.deliveryi.store.domain.Store;
 import com.sparta.deliveryi.store.domain.StoreInfoUpdateRequest;
 import com.sparta.deliveryi.store.domain.StoreRegisterRequest;
+import com.sparta.deliveryi.store.domain.service.StoreRegister;
 import com.sparta.deliveryi.store.domain.service.StoreRegisterService;
-import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
@@ -20,31 +22,50 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.assertj.MockMvcTester;
 import org.springframework.test.web.servlet.assertj.MvcTestResult;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.UUID;
 
 import static com.sparta.deliveryi.AssertThatUtils.*;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.doNothing;
 
 @SpringBootTest
 @Import(DeliveryITestConfiguration.class)
 @AutoConfigureMockMvc
-@Transactional
-@RequiredArgsConstructor
 class StoreApiTest {
-    final MockMvcTester mvcTester;
-    final ObjectMapper objectMapper;
-    final StoreRegisterService registerService;
+    static final String MANAGER_UUID = "00000000-0000-0000-0000-000000000000";
+    static final String OWNER_UUID = "11111111-1111-1111-1111-111111111111";
+    static final String CUSTOMER_UUID = "22222222-2222-2222-2222-222222222222";
+    UUID storeId = UUID.randomUUID();
+
+    @Autowired
+    MockMvcTester mvcTester;
+
+    @Autowired
+    ObjectMapper objectMapper;
+
+    @MockitoBean
+    StoreRegisterService registerService;
+
+    @MockitoBean
+    StoreApplication storeApplication;
+    @Autowired
+    private StoreRegister storeRegister;
 
     @Test
     @WithMockUser(username = "customer", roles = "CUSTOMER")
     void register() throws JsonProcessingException {
         StoreRegisterRequest request = StoreFixture.createStoreRegisterRequest();
         String requestJson = objectMapper.writeValueAsString(request);
+        Store store = StoreFixture.createStore();
+        given(registerService.register(any(StoreRegisterRequest.class))).willReturn(store);
 
         MvcTestResult result = mvcTester.post()
                 .uri("/v1/stores")
@@ -62,14 +83,21 @@ class StoreApiTest {
     @Test
     @WithMockUser(username = "owner", roles = "OWNER")
     void updateInfo() throws JsonProcessingException {
-        Store store = registerService.register(StoreFixture.createStoreRegisterRequest());
-        registerService.acceptRegisterRequest(store.getId().toUuid(), UUID.randomUUID());
         StoreInfoUpdateRequest request = StoreFixture.createStoreUpdateRequest();
         String requestJson = objectMapper.writeValueAsString(request);
-        mockedToken(store.getOwner().getId().toString(), "OWNER");
+
+        Store store = StoreFixture.createStore();
+        given(
+                storeApplication.updateInfo(
+                        eq(storeId),
+                        any(StoreInfoUpdateRequest.class),
+                        eq(UUID.fromString(OWNER_UUID)))
+        ).willReturn(store);
+
+        mockedToken(OWNER_UUID, "OWNER");
 
         MvcTestResult result = mvcTester.put()
-                .uri("/v1/stores/{storeId}", store.getId().toString())
+                .uri("/v1/stores/{storeId}", storeId.toString())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(requestJson)
                 .exchange();
@@ -84,34 +112,36 @@ class StoreApiTest {
     @Test
     @WithMockUser(username = "customer", roles = "CUSTOMER")
     void updateInfoIfUnauthorized() throws JsonProcessingException {
-        Store store = registerService.register(StoreFixture.createStoreRegisterRequest());
-        registerService.acceptRegisterRequest(store.getId().toUuid(), UUID.randomUUID());
         StoreInfoUpdateRequest request = StoreFixture.createStoreUpdateRequest();
         String requestJson = objectMapper.writeValueAsString(request);
-        mockedToken(store.getOwner().getId().toString(), "CUSTOMER");
+        mockedToken(CUSTOMER_UUID, "CUSTOMER");
 
         MvcTestResult result = mvcTester.put()
-                .uri("/v1/stores/{storeId}", store.getId().toString())
+                .uri("/v1/stores/{storeId}", storeId.toString())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(requestJson)
                 .exchange();
 
         assertThat(result)
-                .hasStatusOk()
+                .hasStatus(HttpStatus.FORBIDDEN)
                 .bodyJson()
-                .hasPathSatisfying("$.success", isTrue())
-                .hasPathSatisfying("$.data", notNull());
+                .hasPathSatisfying("$.success", isFalse());
     }
 
     @Test
     @WithMockUser(username = "owner", roles = "OWNER")
     void remove() {
-        Store store = registerService.register(StoreFixture.createStoreRegisterRequest());
-        registerService.acceptRegisterRequest(store.getId().toUuid(), UUID.randomUUID());
-        mockedToken(store.getOwner().getId().toString(), "OWNER");
+        Store store = StoreFixture.createStore();
+        given(
+                storeApplication.remove(
+                        eq(storeId),
+                        eq(UUID.fromString(OWNER_UUID))
+                )
+        ).willReturn(store);
+        mockedToken(OWNER_UUID, "OWNER");
 
         MvcTestResult result = mvcTester.delete()
-                .uri("/v1/stores/{storeId}", store.getId().toString())
+                .uri("/v1/stores/{storeId}", storeId.toString())
                 .exchange();
 
         assertThat(result)
@@ -124,12 +154,10 @@ class StoreApiTest {
     @Test
     @WithMockUser(username = "customer", roles = "CUSTOMER")
     void removeIfUnauthorized() {
-        Store store = registerService.register(StoreFixture.createStoreRegisterRequest());
-        registerService.acceptRegisterRequest(store.getId().toUuid(), UUID.randomUUID());
-        mockedToken(UUID.randomUUID().toString(), "CUSTOMER");
+        mockedToken(CUSTOMER_UUID, "CUSTOMER");
 
         MvcTestResult result = mvcTester.delete()
-                .uri("/v1/stores/{storeId}", store.getId().toString())
+                .uri("/v1/stores/{storeId}", storeId.toString())
                 .exchange();
 
         assertThat(result)
@@ -141,11 +169,14 @@ class StoreApiTest {
     @Test
     @WithMockUser(username = "manager", roles = "MANAGER")
     void acceptRegisterRequest() {
-        Store store = registerService.register(StoreFixture.createStoreRegisterRequest());
+        doNothing().when(storeRegister).acceptRegisterRequest(
+                eq(storeId),
+                any(UUID.class));
+
         mockedToken(UUID.randomUUID().toString(), "MANAGER");
 
         MvcTestResult result = mvcTester.post()
-                .uri("/v1/stores/{storeId}/accept", store.getId().toString())
+                .uri("/v1/stores/{storeId}/accept", storeId.toString())
                 .exchange();
 
         assertThat(result)
@@ -157,10 +188,10 @@ class StoreApiTest {
     @Test
     @WithMockUser(username = "owner", roles = "OWNER")
     void acceptRegisterRequestIfUnauthorized() {
-        Store store = registerService.register(StoreFixture.createStoreRegisterRequest());
+        mockedToken(OWNER_UUID, "OWNER");
 
         MvcTestResult result = mvcTester.post()
-                .uri("/v1/stores/{storeId}/accept", store.getId().toString())
+                .uri("/v1/stores/{storeId}/accept", storeId.toString())
                 .exchange();
 
         assertThat(result)
@@ -172,10 +203,12 @@ class StoreApiTest {
     @Test
     @WithMockUser(username = "manager", roles = "MANAGER")
     void rejectRegisterRequest() {
-        Store store = registerService.register(StoreFixture.createStoreRegisterRequest());
+        doNothing().when(storeRegister).rejectRegisterRequest(eq(storeId));
+
+        mockedToken(UUID.randomUUID().toString(), "MANAGER");
 
         MvcTestResult result = mvcTester.post()
-                .uri("/v1/stores/{storeId}/reject", store.getId().toString())
+                .uri("/v1/stores/{storeId}/reject", storeId.toString())
                 .exchange();
 
         assertThat(result)
@@ -187,10 +220,10 @@ class StoreApiTest {
     @Test
     @WithMockUser(username = "owner", roles = "OWNER")
     void rejectRegisterRequestIfUnauthorized() {
-        Store store = registerService.register(StoreFixture.createStoreRegisterRequest());
+        mockedToken(OWNER_UUID, "OWNER");
 
         MvcTestResult result = mvcTester.post()
-                .uri("/v1/stores/{storeId}/reject", store.getId().toString())
+                .uri("/v1/stores/{storeId}/reject", storeId.toString())
                 .exchange();
 
         assertThat(result)
@@ -202,12 +235,11 @@ class StoreApiTest {
     @Test
     @WithMockUser(username = "owner", roles = "OWNER")
     void open() {
-        Store store = registerService.register(StoreFixture.createStoreRegisterRequest());
-        registerService.acceptRegisterRequest(store.getId().toUuid(), UUID.randomUUID());
-        mockedToken(store.getOwner().getId().toString(), "OWNER");
+        doNothing().when(storeApplication).open(eq(storeId), eq(UUID.fromString(OWNER_UUID)));
+        mockedToken(OWNER_UUID, "OWNER");
 
         MvcTestResult result = mvcTester.post()
-                .uri("/v1/stores/{storeId}/open", store.getId().toString())
+                .uri("/v1/stores/{storeId}/open", storeId.toString())
                 .exchange();
 
         assertThat(result)
@@ -219,12 +251,10 @@ class StoreApiTest {
     @Test
     @WithMockUser(username = "customer", roles = "CUSTOMER")
     void openIfUnauthorized() {
-        Store store = registerService.register(StoreFixture.createStoreRegisterRequest());
-        registerService.acceptRegisterRequest(store.getId().toUuid(), UUID.randomUUID());
         mockedToken(UUID.randomUUID().toString(), "CUSTOMER");
 
         MvcTestResult result = mvcTester.post()
-                .uri("/v1/stores/{storeId}/open", store.getId().toString())
+                .uri("/v1/stores/{storeId}/open", storeId.toString())
                 .exchange();
 
         assertThat(result)
@@ -236,12 +266,11 @@ class StoreApiTest {
     @Test
     @WithMockUser(username = "owner", roles = "OWNER")
     void close() {
-        Store store = registerService.register(StoreFixture.createStoreRegisterRequest());
-        registerService.acceptRegisterRequest(store.getId().toUuid(), UUID.randomUUID());
-        mockedToken(store.getOwner().getId().toString(), "OWNER");
+        doNothing().when(storeApplication).close(eq(storeId), eq(UUID.fromString(OWNER_UUID)));
+        mockedToken(OWNER_UUID, "OWNER");
 
         MvcTestResult result = mvcTester.post()
-                .uri("/v1/stores/{storeId}/close", store.getId().toString())
+                .uri("/v1/stores/{storeId}/close", storeId.toString())
                 .exchange();
 
         assertThat(result)
@@ -253,12 +282,10 @@ class StoreApiTest {
     @Test
     @WithMockUser(username = "customer", roles = "CUSTOMER")
     void closeIfUnauthorized() {
-        Store store = registerService.register(StoreFixture.createStoreRegisterRequest());
-        registerService.acceptRegisterRequest(store.getId().toUuid(), UUID.randomUUID());
         mockedToken(UUID.randomUUID().toString(), "CUSTOMER");
 
         MvcTestResult result = mvcTester.post()
-                .uri("/v1/stores/{storeId}/close", store.getId().toString())
+                .uri("/v1/stores/{storeId}/close", storeId.toString())
                 .exchange();
 
         assertThat(result)
@@ -270,16 +297,14 @@ class StoreApiTest {
     @Test
     @WithMockUser(username = "owner", roles = "OWNER")
     void transfer() throws JsonProcessingException {
-        Store store = registerService.register(StoreFixture.createStoreRegisterRequest());
-        registerService.acceptRegisterRequest(store.getId().toUuid(), UUID.randomUUID());
-
-        StoreTransferRequest request = new StoreTransferRequest(store.getOwner().getId());
+        StoreTransferRequest request = new StoreTransferRequest(UUID.randomUUID());
         String requestJson = objectMapper.writeValueAsString(request);
 
-        mockedToken(store.getOwner().getId().toString(), "OWNER");
+        doNothing().when(storeApplication).transfer(eq(storeId), any(UUID.class), eq(UUID.fromString(OWNER_UUID)));
+        mockedToken(OWNER_UUID, "OWNER");
 
         MvcTestResult result = mvcTester.post()
-                .uri("/v1/stores/{storeId}/transfer", store.getId().toString())
+                .uri("/v1/stores/{storeId}/transfer", storeId.toString())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(requestJson)
                 .exchange();
@@ -293,16 +318,13 @@ class StoreApiTest {
     @Test
     @WithMockUser(username = "customer", roles = "CUSTOMER")
     void transferIfUnauthorized() throws JsonProcessingException {
-        Store store = registerService.register(StoreFixture.createStoreRegisterRequest());
-        registerService.acceptRegisterRequest(store.getId().toUuid(), UUID.randomUUID());
-
         StoreTransferRequest request = new StoreTransferRequest(UUID.randomUUID());
         String requestJson = objectMapper.writeValueAsString(request);
 
         mockedToken(UUID.randomUUID().toString(), "CUSTOMER");
 
         MvcTestResult result = mvcTester.post()
-                .uri("/v1/stores/{storeId}/transfer", store.getId().toString())
+                .uri("/v1/stores/{storeId}/transfer", storeId.toString())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(requestJson)
                 .exchange();
