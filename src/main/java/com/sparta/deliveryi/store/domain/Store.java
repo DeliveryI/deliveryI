@@ -1,6 +1,7 @@
 package com.sparta.deliveryi.store.domain;
 
 import com.sparta.deliveryi.global.domain.AbstractEntity;
+import com.sparta.deliveryi.global.domain.Rating;
 import com.sparta.deliveryi.global.infrastructure.event.Events;
 import com.sparta.deliveryi.store.domain.event.StoreRemoveEvent;
 import com.sparta.deliveryi.store.domain.event.StoreTransferEvent;

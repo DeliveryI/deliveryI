@@ -1,4 +1,4 @@
-package com.sparta.deliveryi.store.domain;
+package com.sparta.deliveryi.global.domain;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
