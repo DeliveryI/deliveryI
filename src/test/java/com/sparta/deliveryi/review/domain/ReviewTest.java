@@ -23,7 +23,7 @@ class ReviewTest {
         review = Review.register(request);
 
         assertThat(review.getId()).isNotNull();
-        assertThat(review.getRating()).isEqualTo(Rating.of((float) request.rating()));
+        assertThat(review.getRating()).isEqualTo(Rating.of(request.rating()));
         assertThat(review.getContent()).isEqualTo(request.content());
     }
 
@@ -33,7 +33,7 @@ class ReviewTest {
 
         review.update(request);
 
-        assertThat(review.getRating()).isEqualTo(Rating.of((float) request.rating()));
+        assertThat(review.getRating()).isEqualTo(Rating.of(request.rating()));
         assertThat(review.getContent()).isEqualTo(request.content());
     }
 

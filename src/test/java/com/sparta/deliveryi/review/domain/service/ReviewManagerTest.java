@@ -32,7 +32,7 @@ record ReviewManagerTest(
 
         Review result = reviewFinder.find(review.getId());
 
-        assertThat(result.getRating()).isEqualTo(Rating.of((float) request.rating()));
+        assertThat(result.getRating()).isEqualTo(Rating.of(request.rating()));
         assertThat(result.getContent()).isEqualTo(request.content());
     }
 

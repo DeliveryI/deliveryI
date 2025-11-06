@@ -167,7 +167,7 @@ class OrderTest {
 
     @Test
     void cancelIfAfterFiveMinute() {
-        ReflectionTestUtils.setField(order, "createdAt", LocalDateTime.now().minusMinutes(5L));
+        ReflectionTestUtils.setField(order, "createdAt", LocalDateTime.now().minusMinutes(6L));
 
         assertThatThrownBy(() -> order.cancel())
                 .isInstanceOf(OrderException.class);

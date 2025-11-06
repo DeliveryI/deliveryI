@@ -44,14 +44,14 @@ public class Review extends AbstractEntity {
         order.storeId = requireNonNull(registerRequest.storeId());
         order.orderId = requireNonNull(registerRequest.orderId());
         order.reviewer = Reviewer.of(registerRequest.reviewerId());
-        order.rating = Rating.of((float) registerRequest.rating());
+        order.rating = Rating.of(registerRequest.rating());
         order.content = requireNonNull(registerRequest.content());
 
         return order;
     }
 
     public void update(ReviewUpdateRequest updateRequest) {
-        this.rating = Rating.of((float) updateRequest.rating());
+        this.rating = Rating.of(updateRequest.rating());
         this.content = updateRequest.content();
     }
 
