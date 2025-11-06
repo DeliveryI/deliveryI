@@ -75,15 +75,30 @@ public class MenuQueryApi {
 
     @Operation(
             summary = "메뉴 상세 조회",
-            description = "메뉴Id를 통해 메뉴를 상세 조회할 수 있다."
+            description = """
+        [CUSTOMER / OWNER / MANAGER / MASTER] 권한별 메뉴 상세 조회 정책은 목록 조회와 동일하다.
+        - CUSTOMER : HIDING 제외 + 삭제되지 않은 메뉴
+        - OWNER : 자신의 가게면 전체, 타 가게면 HIDING 제외
+        - MANAGER, MASTER : 모든 메뉴 (삭제 포함)
+        """
     )
-    @GetMapping("/menus/{menuId}")
+    @GetMapping("/{storeId}/menus/{menuId}")
     public ResponseEntity<ApiResponse<MenuQueryResponse>> getMenu(
+            @Parameter(name = "storeId", description = "가게 ID (UUID)", example = "550e8400-e29b-41d4-a716-446655440000")
+            @PathVariable UUID storeId,
+
             @Parameter(name = "menuId", description = "메뉴 ID", example = "101")
-            @PathVariable Long menuId
+            @PathVariable Long menuId,
+
+            @Parameter(name = "role", description = "조회자 권한 (CUSTOMER, OWNER, MANAGER, MASTER)", example = "CUSTOMER")
+            @RequestParam(defaultValue = "CUSTOMER") String role,
+
+            @Parameter(name = "currentStoreId", description = "현재 로그인한 사용자의 가게 ID (OWNER 권한일 때만 필요)", example = "550e8400-e29b-41d4-a716-446655440000")
+            @RequestParam(required = false) UUID currentStoreId
     ) {
-        Menu menu = menuQueryService.getMenu(menuId);
+        Menu menu = menuQueryService.getMenu(menuId, storeId, currentStoreId, role);
         MenuQueryResponse response = MenuQueryResponse.from(menu);
         return ResponseEntity.ok(ApiResponse.successWithDataOnly(response));
     }
+
 }

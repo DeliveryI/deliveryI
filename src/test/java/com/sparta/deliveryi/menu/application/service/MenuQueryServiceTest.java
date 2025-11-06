@@ -69,19 +69,32 @@ class MenuQueryServiceTest {
         assertThat(found.getMenuPrice()).isEqualTo(6000);
     }
 
+
     @Test
-    @DisplayName("getMenu: 단일 메뉴 조회 성공")
-    void getMenu_success() {
+    @DisplayName("getMenu (권한 정책 적용): OWNER가 자신의 가게 메뉴 조회 성공")
+    void getMenu_withVisibility_success() {
         // given
-        Menu menu = Menu.create(UUID.randomUUID(), "김치찌개", 8000, "따뜻한 찌개", MenuStatus.FORSALE, "tester");
-        given(menuFinder.findById(anyLong())).willReturn(menu);
+        Long menuId = 1L;
+        UUID storeId = UUID.randomUUID();
+        UUID currentStoreId = storeId;
+        String role = "OWNER";
+
+        Menu menu = Menu.create(storeId, "돈까스", 9000, "바삭한 돈까스", MenuStatus.FORSALE, "ownerUser");
+
+        given(menuFinder.findMenuByIdWithVisibility(
+                eq(menuId),
+                eq(storeId),
+                eq(currentStoreId),
+                eq(role)
+        )).willReturn(menu);
 
         // when
-        Menu result = menuQueryService.getMenu(1L);
+        Menu result = menuQueryService.getMenu(menuId, storeId, currentStoreId, role);
 
         // then
-        assertThat(result.getMenuName()).isEqualTo("김치찌개");
-        assertThat(result.getMenuPrice()).isEqualTo(8000);
-        assertThat(result.getCreatedBy()).isEqualTo("tester");
+        assertThat(result).isNotNull();
+        assertThat(result.getMenuName()).isEqualTo("돈까스");
+        assertThat(result.getMenuPrice()).isEqualTo(9000);
+        assertThat(result.getCreatedBy()).isEqualTo("ownerUser");
     }
 }

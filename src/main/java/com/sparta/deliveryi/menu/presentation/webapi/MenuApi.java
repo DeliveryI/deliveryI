@@ -11,6 +11,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
@@ -31,6 +32,7 @@ public class MenuApi {
             summary = "메뉴 등록",
             description = "메뉴를 등록할 수 있다. (Gemini API를 호출하여 메뉴 설명을 쉽게 작성할 수 있다.)"
     )
+    @PreAuthorize("hasAnyRole('OWNER', 'MANAGER', 'MASTER')")
     @PostMapping
     public ResponseEntity<ApiResponse<MenuResponse>> createMenu(
             @Parameter(
@@ -63,6 +65,7 @@ public class MenuApi {
             summary = "메뉴 수정",
             description = "메뉴 정보를 수정할 수 있다."
     )
+    @PreAuthorize("hasAnyRole('OWNER', 'MANAGER', 'MASTER')")
     @PutMapping("/{menuId}")
     public ResponseEntity<ApiResponse<MenuResponse>> updateMenu(
             @Parameter(name="menuId", description = "메뉴 ID", in = ParameterIn.PATH, required = true)
@@ -87,6 +90,7 @@ public class MenuApi {
             summary = "메뉴 삭제",
             description = "메뉴를 Soft Delete 방식으로 삭제할 수 있다."
     )
+    @PreAuthorize("hasAnyRole('OWNER', 'MANAGER', 'MASTER')")
     @DeleteMapping("/{menuId}")
     public ResponseEntity<ApiResponse<Void>> deleteMenu(
             @Parameter(name="id", description = "메뉴 ID", in = ParameterIn.PATH, required = true)
@@ -100,6 +104,7 @@ public class MenuApi {
             summary = "메뉴 상태 변경",
             description = "HIDING / FORSALE / SOLDOUT 중 하나로 메뉴 상태를 변경할 수 있다. 여러 메뉴를 동시에 변경할 수 있다."
     )
+    @PreAuthorize("hasAnyRole('OWNER', 'MANAGER', 'MASTER')")
     @PostMapping("/status")
     public ResponseEntity<ApiResponse<MenuStatusResponse>> changeMenuStatus(
             @RequestBody @Valid MenuStatusRequest request

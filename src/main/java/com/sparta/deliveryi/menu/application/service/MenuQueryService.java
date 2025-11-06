@@ -30,7 +30,7 @@ public class MenuQueryService {
         return menuFinder.findMenusByStore(targetStoreId, currentStoreId, role, menuName, pageable);
     }
 
-    public Menu getMenu(Long menuId) {
-        return menuFinder.findById(menuId);
+    public Menu getMenu(Long menuId, UUID targetStoreId, UUID currentStoreId, String role) {
+        return menuFinder.findMenuByIdWithVisibility(menuId, targetStoreId, currentStoreId, role);
     }
 }

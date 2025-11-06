@@ -75,12 +75,17 @@ class MenuQueryApiTest {
     }
 
     @Test
-    @DisplayName("GET /v1/stores/menus/{menuId} - 메뉴 상세 조회")
+    @DisplayName("GET /v1/stores/{storeId}/menus/{menuId} - 메뉴 상세 조회")
     void getMenu_success() throws Exception {
-        Menu menu = Menu.create(UUID.randomUUID(), "냉면", 8000, "여름별미", MenuStatus.FORSALE, "tester");
-        Mockito.when(menuQueryService.getMenu(anyLong())).thenReturn(menu);
+        UUID storeId = UUID.randomUUID();
+        Menu menu = Menu.create(storeId, "냉면", 8000, "여름별미", MenuStatus.FORSALE, "tester");
 
-        mockMvc.perform(get("/v1/stores/menus/{menuId}", 1L))
+        Mockito.when(menuQueryService.getMenu(anyLong(), any(UUID.class), any(), anyString()))
+                .thenReturn(menu);
+
+        mockMvc.perform(get("/v1/stores/{storeId}/menus/{menuId}", storeId.toString(), 1L)
+                        .param("role", "CUSTOMER")
+                        .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.menuName").value("냉면"))
                 .andExpect(jsonPath("$.data.menuPrice").value(8000));
