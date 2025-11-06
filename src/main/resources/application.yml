@@ -10,7 +10,7 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: https://keycloak1.sparta-project.xyz/realms/sparta
+          issuer-uri: https://keycloak11.sparta-project.xyz/realms/sparta
       client:
         registration:
           keycloak:
@@ -24,7 +24,7 @@ spring:
               - email
         provider:
           keycloak:
-            issuer-uri: https://keycloak1.sparta-project.xyz/realms/sparta
+            issuer-uri: https://keycloak11.sparta-project.xyz/realms/sparta
   config:
     import: optional:file:.env[.properties]
 
@@ -49,7 +49,7 @@ google:
     endpoint: ${GOOGLE_API_URL}
 
 keycloak:
-  server-url: https://keycloak1.sparta-project.xyz
+  server-url: https://keycloak11.sparta-project.xyz
   realm: sparta
   client-id: ${KEYCLOAK_CLIENT_ID}
   client-secret: ${KEYCLOAK_CLIENT_SECRET}
@@ -70,3 +70,8 @@ springdoc:
     doc-expansion: full
   paths-to-match:
     - /v1/**
+
+logging:
+  level:
+    org.hibernate.SQL: debug
+    org.hibernate.orm.jdbc.bind: trace
