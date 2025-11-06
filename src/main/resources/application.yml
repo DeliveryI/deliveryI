@@ -10,7 +10,7 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: https://keycloak1.sparta-project.xyz/realms/sparta
+          issuer-uri: https://keycloak11.sparta-project.xyz/realms/sparta
       client:
         registration:
           keycloak:
@@ -24,9 +24,24 @@ spring:
               - email
         provider:
           keycloak:
-            issuer-uri: https://keycloak1.sparta-project.xyz/realms/sparta
+            issuer-uri: https://keycloak11.sparta-project.xyz/realms/sparta
   config:
     import: optional:file:.env[.properties]
+
+  datasource:
+    url: ${MYSQL_URL}
+    username: ${MYSQL_USERNAME}
+    password: ${MYSQL_PASSWORD}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: create
+      properties:
+        hibernate:
+          format_sql: true
+          show_sql: true
+          dialect: org.hibernate.dialect.MySQLDialect
 
 google:
   ai:
@@ -34,7 +49,7 @@ google:
     endpoint: ${GOOGLE_API_URL}
 
 keycloak:
-  server-url: https://keycloak1.sparta-project.xyz
+  server-url: https://keycloak11.sparta-project.xyz
   realm: sparta
   client-id: ${KEYCLOAK_CLIENT_ID}
   client-secret: ${KEYCLOAK_CLIENT_SECRET}
@@ -55,3 +70,8 @@ springdoc:
     doc-expansion: full
   paths-to-match:
     - /v1/**
+
+logging:
+  level:
+    org.hibernate.SQL: debug
+    org.hibernate.orm.jdbc.bind: trace
