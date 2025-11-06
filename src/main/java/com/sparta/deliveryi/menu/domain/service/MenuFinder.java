@@ -15,4 +15,9 @@ public interface MenuFinder {
                                 Pageable pageable);
 
     Menu findById(Long menuId);
+
+    Menu findMenuByIdWithVisibility(Long menuId,
+                                    UUID targetStoreId,
+                                    UUID currentStoreId,
+                                    String role);
 }

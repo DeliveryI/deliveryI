@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 import com.sparta.deliveryi.global.domain.AbstractEntity;
 import com.sparta.deliveryi.menu.domain.exception.*;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
@@ -85,9 +86,17 @@ public class Menu extends AbstractEntity {
         updateBy(updatedBy);
     }
 
-    @Override
-    public void delete() {
-        super.delete();
+    public void markDeleted(String deletedBy) {
+        if (isDeleted()) {
+            throw new MenuDeletedException();
+        }
+
+        this.deleteBy(deletedBy);
+        this.setDeletedAt(LocalDateTime.now());
+    }
+
+    public boolean isDeleted() {
+        return this.getDeletedAt() != null;
     }
 
     // 비즈니스 규칙
@@ -114,7 +123,13 @@ public class Menu extends AbstractEntity {
         return this.menuStatus != MenuStatus.HIDING;
     }
 
-    public boolean isDeleted() {
-        return this.getDeletedAt() != null;
+    private void setDeletedAt(LocalDateTime deletedAt) {
+        try {
+            var field = AbstractEntity.class.getDeclaredField("deletedAt");
+            field.setAccessible(true);
+            field.set(this, deletedAt);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to set deletedAt field", e);
+        }
     }
 }

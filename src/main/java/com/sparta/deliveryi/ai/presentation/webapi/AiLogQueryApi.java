@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @Tag(name = "AI Query API", description = "AI 생성 로그 목록 조회 기능 제공")
@@ -28,6 +29,7 @@ public class AiLogQueryApi {
                     - AI 생성 결과, 프롬프트, 상태 등 AI 로그 정보를 반환합니다.
                     """
     )
+    @PreAuthorize("hasAnyRole('MANAGER','MASTER')")
     @GetMapping("/{menuId}")
     public ApiResponse<Page<AiLog>> getAiLogsByMenu(
             @Parameter(name = "menuId", description = "대상 메뉴의 ID", example = "101", required = true)
