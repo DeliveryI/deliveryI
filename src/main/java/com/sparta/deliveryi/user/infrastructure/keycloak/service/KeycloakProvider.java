@@ -61,7 +61,7 @@ public class KeycloakProvider {
 
         String name = roles.getFirst().getName();
         try {
-            return UserRole.valueOf(name);
+            return UserRole.valueOf(name.replace("ROLE_", ""));
         } catch (IllegalArgumentException e) {
             throw new KeycloakException(
                     KeycloakMessageCode.INTERNAL_FAILED,
