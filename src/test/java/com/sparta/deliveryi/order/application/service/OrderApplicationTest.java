@@ -38,6 +38,20 @@ class OrderApplicationTest {
     Order order;
 
     Store store;
+    @Autowired
+    private OrderManager orderManager;
+    @Autowired
+    private OrderFinder orderFinder;
+    @Autowired
+    private EntityManager entityManager;
+    @Autowired
+    private OrderApplicationService orderApplicationService;
+    @Autowired
+    private OrderCreator orderCreator;
+    @MockitoBean
+    private StoreFinder storeFinder;
+    @MockitoBean
+    private UserRolePolicy userRolePolicy;
 
     @BeforeEach
     void setUp() {
@@ -288,25 +302,4 @@ class OrderApplicationTest {
 
         return order;
     }
-
-    @Autowired
-    private OrderManager orderManager;
-
-    @Autowired
-    private OrderFinder orderFinder;
-
-    @Autowired
-    private EntityManager entityManager;
-
-    @Autowired
-    private OrderApplicationService orderApplicationService;
-
-    @Autowired
-    private OrderCreator orderCreator;
-
-    @MockitoBean
-    private StoreFinder storeFinder;
-
-    @MockitoBean
-    private UserRolePolicy userRolePolicy;
 }

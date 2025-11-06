@@ -18,6 +18,13 @@ public class OrderFixture {
         return order;
     }
 
+    public static Order createOrder() {
+        Order order = Order.create(createOrderCreateRequest());
+        ReflectionTestUtils.setField(order, "createdAt", LocalDateTime.now());
+
+        return order;
+    }
+
     public static OrderCreateRequest createOrderCreateRequest() {
         OrderItem orderItem1 = OrderItem.of(1L, 5000, 2);
         OrderItem orderItem2 = OrderItem.of(2L, 10000, 1);

@@ -20,6 +20,12 @@ public class OrderManageService implements OrderManager {
 
     private final OrderFinder orderFinder;
 
+    private static void checkOrderer(UUID requestId, Order order) {
+        if (!order.getOrderer().getId().equals(requestId)) {
+            throw new IllegalArgumentException("주문자 정보가 일치하지 않습니다.");
+        }
+    }
+
     @Override
     public Order changeDeliveryAddress(OrderId orderId, String deliveryAddress, UUID requestId) {
         Order order = orderFinder.find(orderId);
@@ -66,12 +72,6 @@ public class OrderManageService implements OrderManager {
         checkOrderer(requestId, order);
 
         order.cancel();
-    }
-
-    private static void checkOrderer(UUID requestId, Order order) {
-        if (!order.getOrderer().getId().equals(requestId)) {
-            throw new IllegalArgumentException("주문자 정보가 일치하지 않습니다.");
-        }
     }
 
     @Override
