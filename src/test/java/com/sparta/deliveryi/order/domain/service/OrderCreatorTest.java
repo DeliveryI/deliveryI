@@ -12,11 +12,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
 @Transactional
-record OrderRegisterTest(OrderRegister orderRegister, EntityManager entityManager) {
+record OrderCreatorTest(OrderCreator orderCreator, EntityManager entityManager) {
 
     @Test
-    void register() {
-        Order order = orderRegister.register(OrderFixture.createOrderCreateRequest());
+    void create() {
+        Order order = orderCreator.create(OrderFixture.createOrderCreateRequest());
 
         assertThat(order.getId()).isNotNull();
         assertThat(order.getStatus()).isEqualTo(OrderStatus.ORDER_REQUESTED);

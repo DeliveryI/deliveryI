@@ -12,12 +12,12 @@ import org.springframework.validation.annotation.Validated;
 @Transactional
 @Validated
 @RequiredArgsConstructor
-public class OrderRegisterService implements OrderRegister {
+public class OrderCreateService implements OrderCreator {
 
     private final OrderRepository orderRepository;
 
     @Override
-    public Order register(OrderCreateRequest createRequest) {
+    public Order create(OrderCreateRequest createRequest) {
         Order order = Order.create(createRequest);
 
         return orderRepository.save(order);

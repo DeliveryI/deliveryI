@@ -101,7 +101,7 @@ public class Order extends AbstractEntity {
 
         this.status = OrderStatus.ORDER_CANCELED;
 
-        Events.trigger(new OrderCancelEvent(getOrderId(), totalPrice));
+        Events.trigger(new OrderCancelEvent(getId(), totalPrice));
     }
 
     public void completeCooking() {
@@ -129,7 +129,7 @@ public class Order extends AbstractEntity {
                 .sum();
     }
 
-    public OrderId getOrderId() {
+    public OrderId getId() {
         return OrderId.of(id);
     }
 
