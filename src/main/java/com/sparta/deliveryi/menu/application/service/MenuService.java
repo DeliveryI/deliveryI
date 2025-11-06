@@ -102,10 +102,16 @@ public class MenuService {
     }
 
     public void deleteMenu(Long menuId) {
+        String username = getCurrentUsername();
+
         Menu menu = menuRepository.findById(menuId)
                 .orElseThrow(MenuNotFoundException::new);
-        if (menu.isDeleted()) throw new MenuDeletedException();
-        menu.delete();
+
+        if (menu.isDeleted()) {
+            throw new MenuDeletedException();
+        }
+
+        menu.markDeleted(username);
     }
 
     public List<Long> changeMenuStatus(List<MenuStatusChangeCommand> commands, String updatedBy) {
