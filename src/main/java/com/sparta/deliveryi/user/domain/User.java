@@ -47,10 +47,12 @@ public class User extends AbstractEntity {
         user.username = request.authUser().username();
         user.role = request.authUser().role();
 
-        user.id = Objects.requireNonNull(UserId.generateId());
+        user.id = Objects.requireNonNull(UserId.of(request.authUser().id()));
         user.nickname = Objects.requireNonNull(request.nickname());
         user.userPhone = Objects.requireNonNull(UserPhone.of(request.userPhone()));
         user.currentAddress = request.currentAddress();
+
+        user.createBy(request.authUser().username());
 
         return user;
     }
