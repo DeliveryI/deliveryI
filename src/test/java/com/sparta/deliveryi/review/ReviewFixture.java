@@ -26,7 +26,7 @@ public class ReviewFixture {
         );
     }
 
-    public static ReviewUpdateRequest  createReviewUpdateRequest() {
+    public static ReviewUpdateRequest createReviewUpdateRequest() {
         return new ReviewUpdateRequest(5, "정말 맛있어요.");
     }
 }
