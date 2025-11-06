@@ -1,10 +1,9 @@
 package com.sparta.deliveryi.user.infrastructure.keycloak.service;
 
-import com.sparta.deliveryi.user.application.service.AdminApplication;
+import com.sparta.deliveryi.user.application.dto.AuthUser;
 import com.sparta.deliveryi.user.application.service.AuthRegister;
 import com.sparta.deliveryi.user.domain.UserRole;
 import com.sparta.deliveryi.user.infrastructure.keycloak.KeycloakProperties;
-import com.sparta.deliveryi.user.application.dto.AuthUser;
 import jakarta.ws.rs.core.Response;
 import lombok.RequiredArgsConstructor;
 import org.keycloak.admin.client.CreatedResponseUtil;
@@ -60,20 +59,20 @@ public class KeycloakRegisterService implements AuthRegister {
         return resource.create(user);
     }
 
-    private void setPassword(String userId, String password) {
+    private void setPassword(String keycloakId, String password) {
         CredentialRepresentation credential = new CredentialRepresentation();
         credential.setTemporary(false);
         credential.setType(CredentialRepresentation.PASSWORD);
         credential.setValue(password);
 
-        provider.getUserResourceById(userId).resetPassword(credential);
+        provider.getUserResourceById(keycloakId).resetPassword(credential);
     }
 
-    private UserRole setDefaultRole(String userId) {
+    private UserRole setDefaultRole(String keycloakId) {
         UserRole defaultRole = UserRole.CUSTOMER;
 
         RoleRepresentation role = provider.toRoleRepresentation(defaultRole);
-        provider.getRoleById(userId).add(List.of(role));
+        provider.getRoleScopeResourceById(keycloakId).add(List.of(role));
 
         return UserRole.CUSTOMER;
     }

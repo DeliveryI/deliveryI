@@ -26,64 +26,77 @@ public class KeycloakProvider {
     private final Keycloak keycloak;
     private final KeycloakProperties properties;
 
+    // 회원 리소스 반환
     UsersResource getUsersResource() {
         return keycloak.realm(properties.getRealm()).users();
     }
 
+    // 특정 회원 리소스 반환 -> 회원에 대한 다양한 설정 가능
     UserResource getUserResourceById(String id) {
         try {
             return keycloak.realm(properties.getRealm()).users().get(id);
         } catch (NotFoundException e) {
             throw new KeycloakException(KeycloakMessageCode.USER_NOT_FOUND);
         } catch (Exception e) {
-            throw new KeycloakException(KeycloakMessageCode.INTERNAL_FAILED, e);
+            throw new KeycloakException(KeycloakMessageCode.INTERNAL_FAILED, "회원 리소스 조회 중 오류가 발생했습니다.", e);
         }
     }
 
-    RoleScopeResource getRoleById(String id) {
-        return getUserResourceById(id).roles().realmLevel();
-    }
-
-    List<UserRepresentation> findUsers() {
+    // 특정 회원의 역할스코프 반환
+    RoleScopeResource getRoleScopeResourceById(String id) {
         try {
-            return keycloak.realm(properties.getRealm())
-                    .users()
-                    .list();
+            return getUserResourceById(id).roles().realmLevel();
         } catch (Exception e) {
-            throw new KeycloakException(KeycloakMessageCode.INTERNAL_FAILED, e);
+            throw new KeycloakException(KeycloakMessageCode.INTERNAL_FAILED, "회원의 역할 스코프 조회 중 오류가 발생했습니다.", e);
         }
     }
 
-    UserRepresentation getUserById(String id) {
-        return getUserResourceById(id).toRepresentation();
-    }
+    // 특정 회원의 역할 목록 반환
+    UserRole getRoleById(String id) {
+        List<RoleRepresentation> roles = getUserResourceById(id).roles().realmLevel().listAll();
 
-    UserRole toUserRole(UserRepresentation user) {
+        if (roles == null || roles.isEmpty()) {
+            throw new KeycloakException(KeycloakMessageCode.INTERNAL_FAILED, "");
+        }
+
+        String name = roles.getFirst().getName();
         try {
-            String role = user.getAttributes().get("role").getFirst();
-            return UserRole.valueOf(role);
+            return UserRole.valueOf(name);
         } catch (IllegalArgumentException e) {
             throw new KeycloakException(
                     KeycloakMessageCode.INTERNAL_FAILED,
-                    "Keycloak에 존재하지 않거나 올바르지 않은 역할입니다.",
+                    String.format("Keycloak의 역할 '%s'이(가) UserRole에 존재하지 않습니다.", name),
                     e
             );
-        } catch (Exception e) {
-            throw new KeycloakException(KeycloakMessageCode.INTERNAL_FAILED, e);
         }
     }
 
-    RoleRepresentation toRoleRepresentation(UserRole role) {
-        RoleRepresentation roleRepresentation = keycloak.realm(properties.getRealm())
-                .roles()
-                .get(role.getAuthority())
-                .toRepresentation();
-
-        if (roleRepresentation == null) {
-            throw new KeycloakException(KeycloakMessageCode.INTERNAL_FAILED, role + "이(가) Keycloak에 존재하지 않습니다.", new IllegalStateException());
+    // 특정 회원정보 반환
+    UserRepresentation getUserById(String id) {
+        try {
+            return getUserResourceById(id).toRepresentation();
+        } catch (Exception e) {
+            throw new KeycloakException(KeycloakMessageCode.INTERNAL_FAILED, "회원정보 조회 중 오류가 발생했습니다.", e);
         }
 
-        return roleRepresentation;
+    }
+
+    // UserRole로 Keycloak role 반환
+    RoleRepresentation toRoleRepresentation(UserRole role) {
+        try {
+            RoleRepresentation roleRepresentation = keycloak.realm(properties.getRealm())
+                    .roles()
+                    .get(role.getAuthority())
+                    .toRepresentation();
+
+            if (roleRepresentation == null) {
+                throw new KeycloakException(KeycloakMessageCode.INTERNAL_FAILED, role + "이(가) Keycloak에 존재하지 않습니다.", new IllegalStateException());
+            }
+
+            return roleRepresentation;
+        } catch (Exception e) {
+            throw new KeycloakException(KeycloakMessageCode.INTERNAL_FAILED, "역할 변환 중 오류가 발생했습니다.", e);
+        }
     }
 
     void checkResponse(Response response, int expectedStatus, String message) {

@@ -26,21 +26,22 @@ public class KeycloakService implements AuthApplication {
     @Override
     public AuthUser getUserById(UUID keycloakId) {
         UserRepresentation user = provider.getUserById(keycloakId.toString());
+        UserRole role = provider.getRoleById(keycloakId.toString());
 
         return AuthUser.builder()
                 .id(UUID.fromString(user.getId()))
                 .username(user.getUsername())
-                .role(provider.toUserRole(user))
+                .role(role)
                 .build();
     }
 
     @Override
     public List<AuthUser> getUsers() {
-        List<UserRepresentation> users = provider.findUsers();
+        List<UserRepresentation> users = provider.getUsersResource().list();
 
         return users.stream()
                 .map(user -> {
-                    UserRole role = provider.toUserRole(user);
+                    UserRole role = provider.getRoleById(user.getId());
                     return AuthUser.builder()
                             .id(UUID.fromString(user.getId()))
                             .username(user.getUsername())
@@ -52,7 +53,7 @@ public class KeycloakService implements AuthApplication {
 
     @Override
     public void updateRole(UUID keycloakId, UserRole role) {
-        RoleScopeResource resource = provider.getRoleById(keycloakId.toString());
+        RoleScopeResource resource = provider.getRoleScopeResourceById(keycloakId.toString());
 
         // 기존 Role 제거
         resource.remove(resource.listAll());
