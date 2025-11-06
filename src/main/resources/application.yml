@@ -28,6 +28,21 @@ spring:
   config:
     import: optional:file:.env[.properties]
 
+  datasource:
+    url: ${MYSQL_URL}
+    username: ${MYSQL_USERNAME}
+    password: ${MYSQL_PASSWORD}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: create
+      properties:
+        hibernate:
+          format_sql: true
+          show_sql: true
+          dialect: org.hibernate.dialect.MySQLDialect
+
 google:
   ai:
     api-key: ${GOOGLE_API_KEY}
