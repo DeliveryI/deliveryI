@@ -1,6 +1,6 @@
 package com.sparta.deliveryi.user.domain.dto;
 
-import com.sparta.deliveryi.user.presentation.annotation.ValidPassword;
+import com.sparta.deliveryi.user.presentation.annotation.ValidPhone;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.Builder;
@@ -8,6 +8,6 @@ import lombok.Builder;
 @Builder
 public record UserInfoUpdateRequest(
     @NotBlank @Size(min=1, max=20) String nickname,
-    @NotBlank @ValidPassword String userPhone,
+    @NotBlank @ValidPhone String userPhone,
     String currentAddress
 ) {}
