@@ -35,6 +35,7 @@ public class StoreApi {
         return ok(successWithDataOnly(StoreRegisterResponse.from(store)));
     }
 
+    @PreAuthorize("hasAnyRole('OWNER', 'MANAGER', 'MASTER')")
     @PutMapping("/v1/stores/{storeId}")
     public ResponseEntity<ApiResponse<StoreUpdateInfoResponse>> updateInfo(@AuthenticationPrincipal Jwt jwt, @PathVariable UUID storeId, @RequestBody @Valid StoreInfoUpdateRequest updateRequest) {
         UUID requestId = UUID.fromString(jwt.getSubject());
