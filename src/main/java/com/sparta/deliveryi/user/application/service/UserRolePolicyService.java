@@ -3,9 +3,8 @@ package com.sparta.deliveryi.user.application.service;
 import com.sparta.deliveryi.user.domain.KeycloakId;
 import com.sparta.deliveryi.user.domain.UserId;
 import com.sparta.deliveryi.user.domain.UserRole;
-import com.sparta.deliveryi.user.domain.service.UserFinder;
-import com.sparta.deliveryi.user.infrastructure.keycloak.dto.KeycloakUser;
-import com.sparta.deliveryi.user.infrastructure.keycloak.service.AuthFinder;
+import com.sparta.deliveryi.user.domain.service.UserQuery;
+import com.sparta.deliveryi.user.application.dto.AuthUser;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,8 +17,8 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class UserRolePolicyService implements UserRolePolicy {
 
-    private final UserFinder userFinder;
-    private final AuthFinder authFinder;
+    private final UserQuery userQuery;
+    private final AuthApplication authApplication;
 
     @Override
     public boolean isAdmin(UUID userId) {
@@ -41,9 +40,9 @@ public class UserRolePolicyService implements UserRolePolicy {
 
     private boolean isUserRole(UUID userId, List<UserRole> roles) {
         // 로그인한 회원정보 DB에서 조회
-        KeycloakId keycloakId = userFinder.getById(UserId.of(userId)).getKeycloakId();
+        KeycloakId keycloakId = userQuery.getUserById(UserId.of(userId)).getKeycloakId();
         // Keycloak 서버에 저장된 역할 조회
-        KeycloakUser user = authFinder.find(keycloakId);
+        AuthUser user = authApplication.getUserById(keycloakId.toUuid());
 
         return roles.contains(user.role());
     }

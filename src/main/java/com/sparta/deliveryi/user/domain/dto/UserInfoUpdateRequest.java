@@ -9,5 +9,5 @@ import lombok.Builder;
 public record UserInfoUpdateRequest(
     @NotBlank @Size(min=1, max=20) String nickname,
     @NotBlank @ValidPhone String userPhone,
-    @NotBlank String currentAddress
+    String currentAddress
 ) {}

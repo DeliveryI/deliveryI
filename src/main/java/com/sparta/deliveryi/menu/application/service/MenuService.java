@@ -6,9 +6,10 @@ import com.sparta.deliveryi.menu.domain.Menu;
 import com.sparta.deliveryi.menu.domain.exception.*;
 import com.sparta.deliveryi.menu.domain.repository.MenuRepository;
 import com.sparta.deliveryi.menu.domain.service.MenuDescriptionGenerator;
+import com.sparta.deliveryi.store.domain.StoreId;
+import com.sparta.deliveryi.store.domain.service.StoreFinder;
+import com.sparta.deliveryi.user.application.service.UserRolePolicy;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,9 +24,11 @@ public class MenuService {
     private final MenuRepository menuRepository;
     private final AiApplicationService aiApplicationService;
     private final MenuDescriptionGenerator descriptionGenerator;
+    private final StoreFinder storeFinder;
+    private final UserRolePolicy userRolePolicy;
 
-    public MenuResult createMenu(UUID storeId, MenuCommand command) {
-        String username = getCurrentUsername();
+    public MenuResult createMenu(UUID storeId, MenuCommand command, UUID requestId) {
+        checkStoreAccess(storeId, requestId);
 
         Menu menu = Menu.create(
                 storeId,
@@ -33,7 +36,7 @@ public class MenuService {
                 command.menuPrice(),
                 command.menuDescription(),
                 command.menuStatus(),
-                username
+                requestId.toString()
         );
         menuRepository.save(menu);
 
@@ -44,7 +47,7 @@ public class MenuService {
                     command.menuName(),
                     fullPrompt,
                     true,
-                    username
+                    requestId.toString()
             );
 
             menu.update(
@@ -52,21 +55,21 @@ public class MenuService {
                     command.menuPrice(),
                     result.description(),
                     command.menuStatus(),
-                    username
+                    requestId.toString()
             );
         }
 
         return MenuResult.from(menu, command.aiGenerate());
     }
 
-    public MenuResult updateMenu(Long menuId, MenuCommand command) {
-        String username = getCurrentUsername();
+
+    public MenuResult updateMenu(Long menuId, MenuCommand command, UUID storeId, UUID requestId) {
+        checkStoreAccess(storeId, requestId);
+
         Menu menu = menuRepository.findById(menuId)
                 .orElseThrow(MenuNotFoundException::new);
 
-        if (menu.isDeleted()) {
-            throw new MenuDeletedException();
-        }
+        if (menu.isDeleted()) throw new MenuDeletedException();
 
         String description;
         boolean aiGenerated;
@@ -81,7 +84,7 @@ public class MenuService {
                     command.menuName(),
                     fullPrompt,
                     true,
-                    username
+                    requestId.toString()
             );
 
             description = (result.description() != null && !result.description().isBlank())
@@ -95,32 +98,45 @@ public class MenuService {
                 command.menuPrice(),
                 description,
                 command.menuStatus(),
-                username
+                requestId.toString()
         );
 
         return MenuResult.from(menu, aiGenerated);
     }
 
-    public void deleteMenu(Long menuId) {
+    public void deleteMenu(Long menuId, UUID storeId, UUID requestId) {
+        checkStoreAccess(storeId, requestId);
+
         Menu menu = menuRepository.findById(menuId)
                 .orElseThrow(MenuNotFoundException::new);
+
         if (menu.isDeleted()) throw new MenuDeletedException();
-        menu.delete();
+
+        menu.markDeleted(requestId.toString());
     }
 
-    public List<Long> changeMenuStatus(List<MenuStatusChangeCommand> commands, String updatedBy) {
+    public List<Long> changeMenuStatus(List<MenuStatusChangeCommand> commands, UUID storeId, UUID requestId) {
+        checkStoreAccess(storeId, requestId);
+
         return commands.stream().map(cmd -> {
             Menu menu = menuRepository.findById(cmd.menuId())
                     .orElseThrow(MenuNotFoundException::new);
-            menu.changeStatus(cmd.status(), updatedBy);
+            menu.changeStatus(cmd.status(), requestId.toString());
             return menu.getMenuId();
         }).toList();
     }
 
-    private String getCurrentUsername() {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        return (auth != null && auth.isAuthenticated() && !"anonymousUser".equals(auth.getName()))
-                ? auth.getName()
-                : "anonymousUser";
+    // OWNER는 자신의 가게만, MANAGER/MASTER는 전체 접근 가능
+    private void checkStoreAccess(UUID storeId, UUID requestId) {
+        // 관리자는 모든 가게 접근 가능
+        if (userRolePolicy.isAdmin(requestId) || userRolePolicy.isMaster(requestId)) return;
+
+        // OWNER는 자신의 가게만 접근 가능
+        if (userRolePolicy.isOwner(requestId)) {
+            var store = storeFinder.find(StoreId.of(storeId));
+            if (!store.getOwner().getId().equals(requestId)) {
+                throw new MenuStoreAccessDeniedException();
+            }
+        }
     }
 }

@@ -6,7 +6,7 @@ import com.sparta.deliveryi.store.domain.StoreInfoUpdateRequest;
 import com.sparta.deliveryi.store.domain.service.StoreFinder;
 import com.sparta.deliveryi.store.domain.service.StoreManager;
 import com.sparta.deliveryi.store.domain.service.StoreRegister;
-import com.sparta.deliveryi.user.application.service.UserRoleService;
+import com.sparta.deliveryi.user.application.service.UserRolePolicy;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -24,7 +24,7 @@ public class StoreApplicationService implements StoreApplication {
 
     private final StoreFinder storeFinder;
 
-    private final UserRoleService userRoleService;
+    private final UserRolePolicy userRolePolicy;
 
     @Override
     public Store updateInfo(UUID storeId, StoreInfoUpdateRequest updateRequest, UUID requestId) {
@@ -75,7 +75,7 @@ public class StoreApplicationService implements StoreApplication {
     }
 
     private boolean isAdmin(UUID requestId) {
-        return userRoleService.isAdmin(requestId);
+        return userRolePolicy.isAdmin(requestId);
     }
 
     private Store removeStore(StoreId storeId, UUID requestId) {

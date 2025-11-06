@@ -9,9 +9,7 @@ import java.util.Optional;
 
 public interface UserRepository extends Repository<User, UserId>, UserRepositoryCustom {
     User save(User user);
-
     Optional<User> findById(UserId userId);
     Optional<User> findByKeycloakId(KeycloakId keycloakId);
-
     Page<User> search(UserSearchRequest search, Pageable pageable);
 }

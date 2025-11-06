@@ -2,28 +2,22 @@ package com.sparta.deliveryi.user.application.dto;
 
 import com.sparta.deliveryi.user.domain.User;
 import com.sparta.deliveryi.user.domain.UserRole;
-import lombok.Builder;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-@Builder
-public record AdminUserResponse(
+public record LoginUserInfoResponse(
         UUID userId,
         String username,
         String nickname,
         UserRole role,
-        String UserPhone,
+        String userPhone,
         String currentAddress,
         LocalDateTime createdAt,
-        String createdBy,
-        LocalDateTime updatedAt,
-        String updatedBy,
-        LocalDateTime deletedAt,
-        String deletedBy
+        String createdBy
 ) {
-    public static AdminUserResponse from(User user) {
-        return new AdminUserResponse(
+    public static LoginUserInfoResponse from(User user) {
+        return new LoginUserInfoResponse(
                 user.getId().toUuid(),
                 user.getUsername(),
                 user.getNickname(),
@@ -31,11 +25,7 @@ public record AdminUserResponse(
                 user.getUserPhone().formatted(),
                 user.getCurrentAddress(),
                 user.getCreatedAt(),
-                user.getCreatedBy(),
-                user.getUpdatedAt(),
-                user.getUpdatedBy(),
-                user.getDeletedAt(),
-                user.getDeletedBy()
+                user.getCreatedBy()
         );
     }
 }
