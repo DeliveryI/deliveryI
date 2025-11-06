@@ -2,7 +2,6 @@ package com.sparta.deliveryi.order;
 
 import com.sparta.deliveryi.order.domain.Order;
 import com.sparta.deliveryi.order.domain.OrderCreateRequest;
-import com.sparta.deliveryi.order.domain.OrderId;
 import com.sparta.deliveryi.order.domain.OrderItem;
 import org.springframework.test.util.ReflectionTestUtils;
 

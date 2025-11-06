@@ -2,7 +2,6 @@ package com.sparta.deliveryi.order.domain.service;
 
 import com.sparta.deliveryi.order.OrderFixture;
 import com.sparta.deliveryi.order.domain.Order;
-import com.sparta.deliveryi.order.domain.OrderException;
 import com.sparta.deliveryi.order.domain.OrderStatus;
 import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
