@@ -69,7 +69,7 @@ jobs:
             -e SPRING_DATASOURCE_URL=${{ secrets.DB_URL }} \
             -e SPRING_DATASOURCE_USERNAME=${{ secrets.DB_USERNAME }} \
             -e SPRING_DATASOURCE_PASSWORD=${{ secrets.DB_PASSWORD }} \
-            -e GOOGLE_AI_API_KEY=${{ secrets.AI_API_KEY }}  \
+            -e GOOGLE_AI_API_KEY=${{ secrets.AI_API_KEY }} \
             -e GOOGLE_AI_API_ENDPOINT=${{ secrets.AI_ENDPOINT }} \
             -e KEYCLOAK_CLIENT_ID=${{ secrets.KC_CLIENT_ID }} \
             -e KEYCLOAK_CLIENT_SECRET=${{ secrets.KC_CLIENT_SECRET }} \
