@@ -8,30 +8,47 @@ import com.sparta.deliveryi.store.domain.StoreInfoUpdateRequest;
 import com.sparta.deliveryi.store.domain.StoreStatus;
 import com.sparta.deliveryi.store.domain.service.StoreFinder;
 import com.sparta.deliveryi.store.domain.service.StoreRegister;
+import com.sparta.deliveryi.user.application.service.UserRolePolicy;
 import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.*;
 
 @SpringBootTest
 @Transactional
 @Import(DeliveryITestConfiguration.class)
-record StoreApplicationTest(
-        StoreApplication storeApplication,
-        StoreRegister storeRegister,
-        StoreFinder storeFinder,
-        EntityManager entityManager
-) {
+class StoreApplicationTest {
+    private static final UUID MANAGER_UUID = UUID.fromString("00000000-0000-0000-0000-000000000000");
+
+    @Autowired
+    private StoreApplication storeApplication;
+
+    @Autowired
+    private StoreRegister storeRegister;
+
+    @Autowired
+    private StoreFinder storeFinder;
+
+    @Autowired
+    private EntityManager entityManager;
+
+    @MockitoBean
+    private UserRolePolicy rolePolicy;
+
     @Test
     void updateInfo() {
         Store store = registerStore();
-
         StoreInfoUpdateRequest updateRequest = StoreFixture.createStoreUpdateRequest();
+        when(rolePolicy.isAdmin(store.getOwner().getId())).thenReturn(false);
 
         store = storeApplication.updateInfo(store.getId().toUuid(), updateRequest, store.getOwner().getId());
 
@@ -41,10 +58,10 @@ record StoreApplicationTest(
     @Test
     void updateInfoIfManager() {
         Store store = registerStore();
-
         StoreInfoUpdateRequest updateRequest = StoreFixture.createStoreUpdateRequest();
+        when(rolePolicy.isAdmin(MANAGER_UUID)).thenReturn(true);
 
-        store = storeApplication.updateInfo(store.getId().toUuid(), updateRequest, UUID.fromString("00000000-0000-0000-0000-000000000000"));
+        store = storeApplication.updateInfo(store.getId().toUuid(), updateRequest, MANAGER_UUID);
 
         assertThat(store.getName()).isEqualTo(updateRequest.name());
     }
@@ -52,6 +69,7 @@ record StoreApplicationTest(
     @Test
     void remove() {
         Store store = registerStore();
+        when(rolePolicy.isAdmin(store.getOwner().getId())).thenReturn(false);
 
         storeApplication.remove(store.getId().toUuid(), store.getOwner().getId());
         entityManager.flush();
@@ -65,8 +83,9 @@ record StoreApplicationTest(
     @Test
     void removeIfManager() {
         Store store = registerStore();
+        when(rolePolicy.isAdmin(MANAGER_UUID)).thenReturn(true);
 
-        storeApplication.remove(store.getId().toUuid(), UUID.fromString("00000000-0000-0000-0000-000000000000"));
+        storeApplication.remove(store.getId().toUuid(), MANAGER_UUID);
         entityManager.flush();
         entityManager.clear();
 
@@ -78,6 +97,7 @@ record StoreApplicationTest(
     @Test
     void open() {
         Store store = registerStore();
+        when(rolePolicy.isAdmin(store.getOwner().getId())).thenReturn(false);
 
         storeApplication.open(store.getId().toUuid(), store.getOwner().getId());
         entityManager.flush();
@@ -90,8 +110,9 @@ record StoreApplicationTest(
     @Test
     void openIfManager() {
         Store store = registerStore();
+        when(rolePolicy.isAdmin(MANAGER_UUID)).thenReturn(true);
 
-        storeApplication.open(store.getId().toUuid(), UUID.fromString("00000000-0000-0000-0000-000000000000"));
+        storeApplication.open(store.getId().toUuid(), MANAGER_UUID);
         entityManager.flush();
         entityManager.clear();
 
@@ -104,6 +125,7 @@ record StoreApplicationTest(
     void close() {
         Store store = registerStore();
         storeApplication.open(store.getId().toUuid(), store.getOwner().getId());
+        when(rolePolicy.isAdmin(store.getOwner().getId())).thenReturn(false);
 
         storeApplication.close(store.getId().toUuid(), store.getOwner().getId());
         entityManager.flush();
@@ -118,8 +140,9 @@ record StoreApplicationTest(
     void closeIfManager() {
         Store store = registerStore();
         storeApplication.open(store.getId().toUuid(), store.getOwner().getId());
+        when(rolePolicy.isAdmin(MANAGER_UUID)).thenReturn(true);
 
-        storeApplication.close(store.getId().toUuid(), UUID.fromString("00000000-0000-0000-0000-000000000000"));
+        storeApplication.close(store.getId().toUuid(), MANAGER_UUID);
         entityManager.flush();
         entityManager.clear();
 
@@ -132,6 +155,7 @@ record StoreApplicationTest(
     void transfer() {
         Store store = registerStore();
         UUID newOwnerId = UUID.randomUUID();
+        when(rolePolicy.isAdmin(store.getOwner().getId())).thenReturn(false);
 
         storeApplication.transfer(store.getId().toUuid(), newOwnerId, store.getOwner().getId());
 

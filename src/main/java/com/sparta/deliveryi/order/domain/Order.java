@@ -93,7 +93,7 @@ public class Order extends AbstractEntity {
 
         this.status = OrderStatus.ORDER_REJECTED;
 
-        Events.trigger(new OrderRejectEvent(getOrderId(), totalPrice));
+        Events.trigger(new OrderRejectEvent(id, totalPrice));
     }
 
     public void cancel() {
