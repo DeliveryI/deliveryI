@@ -42,7 +42,7 @@ record OrderManagerTest(
         Order order = registerOrder();
 
         assertThatThrownBy(() -> orderManager.changeDeliveryAddress(order.getId(), "서울시 강남구 테스트로 12", UUID.randomUUID()))
-                .isInstanceOf(OrderException.class);
+                .isInstanceOf(IllegalArgumentException.class);
     }
 
     @Test
@@ -74,6 +74,7 @@ record OrderManagerTest(
     @Test
     void accept() {
         Order order = registerOrder();
+        orderManager.successPayment(order.getId());
 
         orderManager.accept(order.getId());
         entityManager.flush();
@@ -87,6 +88,7 @@ record OrderManagerTest(
     @Test
     void reject() {
         Order order = registerOrder();
+        orderManager.successPayment(order.getId());
 
         orderManager.reject(order.getId());
         entityManager.flush();
@@ -115,12 +117,14 @@ record OrderManagerTest(
         Order order = registerOrder();
 
         assertThatThrownBy(() -> orderManager.cancel(order.getId(), UUID.randomUUID()))
-                .isInstanceOf(OrderException.class);
+                .isInstanceOf(IllegalArgumentException.class);
     }
 
     @Test
     void completeCooking() {
         Order order = registerOrder();
+        orderManager.successPayment(order.getId());
+        orderManager.accept(order.getId());
 
         orderManager.completeCooking(order.getId());
         entityManager.flush();
@@ -134,6 +138,9 @@ record OrderManagerTest(
     @Test
     void delivery() {
         Order order = registerOrder();
+        orderManager.successPayment(order.getId());
+        orderManager.accept(order.getId());
+        orderManager.completeCooking(order.getId());
 
         orderManager.delivery(order.getId());
         entityManager.flush();
@@ -147,6 +154,10 @@ record OrderManagerTest(
     @Test
     void complete() {
         Order order = registerOrder();
+        orderManager.successPayment(order.getId());
+        orderManager.accept(order.getId());
+        orderManager.completeCooking(order.getId());
+        orderManager.delivery(order.getId());
 
         orderManager.complete(order.getId());
         entityManager.flush();
