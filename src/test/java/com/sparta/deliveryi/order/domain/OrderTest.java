@@ -31,6 +31,7 @@ class OrderTest {
 
         order = OrderFixture.createOrder(request);
 
+        assertThat(order.getId()).isNotNull();
         assertThat(order.getStoreId()).isEqualTo(request.storeId());
         assertThat(order.getOrderer()).isEqualTo(Orderer.of(request.ordererId()));
         assertThat(order.getTotalPrice()).isEqualTo(20000);
