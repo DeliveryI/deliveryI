@@ -10,9 +10,11 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.UUID;
+import java.util.*;
 
 @Tag(name = "메뉴 Query API", description = "메뉴 상세 조회, 권한별 목록 조회 기능 제공")
 @RestController
@@ -33,6 +35,7 @@ public class MenuQueryApi {
     )
     @GetMapping("/{storeId}/menus")
     public ResponseEntity<ApiResponse<Page<MenuQueryResponse>>> getMenusByStore(
+            @AuthenticationPrincipal Jwt jwt,
             @Parameter(name = "storeId", description = "가게 ID (UUID)", example = "550e8400-e29b-41d4-a716-446655440000")
             @PathVariable UUID storeId,
 
@@ -49,17 +52,14 @@ public class MenuQueryApi {
             @RequestParam(defaultValue = "createdAt") String sortBy,
 
             @Parameter(name = "direction", description = "정렬 방향 (ASC, DESC)", example = "DESC")
-            @RequestParam(defaultValue = "DESC") String direction,
-
-            @Parameter(name = "role", description = "조회자 권한 (CUSTOMER, OWNER, MANAGER, MASTER)", example = "CUSTOMER")
-            @RequestParam(defaultValue = "CUSTOMER") String role,
-
-            @Parameter(name = "currentStoreId", description = "현재 로그인한 사용자의 가게 ID (OWNER 권한일 때만 필요)", example = "550e8400-e29b-41d4-a716-446655440000")
-            @RequestParam(required = false) UUID currentStoreId
+            @RequestParam(defaultValue = "DESC") String direction
     ) {
+        UUID requestId = UUID.fromString(jwt.getSubject());
+        String role = extractRole(jwt);
+
         Page<Menu> menus = menuQueryService.getMenusByStore(
                 storeId,
-                currentStoreId,
+                requestId,
                 role,
                 menuName,
                 page,
@@ -69,7 +69,6 @@ public class MenuQueryApi {
         );
 
         Page<MenuQueryResponse> response = menus.map(MenuQueryResponse::from);
-
         return ResponseEntity.ok(ApiResponse.successWithDataOnly(response));
     }
 
@@ -84,21 +83,30 @@ public class MenuQueryApi {
     )
     @GetMapping("/{storeId}/menus/{menuId}")
     public ResponseEntity<ApiResponse<MenuQueryResponse>> getMenu(
+            @AuthenticationPrincipal Jwt jwt,
             @Parameter(name = "storeId", description = "가게 ID (UUID)", example = "550e8400-e29b-41d4-a716-446655440000")
             @PathVariable UUID storeId,
 
             @Parameter(name = "menuId", description = "메뉴 ID", example = "101")
-            @PathVariable Long menuId,
-
-            @Parameter(name = "role", description = "조회자 권한 (CUSTOMER, OWNER, MANAGER, MASTER)", example = "CUSTOMER")
-            @RequestParam(defaultValue = "CUSTOMER") String role,
-
-            @Parameter(name = "currentStoreId", description = "현재 로그인한 사용자의 가게 ID (OWNER 권한일 때만 필요)", example = "550e8400-e29b-41d4-a716-446655440000")
-            @RequestParam(required = false) UUID currentStoreId
+            @PathVariable Long menuId
     ) {
-        Menu menu = menuQueryService.getMenu(menuId, storeId, currentStoreId, role);
+        UUID requestId = UUID.fromString(jwt.getSubject());
+        String role = extractRole(jwt);
+
+        Menu menu = menuQueryService.getMenu(menuId, storeId, requestId, role);
         MenuQueryResponse response = MenuQueryResponse.from(menu);
         return ResponseEntity.ok(ApiResponse.successWithDataOnly(response));
     }
 
+    // Keycloak JWT에서 단일 Role 추출
+    private String extractRole(Jwt jwt) {
+        Object realmAccessObj = jwt.getClaims().get("realm_access");
+        if (!(realmAccessObj instanceof Map<?, ?> realmAccess)) return "CUSTOMER";
+
+        Object rolesObj = realmAccess.get("roles");
+        if (!(rolesObj instanceof List<?> roles) || roles.isEmpty()) return "CUSTOMER";
+
+        Object firstRole = roles.getFirst();
+        return firstRole instanceof String role ? role : "CUSTOMER";
+    }
 }

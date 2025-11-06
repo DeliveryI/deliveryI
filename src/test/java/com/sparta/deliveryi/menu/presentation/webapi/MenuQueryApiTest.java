@@ -16,12 +16,14 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.MediaType;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.test.web.servlet.MockMvc;
 
-import java.util.List;
-import java.util.UUID;
+import java.time.Instant;
+import java.util.*;
 
 import static org.mockito.ArgumentMatchers.*;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -43,6 +45,23 @@ class MenuQueryApiTest {
         }
     }
 
+    private Jwt createTestJwt(String role) {
+        Map<String, Object> realmAccess = Map.of("roles", List.of(role));
+        Map<String, Object> claims = Map.of(
+                "sub", UUID.randomUUID().toString(),
+                "preferred_username", "tester",
+                "realm_access", realmAccess
+        );
+
+        return new Jwt(
+                "fake-token",
+                Instant.now(),
+                Instant.now().plusSeconds(3600),
+                Map.of("alg", "none"),
+                claims
+        );
+    }
+
     @Test
     @DisplayName("GET /v1/stores/{storeId}/menus - 메뉴 목록 조회")
     void getMenusByStore_success() throws Exception {
@@ -53,7 +72,7 @@ class MenuQueryApiTest {
 
         Mockito.when(menuQueryService.getMenusByStore(
                 any(UUID.class),
-                nullable(UUID.class),
+                any(UUID.class),
                 anyString(),
                 any(),
                 anyInt(),
@@ -62,8 +81,8 @@ class MenuQueryApiTest {
                 anyString()
         )).thenReturn(page);
 
-        mockMvc.perform(get("/v1/stores/{storeId}/menus", UUID.randomUUID().toString())
-                        .param("role", "CUSTOMER")
+        mockMvc.perform(get("/v1/stores/{storeId}/menus", UUID.randomUUID())
+                        .with(jwt().jwt(createTestJwt("CUSTOMER")))
                         .param("page", "0")
                         .param("size", "10")
                         .param("sortBy", "createdAt")
@@ -80,11 +99,11 @@ class MenuQueryApiTest {
         UUID storeId = UUID.randomUUID();
         Menu menu = Menu.create(storeId, "냉면", 8000, "여름별미", MenuStatus.FORSALE, "tester");
 
-        Mockito.when(menuQueryService.getMenu(anyLong(), any(UUID.class), any(), anyString()))
+        Mockito.when(menuQueryService.getMenu(anyLong(), any(UUID.class), any(UUID.class), anyString()))
                 .thenReturn(menu);
 
-        mockMvc.perform(get("/v1/stores/{storeId}/menus/{menuId}", storeId.toString(), 1L)
-                        .param("role", "CUSTOMER")
+        mockMvc.perform(get("/v1/stores/{storeId}/menus/{menuId}", storeId, 1L)
+                        .with(jwt().jwt(createTestJwt("CUSTOMER")))
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.menuName").value("냉면"))

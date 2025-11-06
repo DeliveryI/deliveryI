@@ -9,7 +9,8 @@ public enum MenuMessageCode implements MessageCode {
     MENU_UPDATED_BY_EMPTY("MENU.UPDATED_BY_EMPTY", HttpStatus.BAD_REQUEST),
     MENU_NOT_FOUND("MENU.NOT_FOUND", HttpStatus.NOT_FOUND),
     MENU_DELETED("MENU.DELETED", HttpStatus.BAD_REQUEST),
-    MENU_DELETE_FORBIDDEN("MENU.DELETE_FORBIDDEN", HttpStatus.FORBIDDEN);
+    MENU_DELETE_FORBIDDEN("MENU.DELETE_FORBIDDEN", HttpStatus.FORBIDDEN),
+    MENU_STORE_ACCESS_DENIED("MENU.STORE_ACCESS_DENIED", HttpStatus.FORBIDDEN),;;
 
     private final String code;
     private final HttpStatus status;
