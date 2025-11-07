@@ -10,6 +10,7 @@ import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -23,6 +24,7 @@ import java.util.UUID;
 import static com.sparta.deliveryi.global.presentation.dto.ApiResponse.success;
 import static com.sparta.deliveryi.global.presentation.dto.ApiResponse.successWithDataOnly;
 
+@Slf4j
 @Tag(name = "메뉴 Command API", description = "메뉴 등록, 수정, 삭제, 상태 변경 기능 제공")
 @RestController
 @RequestMapping("/v1/menus")
@@ -49,6 +51,7 @@ public class MenuApi {
             @RequestParam UUID storeId,
             @RequestBody @Valid MenuRequest request
     ) {
+        log.info("storeId = {}", storeId.toString());
         UUID requestId = UUID.fromString(jwt.getSubject());
 
         MenuCommand command = new MenuCommand(
