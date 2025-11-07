@@ -94,6 +94,22 @@ public class Menu extends AbstractEntity {
         return this.getDeletedAt() != null;
     }
 
+    public void markDeleted(String deletedBy) {
+        if (isDeleted()) {
+            throw new MenuDeletedException();
+        }
+
+        this.deleteBy(deletedBy);
+        try {
+            var field = AbstractEntity.class.getDeclaredField("deletedAt");
+            field.setAccessible(true);
+            field.set(this, java.time.LocalDateTime.now());
+        } catch (Exception e) {
+            throw new RuntimeException("deletedAt 필드를 설정하는 데 실패했습니다.", e);
+        }
+    }
+
+
     // 비즈니스 규칙
     private static void validatePrice(Integer price) {
         if (price == null || price <= 0) {

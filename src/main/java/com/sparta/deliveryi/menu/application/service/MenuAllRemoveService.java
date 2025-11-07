@@ -15,8 +15,8 @@ public class MenuAllRemoveService {
     private final MenuRepository menuRepository;
 
     @Transactional
-    public void removeAllByStoreId(UUID storeId, String removedBy) {
+    public void removeAllByStoreId(UUID storeId, String deletedBy) {
         var menus = menuRepository.findAllByStoreIdAndDeletedAtIsNull(storeId);
-        menus.forEach(Menu::delete);
+        menus.forEach(menu -> menu.markDeleted(deletedBy));
     }
 }
