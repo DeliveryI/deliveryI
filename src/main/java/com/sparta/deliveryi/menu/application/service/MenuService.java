@@ -112,7 +112,7 @@ public class MenuService {
 
         if (menu.isDeleted()) throw new MenuDeletedException();
 
-        menu.markDeleted(requestId.toString());
+        menu.delete();
     }
 
     public List<Long> changeMenuStatus(List<MenuStatusChangeCommand> commands, UUID storeId, UUID requestId) {
