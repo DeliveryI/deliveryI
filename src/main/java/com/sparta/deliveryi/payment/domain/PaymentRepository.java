@@ -5,7 +5,7 @@ import org.springframework.data.repository.Repository;
 import java.util.Optional;
 import java.util.UUID;
 
-public interface PaymentRepository extends Repository<Payment, Long> {
+public interface PaymentRepository extends Repository<Payment, Long>, PaymentRepositoryCustom {
     Payment save(Payment payment);
     Optional<Payment> findById(Long id);
     Optional<Payment> findByOrderId(UUID orderId);
