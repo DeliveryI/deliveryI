@@ -1,6 +1,6 @@
 package com.sparta.deliveryi.payment.application.dto;
 
-public record CancelInfo (
+public record PaymentCancel(
         Integer cancelAmount,
         String cancelReason,
         String canceledAt,
