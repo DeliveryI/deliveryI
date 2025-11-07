@@ -1,6 +1,11 @@
 package com.sparta.deliveryi.review.application;
 
 import com.sparta.deliveryi.global.domain.Rating;
+import com.sparta.deliveryi.order.OrderFixture;
+import com.sparta.deliveryi.order.domain.Order;
+import com.sparta.deliveryi.order.domain.OrderId;
+import com.sparta.deliveryi.order.domain.OrderStatus;
+import com.sparta.deliveryi.order.domain.service.OrderFinder;
 import com.sparta.deliveryi.review.ReviewFixture;
 import com.sparta.deliveryi.review.domain.Review;
 import com.sparta.deliveryi.review.domain.ReviewRegisterRequest;
@@ -16,11 +21,13 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.UUID;
 
 import static com.sparta.deliveryi.review.ReviewFixture.createReviewRegisterRequest;
 import static com.sparta.deliveryi.review.ReviewFixture.createReviewUpdateRequest;
+import static java.util.UUID.randomUUID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.eq;
@@ -45,6 +52,9 @@ class ReviewApplicationTest {
     private EntityManager entityManager;
 
     @MockitoBean
+    private OrderFinder orderFinder;
+
+    @MockitoBean
     private UserRolePolicy userRolePolicy;
 
     @BeforeEach
@@ -55,10 +65,26 @@ class ReviewApplicationTest {
     @Test
     void register() {
         ReviewRegisterRequest request = createReviewRegisterRequest();
+        Order order = OrderFixture.createOrder();
+        ReflectionTestUtils.setField(review, "id", OrderId.of(request.orderId()));
+        ReflectionTestUtils.setField(order, "status", OrderStatus.ORDER_COMPLETED);
+        when(orderFinder.find(order.getId())).thenReturn(order);
 
-        review = reviewApplication.register(request, UUID.randomUUID());
+        review = reviewApplication.register(request, randomUUID());
 
         assertThat(review.getId()).isNotNull();
+    }
+
+    @Test
+    void registerInvalidOrderStatus() {
+        ReviewRegisterRequest request = createReviewRegisterRequest();
+        Order order = OrderFixture.createOrder();
+        ReflectionTestUtils.setField(review, "id", OrderId.of(request.orderId()));
+        ReflectionTestUtils.setField(order, "status", OrderStatus.ORDER_REQUESTED);
+        when(orderFinder.find(order.getId())).thenReturn(order);
+
+        assertThatThrownBy(() -> reviewApplication.register(request, randomUUID()))
+                .isInstanceOf(IllegalStateException.class);
     }
 
     @Test
@@ -75,17 +101,17 @@ class ReviewApplicationTest {
 
     @Test
     void updateIfNotReviewer() {
-        UUID requestId = UUID.randomUUID();
+        UUID requestId = randomUUID();
         when(userRolePolicy.isAdmin(eq(requestId))).thenReturn(false);
         ReviewUpdateRequest request = createReviewUpdateRequest();
 
         assertThatThrownBy(() -> reviewApplication.update(review.getId().value(), request, requestId))
-            .isInstanceOf(ReviewException.class);
+                .isInstanceOf(ReviewException.class);
     }
 
     @Test
     void updateIfAdmin() {
-        UUID requestId = UUID.randomUUID();
+        UUID requestId = randomUUID();
         when(userRolePolicy.isAdmin(eq(requestId))).thenReturn(true);
         ReviewUpdateRequest request = createReviewUpdateRequest();
 
@@ -116,7 +142,7 @@ class ReviewApplicationTest {
 
     @Test
     void removeIfAdmin() {
-        UUID requestId = UUID.randomUUID();
+        UUID requestId = randomUUID();
         when(userRolePolicy.isAdmin(eq(requestId))).thenReturn(true);
 
         Review result = reviewApplication.remove(review.getId().value(), requestId);
