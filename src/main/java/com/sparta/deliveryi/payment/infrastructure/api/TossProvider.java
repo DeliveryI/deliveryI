@@ -49,7 +49,7 @@ class TossProvider {
             String code = failure.get("code");
             String message = failure.get("message");
 
-            log.info("[TOSS] code: {}, message: {}", code, message);
+            log.info("Toss API를 호출합니다. {code={}, message={}}", code, message);
 
             return new PaymentResponse(httpStatus, code, message, paymentInfo);
         } catch (JsonProcessingException e) {

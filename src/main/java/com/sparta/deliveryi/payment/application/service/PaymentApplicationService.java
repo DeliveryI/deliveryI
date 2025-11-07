@@ -11,14 +11,12 @@ import com.sparta.deliveryi.payment.domain.service.PaymentQuery;
 import com.sparta.deliveryi.payment.infrastructure.TossException;
 import com.sparta.deliveryi.user.application.service.UserApplication;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.log4j.Log4j2;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.UUID;
 
-@Log4j2
 @Service
 @Transactional
 @RequiredArgsConstructor
