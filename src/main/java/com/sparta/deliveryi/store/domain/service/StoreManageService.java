@@ -1,9 +1,11 @@
 package com.sparta.deliveryi.store.domain.service;
 
+import com.sparta.deliveryi.global.infrastructure.event.Events;
 import com.sparta.deliveryi.store.domain.Store;
 import com.sparta.deliveryi.store.domain.StoreId;
 import com.sparta.deliveryi.store.domain.StoreInfoUpdateRequest;
 import com.sparta.deliveryi.store.domain.StoreRepository;
+import com.sparta.deliveryi.store.event.StoreRemoveEvent;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -49,7 +51,11 @@ public class StoreManageService implements StoreManager {
 
         store.remove();
 
-        return storeRepository.save(store);
+        store = storeRepository.save(store);
+
+        Events.trigger(new StoreRemoveEvent(store.getOwner().getId(), requestId));
+
+        return store;
     }
 
     @Override
