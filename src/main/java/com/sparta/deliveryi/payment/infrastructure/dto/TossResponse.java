@@ -4,7 +4,7 @@ import com.sparta.deliveryi.payment.application.dto.PaymentCancel;
 
 import java.util.List;
 
-public record PaymentInfo(
+public record TossResponse(
     String paymentKey,
     String orderId,
     Integer totalAmount,

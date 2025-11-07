@@ -5,7 +5,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sparta.deliveryi.payment.application.dto.PaymentResponse;
 import com.sparta.deliveryi.payment.infrastructure.TossProperties;
-import com.sparta.deliveryi.payment.infrastructure.dto.PaymentInfo;
+import com.sparta.deliveryi.payment.infrastructure.dto.TossResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -40,7 +40,7 @@ class TossProvider {
 
     public PaymentResponse handleResponse(ResponseEntity<String> response) {
         try {
-            PaymentInfo paymentInfo = objectMapper.readValue(response.getBody(), PaymentInfo.class);
+            TossResponse tossResponse = objectMapper.readValue(response.getBody(), TossResponse.class);
 
             int httpStatus = response.getStatusCode().value();
 
@@ -51,7 +51,7 @@ class TossProvider {
 
             log.info("Toss API를 호출합니다. {code={}, message={}}", code, message);
 
-            return new PaymentResponse(httpStatus, code, message, paymentInfo);
+            return new PaymentResponse(httpStatus, code, message, tossResponse);
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
