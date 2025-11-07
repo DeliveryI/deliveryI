@@ -1,6 +1,5 @@
 package com.sparta.deliveryi.menu.application.service;
 
-import com.sparta.deliveryi.menu.domain.Menu;
 import com.sparta.deliveryi.menu.domain.repository.MenuRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
