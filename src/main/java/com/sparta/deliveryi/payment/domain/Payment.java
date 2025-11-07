@@ -81,6 +81,11 @@ public class Payment extends AbstractEntity {
         this.status = PaymentStatus.REFUNDED;
     }
 
+    public void verifyAmount(int amount) {
+        if (this.totalPrice != amount)
+            throw new PaymentException(PaymentMessageCode.PAYMENT_AMOUNT_MISMATCH);
+    }
+
     private static void validateTotalPrice(Integer totalPrice){
         if (totalPrice == null || totalPrice <= 0) {
             throw new IllegalArgumentException("결제 금액은 0원 이하일 수 없습니다.");
