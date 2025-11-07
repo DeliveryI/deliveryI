@@ -27,6 +27,12 @@ public class OrderApplicationService implements OrderApplication {
 
     private final UserRolePolicy userRolePolicy;
 
+    private static void validateCanChange(Order order, UUID resolveRequestId) {
+        if (!order.getOrderer().getId().equals(resolveRequestId)) {
+            throw new IllegalArgumentException("변경 권한이 없습니다.");
+        }
+    }
+
     @Override
     public Order changeDeliveryAddress(UUID orderId, String deliveryAddress, UUID requestId) {
         Order order = orderFinder.find(OrderId.of(orderId));
@@ -49,7 +55,7 @@ public class OrderApplicationService implements OrderApplication {
     public void reject(UUID orderId, UUID requestId) {
         validateCanProcess(orderId, requestId);
 
-        orderManager.reject(OrderId.of(orderId));
+        orderManager.reject(OrderId.of(orderId), requestId);
     }
 
     @Override
@@ -75,12 +81,6 @@ public class OrderApplicationService implements OrderApplication {
 
     private UUID resolveRequestId(UUID requestId, Order order) {
         return isAdmin(requestId) ? order.getOrderer().getId() : requestId;
-    }
-
-    private static void validateCanChange(Order order, UUID resolveRequestId) {
-        if (!order.getOrderer().getId().equals(resolveRequestId)) {
-            throw new IllegalArgumentException("변경 권한이 없습니다.");
-        }
     }
 
     private void validateCanProcess(UUID orderId, UUID requestId) {

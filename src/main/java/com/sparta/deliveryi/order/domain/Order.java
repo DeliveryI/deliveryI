@@ -1,7 +1,6 @@
 package com.sparta.deliveryi.order.domain;
 
 import com.sparta.deliveryi.global.domain.AbstractEntity;
-import com.sparta.deliveryi.global.infrastructure.event.Events;
 import io.micrometer.common.util.StringUtils;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -91,16 +90,12 @@ public class Order extends AbstractEntity {
         validateProcessable();
 
         this.status = OrderStatus.ORDER_REJECTED;
-
-        Events.trigger(new OrderRejectEvent(id.toUuid(), totalPrice));
     }
 
     public void cancel() {
         validateCancelable();
 
         this.status = OrderStatus.ORDER_CANCELED;
-
-        Events.trigger(new OrderCancelEvent(getId(), totalPrice));
     }
 
     public void completeCooking() {
@@ -121,7 +116,7 @@ public class Order extends AbstractEntity {
         this.status = OrderStatus.ORDER_COMPLETED;
     }
 
-    public Integer calculateTotalPrice() {
+    private Integer calculateTotalPrice() {
         return this.orderDetails.stream()
                 .map(OrderDetail::getOrderItem)
                 .mapToInt(OrderItem::totalPrice)

@@ -9,6 +9,7 @@ import com.sparta.deliveryi.menu.domain.Menu;
 import com.sparta.deliveryi.menu.domain.MenuStatus;
 import com.sparta.deliveryi.menu.domain.repository.MenuRepository;
 import com.sparta.deliveryi.menu.domain.service.MenuDescriptionGenerator;
+import com.sparta.deliveryi.user.application.service.UserRolePolicy;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -41,6 +42,10 @@ class MenuServiceTest {
 
     @Mock
     private MenuDescriptionGenerator descriptionGenerator;
+
+    @Mock
+    private UserRolePolicy userRolePolicy;
+
 
     @Test
     @DisplayName("AI 사용 시 메뉴 생성 성공")

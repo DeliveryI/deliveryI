@@ -1,12 +1,14 @@
 package com.sparta.deliveryi.menu.presentation.webapi;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.sparta.deliveryi.TestMessageResolverInitializer;
 import com.sparta.deliveryi.menu.application.dto.MenuCommand;
 import com.sparta.deliveryi.menu.application.dto.MenuResult;
 import com.sparta.deliveryi.menu.application.service.MenuService;
 import com.sparta.deliveryi.menu.domain.MenuStatus;
 import com.sparta.deliveryi.menu.presentation.dto.MenuRequest;
 import com.sparta.deliveryi.menu.presentation.dto.MenuStatusRequest;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -23,12 +25,13 @@ import java.util.List;
 import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.*;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(MenuApi.class)
-@AutoConfigureMockMvc(addFilters = false)
+@AutoConfigureMockMvc
 @Import(MenuApiTest.TestConfig.class)
 @DisplayName("MenuApi 테스트")
 class MenuApiTest {
@@ -36,6 +39,11 @@ class MenuApiTest {
     @Autowired MockMvc mockMvc;
     @Autowired ObjectMapper objectMapper;
     @Autowired MenuService menuService;
+
+    @BeforeEach
+    void setUp() throws Exception {
+        TestMessageResolverInitializer.initializeFromResourceBundle();
+    }
 
     @TestConfiguration
     static class TestConfig {
@@ -60,6 +68,7 @@ class MenuApiTest {
         Mockito.when(menuService.createMenu(eq(storeId), any(MenuCommand.class), any(UUID.class))).thenReturn(result);
 
         mockMvc.perform(post("/v1/menus")
+                        .with(jwt().jwt(jwt -> jwt.subject(requestId.toString())))
                         .param("storeId", storeId.toString())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
@@ -84,6 +93,7 @@ class MenuApiTest {
                 .thenReturn(result);
 
         mockMvc.perform(put("/v1/menus/{menuId}", menuId)
+                        .with(jwt().jwt(jwt -> jwt.subject(requestId.toString())))
                         .param("storeId", storeId.toString())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
@@ -102,8 +112,9 @@ class MenuApiTest {
         Mockito.doNothing().when(menuService).deleteMenu(eq(menuId), eq(storeId), any(UUID.class));
 
         mockMvc.perform(delete("/v1/menus/{menuId}", menuId)
+                        .with(jwt().jwt(jwt -> jwt.subject(requestId.toString())))
                         .param("storeId", storeId.toString()))
-                .andExpect(status().isOk())
+                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true));
     }
 
@@ -123,6 +134,7 @@ class MenuApiTest {
                 .thenReturn(List.of(1L, 2L));
 
         mockMvc.perform(post("/v1/menus/status")
+                        .with(jwt().jwt(jwt -> jwt.subject(requestId.toString())))
                         .param("storeId", storeId.toString())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))

@@ -1,6 +1,7 @@
 package com.sparta.deliveryi.store.domain;
 
 import com.sparta.deliveryi.TestMessageResolverInitializer;
+import com.sparta.deliveryi.global.domain.Rating;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 

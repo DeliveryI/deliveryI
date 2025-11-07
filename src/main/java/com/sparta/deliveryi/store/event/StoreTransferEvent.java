@@ -1,4 +1,4 @@
-package com.sparta.deliveryi.store.domain.event;
+package com.sparta.deliveryi.store.event;
 
 import java.util.UUID;
 

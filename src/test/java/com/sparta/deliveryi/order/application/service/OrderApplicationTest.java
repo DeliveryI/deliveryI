@@ -51,7 +51,7 @@ class OrderApplicationTest {
         when(userRolePolicy.isAdmin(eq(ordererId))).thenReturn(false);
         String deliveryAddress = "서울시 강남구 테스트로 12";
 
-        orderApplicationService.changeDeliveryAddress(order.getId().toUuid(), deliveryAddress, ordererId);
+        orderApplication.changeDeliveryAddress(order.getId().toUuid(), deliveryAddress, ordererId);
         entityManager.flush();
         entityManager.clear();
 
@@ -65,7 +65,7 @@ class OrderApplicationTest {
         when(userRolePolicy.isAdmin(eq(requestId))).thenReturn(true);
         String deliveryAddress = "서울시 강남구 테스트로 12";
 
-        orderApplicationService.changeDeliveryAddress(order.getId().toUuid(), deliveryAddress, requestId);
+        orderApplication.changeDeliveryAddress(order.getId().toUuid(), deliveryAddress, requestId);
         entityManager.flush();
         entityManager.clear();
 
@@ -78,7 +78,7 @@ class OrderApplicationTest {
     void changeDeliveryAddressIfNotOrderer() {
         when(userRolePolicy.isAdmin(eq(requestId))).thenReturn(false);
 
-        assertThatThrownBy(() -> orderApplicationService.changeDeliveryAddress(order.getId().toUuid(), "서울시 강남구 테스트로 12", requestId))
+        assertThatThrownBy(() -> orderApplication.changeDeliveryAddress(order.getId().toUuid(), "서울시 강남구 테스트로 12", requestId))
                 .isInstanceOf(IllegalArgumentException.class);
     }
 
@@ -88,7 +88,7 @@ class OrderApplicationTest {
         when(storeFinder.find(any(StoreId.class))).thenReturn(store);
         ReflectionTestUtils.setField(store, "owner", Owner.of(requestId));
 
-        orderApplicationService.accept(order.getId().toUuid(), requestId);
+        orderApplication.accept(order.getId().toUuid(), requestId);
         entityManager.flush();
         entityManager.clear();
 
@@ -101,7 +101,7 @@ class OrderApplicationTest {
     void acceptIfManager() {
         when(userRolePolicy.isAdmin(eq(requestId))).thenReturn(true);
 
-        orderApplicationService.accept(order.getId().toUuid(), requestId);
+        orderApplication.accept(order.getId().toUuid(), requestId);
         entityManager.flush();
         entityManager.clear();
 
@@ -115,7 +115,7 @@ class OrderApplicationTest {
         when(userRolePolicy.isAdmin(eq(requestId))).thenReturn(false);
         when(storeFinder.find(any(StoreId.class))).thenReturn(store);
 
-        assertThatThrownBy(() -> orderApplicationService.accept(order.getId().toUuid(), requestId))
+        assertThatThrownBy(() -> orderApplication.accept(order.getId().toUuid(), requestId))
                 .isInstanceOf(IllegalArgumentException.class);
     }
 
@@ -125,7 +125,7 @@ class OrderApplicationTest {
         when(storeFinder.find(any(StoreId.class))).thenReturn(store);
         ReflectionTestUtils.setField(store, "owner", Owner.of(requestId));
 
-        orderApplicationService.reject(order.getId().toUuid(), requestId);
+        orderApplication.reject(order.getId().toUuid(), requestId);
         entityManager.flush();
         entityManager.clear();
 
@@ -138,7 +138,7 @@ class OrderApplicationTest {
     void rejectIfManager() {
         when(userRolePolicy.isAdmin(eq(requestId))).thenReturn(true);
 
-        orderApplicationService.reject(order.getId().toUuid(), requestId);
+        orderApplication.reject(order.getId().toUuid(), requestId);
         entityManager.flush();
         entityManager.clear();
 
@@ -152,7 +152,7 @@ class OrderApplicationTest {
         when(userRolePolicy.isAdmin(eq(requestId))).thenReturn(false);
         when(storeFinder.find(any(StoreId.class))).thenReturn(store);
 
-        assertThatThrownBy(() -> orderApplicationService.reject(order.getId().toUuid(), requestId))
+        assertThatThrownBy(() -> orderApplication.reject(order.getId().toUuid(), requestId))
                 .isInstanceOf(IllegalArgumentException.class);
     }
 
@@ -163,7 +163,7 @@ class OrderApplicationTest {
         when(storeFinder.find(any(StoreId.class))).thenReturn(store);
         ReflectionTestUtils.setField(store, "owner", Owner.of(requestId));
 
-        orderApplicationService.completeCooking(order.getId().toUuid(), requestId);
+        orderApplication.completeCooking(order.getId().toUuid(), requestId);
         entityManager.flush();
         entityManager.clear();
 
@@ -177,7 +177,7 @@ class OrderApplicationTest {
         orderManager.accept(order.getId());
         when(userRolePolicy.isAdmin(eq(requestId))).thenReturn(true);
 
-        orderApplicationService.completeCooking(order.getId().toUuid(), requestId);
+        orderApplication.completeCooking(order.getId().toUuid(), requestId);
         entityManager.flush();
         entityManager.clear();
 
@@ -191,7 +191,7 @@ class OrderApplicationTest {
         when(userRolePolicy.isAdmin(eq(requestId))).thenReturn(false);
         when(storeFinder.find(any(StoreId.class))).thenReturn(store);
 
-        assertThatThrownBy(() -> orderApplicationService.completeCooking(order.getId().toUuid(), requestId))
+        assertThatThrownBy(() -> orderApplication.completeCooking(order.getId().toUuid(), requestId))
                 .isInstanceOf(IllegalArgumentException.class);
     }
 
@@ -203,7 +203,7 @@ class OrderApplicationTest {
         when(storeFinder.find(any(StoreId.class))).thenReturn(store);
         ReflectionTestUtils.setField(store, "owner", Owner.of(requestId));
 
-        orderApplicationService.delivery(order.getId().toUuid(), requestId);
+        orderApplication.delivery(order.getId().toUuid(), requestId);
         entityManager.flush();
         entityManager.clear();
 
@@ -218,7 +218,7 @@ class OrderApplicationTest {
         orderManager.completeCooking(order.getId());
         when(userRolePolicy.isAdmin(eq(requestId))).thenReturn(true);
 
-        orderApplicationService.delivery(order.getId().toUuid(), requestId);
+        orderApplication.delivery(order.getId().toUuid(), requestId);
         entityManager.flush();
         entityManager.clear();
 
@@ -232,7 +232,7 @@ class OrderApplicationTest {
         when(userRolePolicy.isAdmin(eq(requestId))).thenReturn(false);
         when(storeFinder.find(any(StoreId.class))).thenReturn(store);
 
-        assertThatThrownBy(() -> orderApplicationService.delivery(order.getId().toUuid(), requestId))
+        assertThatThrownBy(() -> orderApplication.delivery(order.getId().toUuid(), requestId))
                 .isInstanceOf(IllegalArgumentException.class);
     }
 
@@ -245,7 +245,7 @@ class OrderApplicationTest {
         when(storeFinder.find(any(StoreId.class))).thenReturn(store);
         ReflectionTestUtils.setField(store, "owner", Owner.of(requestId));
 
-        orderApplicationService.complete(order.getId().toUuid(), requestId);
+        orderApplication.complete(order.getId().toUuid(), requestId);
         entityManager.flush();
         entityManager.clear();
 
@@ -261,7 +261,7 @@ class OrderApplicationTest {
         orderManager.delivery(order.getId());
         when(userRolePolicy.isAdmin(eq(requestId))).thenReturn(true);
 
-        orderApplicationService.complete(order.getId().toUuid(), requestId);
+        orderApplication.complete(order.getId().toUuid(), requestId);
         entityManager.flush();
         entityManager.clear();
 
@@ -275,7 +275,7 @@ class OrderApplicationTest {
         when(userRolePolicy.isAdmin(eq(requestId))).thenReturn(false);
         when(storeFinder.find(any(StoreId.class))).thenReturn(store);
 
-        assertThatThrownBy(() -> orderApplicationService.delivery(order.getId().toUuid(), requestId))
+        assertThatThrownBy(() -> orderApplication.delivery(order.getId().toUuid(), requestId))
                 .isInstanceOf(IllegalArgumentException.class);
     }
 
@@ -299,7 +299,7 @@ class OrderApplicationTest {
     private EntityManager entityManager;
 
     @Autowired
-    private OrderApplicationService orderApplicationService;
+    private OrderApplication orderApplication;
 
     @Autowired
     private OrderCreator orderCreator;

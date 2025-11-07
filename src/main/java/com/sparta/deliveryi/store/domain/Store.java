@@ -1,9 +1,10 @@
 package com.sparta.deliveryi.store.domain;
 
 import com.sparta.deliveryi.global.domain.AbstractEntity;
+import com.sparta.deliveryi.global.domain.Rating;
 import com.sparta.deliveryi.global.infrastructure.event.Events;
-import com.sparta.deliveryi.store.domain.event.StoreRemoveEvent;
-import com.sparta.deliveryi.store.domain.event.StoreTransferEvent;
+import com.sparta.deliveryi.store.event.StoreRemoveEvent;
+import com.sparta.deliveryi.store.event.StoreTransferEvent;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -137,7 +138,5 @@ public class Store extends AbstractEntity {
     public void remove() {
         super.delete();
         this.status = StoreStatus.REMOVED;
-
-        Events.trigger(new StoreRemoveEvent(owner.getId()));
     }
 }
