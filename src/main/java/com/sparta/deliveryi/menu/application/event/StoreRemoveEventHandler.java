@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.event.TransactionalEventListener;
 
 @Service
 @RequiredArgsConstructor
@@ -17,7 +18,7 @@ public class StoreRemoveEventHandler {
     private final UserQuery userQuery;
 
     @Async
-    @EventListener(StoreRemoveEvent.class)
+    @TransactionalEventListener(StoreRemoveEvent.class)
     public void handleStoreRemoveEvent(StoreRemoveEvent event) {
         var user = userQuery.getUserById(UserId.of(event.userId()));
 
