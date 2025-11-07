@@ -1,4 +1,6 @@
-package com.sparta.deliveryi.payment.application.dto;
+package com.sparta.deliveryi.payment.infrastructure.dto;
+
+import com.sparta.deliveryi.payment.application.dto.PaymentCancel;
 
 import java.util.List;
 
@@ -10,6 +12,6 @@ public record PaymentInfo(
     String requestedAt,
     String approvedAt,
     String lastTransactionKey,
-    List<CancelInfo> cancels
+    List<PaymentCancel> cancels
     // String secret,
 ) {}
