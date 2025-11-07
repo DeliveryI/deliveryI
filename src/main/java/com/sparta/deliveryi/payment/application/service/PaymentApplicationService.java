@@ -7,6 +7,7 @@ import com.sparta.deliveryi.order.domain.service.OrderFinder;
 import com.sparta.deliveryi.payment.application.dto.*;
 import com.sparta.deliveryi.payment.application.event.PaymentFailEvent;
 import com.sparta.deliveryi.payment.application.event.PaymentSuccessEvent;
+import com.sparta.deliveryi.payment.application.event.TransactionCreateEvent;
 import com.sparta.deliveryi.payment.domain.Payment;
 import com.sparta.deliveryi.payment.domain.PaymentException;
 import com.sparta.deliveryi.payment.domain.PaymentMessageCode;
@@ -14,6 +15,9 @@ import com.sparta.deliveryi.payment.domain.PaymentStatus;
 import com.sparta.deliveryi.payment.domain.service.PaymentCreate;
 import com.sparta.deliveryi.payment.domain.service.PaymentQuery;
 import com.sparta.deliveryi.payment.infrastructure.TossException;
+import com.sparta.deliveryi.transaction.domain.TransactionResponse;
+import com.sparta.deliveryi.transaction.domain.TransactionStatus;
+import com.sparta.deliveryi.transaction.domain.TransactionType;
 import com.sparta.deliveryi.user.application.service.UserApplication;
 import com.sparta.deliveryi.user.application.service.UserRolePolicy;
 import com.sparta.deliveryi.user.domain.User;
@@ -36,13 +40,25 @@ public class PaymentApplicationService implements PaymentApplication {
     private final OrderFinder orderFinder;
 
     private final TossPaymentsService tossService;
-    private final PaymentCreate  paymentCreate;
+    private final PaymentCreate paymentCreate;
     private final PaymentQuery paymentQuery;
 
     @Override
     public Payment request(UUID userId, UUID orderId, int amount) {
         User user = userApplication.getUserById(userId);
-        return paymentCreate.register(orderId, amount, user.getUsername());
+        Payment payment = paymentCreate.register(orderId, amount, user.getUsername());
+
+        // (1) 결제 요청 대기
+        Events.trigger(new TransactionCreateEvent(
+                payment.getId(),
+                payment.getTotalPrice(),
+                TransactionType.REQUEST,
+                TransactionStatus.PENDING,
+                new TransactionResponse(null, null, null),
+                userId
+        ));
+
+        return payment;
     }
 
     @Override
@@ -57,14 +73,42 @@ public class PaymentApplicationService implements PaymentApplication {
         // paymentKey 저장
         payment.updatePaymentKey(command.paymentKey());
 
+        // (2)-1 결제 요청 성공 = 결제 승인 대기
+        Events.trigger(new TransactionCreateEvent(
+                payment.getId(),
+                payment.getTotalPrice(),
+                TransactionType.APPROVE,
+                TransactionStatus.PENDING,
+                new TransactionResponse(null, null, null),
+                userId
+        ));
+
         // 결제 승인 요청
         PaymentResponse response = tossService.confirm(command.paymentKey(), command.orderId().toString(), command.amount());
 
         if (response.httpStatus() == 200) {
             payment.approve(user.getUsername());
+            // (3)-1 결제 승인 성공
+            Events.trigger(new TransactionCreateEvent(
+                    payment.getId(),
+                    payment.getTotalPrice(),
+                    TransactionType.APPROVE,
+                    TransactionStatus.SUCCESS,
+                    new TransactionResponse(response.payment().lastTransactionKey(), response.code(), response.message()),
+                    userId
+            ));
             Events.trigger(new PaymentSuccessEvent(command.orderId(), userId));
         } else {
             payment.failed(user.getUsername());
+            // (3)-2 결제 승인 실패
+            Events.trigger(new TransactionCreateEvent(
+                    payment.getId(),
+                    payment.getTotalPrice(),
+                    TransactionType.APPROVE,
+                    TransactionStatus.FAIL,
+                    new TransactionResponse(response.payment().lastTransactionKey(), response.code(), response.message()),
+                    userId
+            ));
             Events.trigger(new PaymentFailEvent(command.orderId(), userId));
 
             HttpStatus httpStatus = HttpStatus.resolve(response.httpStatus());
@@ -78,6 +122,16 @@ public class PaymentApplicationService implements PaymentApplication {
         Payment payment = paymentQuery.getPaymentByOrderId(command.orderId());
         User user = userApplication.getUserById(userId);
 
+        // (2)-2 결제 요청 실패
+        Events.trigger(new TransactionCreateEvent(
+                payment.getId(),
+                payment.getTotalPrice(),
+                TransactionType.REQUEST,
+                TransactionStatus.FAIL,
+                new TransactionResponse(null, null, null),
+                userId
+        ));
+
         payment.failed(user.getUsername());
         Events.trigger(new PaymentFailEvent(command.orderId(), userId));
     }
@@ -86,16 +140,45 @@ public class PaymentApplicationService implements PaymentApplication {
     public void refund(UUID userId, PaymentRefundCommand command) {
         verifyRefund(command.orderId(), command.amount(), userId);
 
-        // 환불 요청
         Payment payment = paymentQuery.getPaymentByOrderId(command.orderId());
         PaymentCancelRequest request = new PaymentCancelRequest(command.reason());
+
+        // (4) 환불 요청
+        Events.trigger(new TransactionCreateEvent(
+                payment.getId(),
+                payment.getTotalPrice(),
+                TransactionType.REFUND,
+                TransactionStatus.PENDING,
+                new TransactionResponse(null, null, null),
+                userId
+        ));
+
         PaymentResponse response = tossService.cancel(payment.getPaymentKey(), request);
 
-        User user = userApplication.getUserById(userId);
-
         if (response.httpStatus() == 200) {
+            User user = userApplication.getUserById(userId);
             payment.refunded(user.getUsername());
+
+            // (5)-1 환불 성공
+            Events.trigger(new TransactionCreateEvent(
+                    payment.getId(),
+                    payment.getTotalPrice(),
+                    TransactionType.REFUND,
+                    TransactionStatus.SUCCESS,
+                    new TransactionResponse(response.payment().lastTransactionKey(), response.code(), response.message()),
+                    userId
+            ));
         } else {
+            // (5)-2 환불 실패
+            Events.trigger(new TransactionCreateEvent(
+                    payment.getId(),
+                    payment.getTotalPrice(),
+                    TransactionType.REFUND,
+                    TransactionStatus.FAIL,
+                    new TransactionResponse(response.payment().lastTransactionKey(), response.code(), response.message()),
+                    userId
+            ));
+
             HttpStatus httpStatus = HttpStatus.resolve(response.httpStatus());
             throw new TossException(response.code(), response.message(), httpStatus);
         }
@@ -132,8 +215,8 @@ public class PaymentApplicationService implements PaymentApplication {
 
     @Override
     public Page<Payment> searchPayments(UUID userId, PaymentSearchRequest search, Pageable pageable) {
-        if(!userRolePolicy.isAdmin(userId)) {
-            throw  new PaymentException(PaymentMessageCode.PAYMENT_NOT_AUTHORIZED);
+        if (!userRolePolicy.isAdmin(userId)) {
+            throw new PaymentException(PaymentMessageCode.PAYMENT_NOT_AUTHORIZED);
         }
 
         return paymentQuery.getPayments(search, pageable);
