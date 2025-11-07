@@ -1,6 +1,5 @@
 package com.sparta.deliveryi.payment.application.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sparta.deliveryi.global.infrastructure.event.Events;
 import com.sparta.deliveryi.order.domain.Order;
 import com.sparta.deliveryi.order.domain.OrderId;
@@ -12,6 +11,7 @@ import com.sparta.deliveryi.payment.domain.Payment;
 import com.sparta.deliveryi.payment.domain.PaymentException;
 import com.sparta.deliveryi.payment.domain.PaymentMessageCode;
 import com.sparta.deliveryi.payment.domain.PaymentStatus;
+import com.sparta.deliveryi.payment.domain.service.PaymentCreate;
 import com.sparta.deliveryi.payment.domain.service.PaymentQuery;
 import com.sparta.deliveryi.payment.infrastructure.TossException;
 import com.sparta.deliveryi.user.application.service.UserApplication;
@@ -36,7 +36,14 @@ public class PaymentApplicationService implements PaymentApplication {
     private final OrderFinder orderFinder;
 
     private final TossPaymentsService tossService;
+    private final PaymentCreate  paymentCreate;
     private final PaymentQuery paymentQuery;
+
+    @Override
+    public Payment request(UUID userId, UUID orderId, int amount) {
+        User user = userApplication.getUserById(userId);
+        return paymentCreate.register(orderId, amount, user.getUsername());
+    }
 
     @Override
     public PaymentResponse confirm(UUID userId, PaymentConfirmCommand command) {
@@ -76,7 +83,25 @@ public class PaymentApplicationService implements PaymentApplication {
     }
 
     @Override
-    public void refund(UUID orderId, int amount, String reason, UUID userId) {
+    public void refund(UUID userId, PaymentRefundCommand command) {
+        verifyRefund(command.orderId(), command.amount(), userId);
+
+        // 환불 요청
+        Payment payment = paymentQuery.getPaymentByOrderId(command.orderId());
+        PaymentCancelRequest request = new PaymentCancelRequest(command.reason());
+        PaymentResponse response = tossService.cancel(payment.getPaymentKey(), request);
+
+        User user = userApplication.getUserById(userId);
+
+        if (response.httpStatus() == 200) {
+            payment.refunded(user.getUsername());
+        } else {
+            HttpStatus httpStatus = HttpStatus.resolve(response.httpStatus());
+            throw new TossException(response.code(), response.message(), httpStatus);
+        }
+    }
+
+    private void verifyRefund(UUID orderId, int amount, UUID userId) {
         Payment payment = paymentQuery.getPaymentByOrderId(orderId);
         Order order = orderFinder.find(OrderId.of(orderId));
 
@@ -94,10 +119,6 @@ public class PaymentApplicationService implements PaymentApplication {
         if (!order.getOrderer().getId().equals(userId)) {
             throw new PaymentException(PaymentMessageCode.PAYMENT_NOT_AUTHORIZED);
         }
-
-        // 환불 요청
-        PaymentCancelRequest request = new PaymentCancelRequest(reason);
-        tossService.cancel(payment.getPaymentKey(), request);
     }
 
     @Override
