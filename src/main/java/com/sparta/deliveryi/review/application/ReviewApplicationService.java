@@ -6,9 +6,8 @@ import com.sparta.deliveryi.order.domain.Order;
 import com.sparta.deliveryi.order.domain.OrderId;
 import com.sparta.deliveryi.order.domain.OrderStatus;
 import com.sparta.deliveryi.order.domain.service.OrderFinder;
-import com.sparta.deliveryi.review.application.event.CalculateAverageRatingEvent;
+import com.sparta.deliveryi.review.application.event.RatineCalculatedEvent;
 import com.sparta.deliveryi.review.domain.*;
-import com.sparta.deliveryi.review.domain.service.*;
 import com.sparta.deliveryi.user.application.service.UserRolePolicy;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -100,7 +99,7 @@ public class ReviewApplicationService implements ReviewApplication {
 
         Rating average = Rating.averageOf(ratings);
 
-        Events.trigger(new CalculateAverageRatingEvent(storeId, average.getScore()));
+        Events.trigger(new RatineCalculatedEvent(storeId, average.getScore()));
     }
 
     private void validateRemovePermission(ReviewId id, UUID requestId) {
