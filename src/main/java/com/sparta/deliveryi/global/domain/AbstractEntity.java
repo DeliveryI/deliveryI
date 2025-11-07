@@ -33,41 +33,41 @@ public abstract class AbstractEntity {
     /**
      * 등록자 계정
      */
-    @Column(name = "created_by")
+    @Column(name = "created_by", nullable = false)
     @CreatedBy
     private String createdBy;
 
     /**
      * 등록 일시
      */
-    @Column(name = "created_at")
+    @Column(name = "created_at", nullable = false)
     @CreatedDate
     private LocalDateTime createdAt;
 
     /**
      * 수정자 계정
      */
-    @Column(name = "updated_by")
+    @Column(name = "updated_by", nullable = false)
     @LastModifiedBy
     private String updatedBy;
 
     /**
      * 수정 일시
      */
-    @Column(name = "updated_at")
+    @Column(name = "updated_at", nullable = false)
     @LastModifiedDate
     private LocalDateTime updatedAt;
 
     /**
      * 삭제자 계정
      */
-    @Column(name = "deleted_by")
+    @Column(name = "deleted_by", nullable = false)
     private String deletedBy;
 
     /**
      * 삭제 일시
      */
-    @Column(name = "deleted_at")
+    @Column(name = "deleted_at", nullable = false)
     private LocalDateTime deletedAt;
 
     /**
