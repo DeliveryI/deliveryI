@@ -5,6 +5,7 @@ import com.sparta.deliveryi.ai.domain.AiLog;
 import com.sparta.deliveryi.ai.domain.exception.AiMenuNotFoundException;
 import com.sparta.deliveryi.ai.domain.service.AiLogFinder;
 import com.sparta.deliveryi.ai.domain.service.MenuLookupClient;
+import com.sparta.deliveryi.ai.presentation.dto.AiLogQueryResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -35,7 +36,7 @@ class AiLogQueryServiceTest {
     }
 
     @Test
-    @DisplayName("존재하는 메뉴 ID로 AI 로그 조회 성공")
+    @DisplayName("✅ 존재하는 메뉴 ID로 AI 로그 조회 성공")
     void getAiLogsByMenu_success() {
         // given
         Long menuId = 1L;
@@ -47,7 +48,7 @@ class AiLogQueryServiceTest {
         given(aiLogFinder.findAllByMenuId(menuId, pageable)).willReturn(mockPage);
 
         // when
-        Page<AiLog> result = aiLogQueryService.getAiLogsByMenu(menuId, pageable);
+        Page<AiLogQueryResponse> result = aiLogQueryService.getAiLogsByMenu(menuId, pageable);
 
         // then
         assertThat(result).isNotNull();
@@ -57,7 +58,7 @@ class AiLogQueryServiceTest {
     }
 
     @Test
-    @DisplayName("존재하지 않는 메뉴 ID로 조회 시 AiMenuNotFoundException 발생")
+    @DisplayName("❌ 존재하지 않는 메뉴 ID로 조회 시 AiMenuNotFoundException 발생")
     void getAiLogsByMenu_notFound() {
         // given
         Long menuId = 999L;
@@ -67,12 +68,13 @@ class AiLogQueryServiceTest {
         // when & then
         assertThatThrownBy(() -> aiLogQueryService.getAiLogsByMenu(menuId, pageable))
                 .isInstanceOf(AiMenuNotFoundException.class);
+
         verify(menuLookupClient).existsMenuById(menuId);
         verify(aiLogFinder, never()).findAllByMenuId(anyLong(), any());
     }
 
     @Test
-    @DisplayName("허용되지 않은 페이지 크기일 경우 기본값(10)으로 조정")
+    @DisplayName("⚙️ 허용되지 않은 페이지 크기일 경우 기본값(10)으로 조정")
     void adjustPageSize_invalidSize_defaultsTo10() {
         // given
         Long menuId = 1L;
@@ -82,7 +84,7 @@ class AiLogQueryServiceTest {
         given(aiLogFinder.findAllByMenuId(eq(menuId), any())).willReturn(mockPage);
 
         // when
-        Page<AiLog> result = aiLogQueryService.getAiLogsByMenu(menuId, pageable);
+        Page<AiLogQueryResponse> result = aiLogQueryService.getAiLogsByMenu(menuId, pageable);
 
         // then
         assertThat(result).isNotNull();
@@ -94,18 +96,19 @@ class AiLogQueryServiceTest {
     }
 
     @Test
-    @DisplayName("허용된 페이지 크기(30, 50)는 그대로 유지됨")
+    @DisplayName("⚙️ 허용된 페이지 크기(10, 30, 50)는 그대로 유지됨")
     void adjustPageSize_validSizes_staysSame() {
+        // given
         Long menuId = 1L;
         given(menuLookupClient.existsMenuById(menuId)).willReturn(true);
+        given(aiLogFinder.findAllByMenuId(eq(menuId), any())).willReturn(Page.empty());
 
         List<Integer> allowedSizes = List.of(10, 30, 50);
 
+        // when & then
         for (int size : allowedSizes) {
             Pageable pageable = PageRequest.of(0, size);
-            given(aiLogFinder.findAllByMenuId(eq(menuId), any())).willReturn(Page.empty());
-
-            Page<AiLog> result = aiLogQueryService.getAiLogsByMenu(menuId, pageable);
+            aiLogQueryService.getAiLogsByMenu(menuId, pageable);
 
             ArgumentCaptor<Pageable> pageableCaptor = ArgumentCaptor.forClass(Pageable.class);
             verify(aiLogFinder, atLeastOnce()).findAllByMenuId(eq(menuId), pageableCaptor.capture());

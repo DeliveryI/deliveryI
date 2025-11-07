@@ -4,6 +4,7 @@ import com.sparta.deliveryi.ai.domain.AiLog;
 import com.sparta.deliveryi.ai.domain.exception.AiMenuNotFoundException;
 import com.sparta.deliveryi.ai.domain.service.AiLogFinder;
 import com.sparta.deliveryi.ai.domain.service.MenuLookupClient;
+import com.sparta.deliveryi.ai.presentation.dto.AiLogQueryResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
@@ -20,13 +21,16 @@ public class AiLogQueryService {
     private static final List<Integer> ALLOWED_PAGE_SIZES = List.of(10, 30, 50);
     private static final int DEFAULT_PAGE_SIZE = 10;
 
-    public Page<AiLog> getAiLogsByMenu(Long menuId, Pageable pageable) {
+    public Page<AiLogQueryResponse> getAiLogsByMenu(Long menuId, Pageable pageable) {
         if (!menuLookupClient.existsMenuById(menuId)) {
             throw new AiMenuNotFoundException();
         }
 
         Pageable validatedPageable = adjustPageSize(pageable);
-        return aiLogFinder.findAllByMenuId(menuId, validatedPageable);
+
+        Page<com.sparta.deliveryi.ai.domain.AiLog> aiLogs = aiLogFinder.findAllByMenuId(menuId, validatedPageable);
+
+        return aiLogs.map(AiLogQueryResponse::from);
     }
 
     private Pageable adjustPageSize(Pageable pageable) {

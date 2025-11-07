@@ -1,7 +1,7 @@
 package com.sparta.deliveryi.ai.presentation.webapi;
 
 import com.sparta.deliveryi.ai.application.service.AiLogQueryService;
-import com.sparta.deliveryi.ai.domain.AiLog;
+import com.sparta.deliveryi.ai.presentation.dto.AiLogQueryResponse;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.BDDMockito;
@@ -45,8 +45,13 @@ class AiLogQueryApiTest {
     void getAiLogsByMenu_success() throws Exception {
         // given
         Long menuId = 1L;
-        AiLog mockLog = BDDMockito.mock(AiLog.class);
-        Page<AiLog> mockPage = new PageImpl<>(List.of(mockLog));
+
+        AiLogQueryResponse mockResponse = new AiLogQueryResponse(
+                1L, menuId, "prompt", "fullPrompt", "response",
+                "SUCCESS", "tester", "2025-11-07T10:00:00"
+        );
+
+        Page<AiLogQueryResponse> mockPage = new PageImpl<>(List.of(mockResponse));
 
         BDDMockito.given(aiLogQueryService.getAiLogsByMenu(eq(menuId), any(Pageable.class)))
                 .willReturn(mockPage);
@@ -55,6 +60,8 @@ class AiLogQueryApiTest {
         mockMvc.perform(get("/v1/ai/logs/{menuId}", menuId))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
-                .andExpect(jsonPath("$.data.content").isArray());
+                .andExpect(jsonPath("$.data.content").isArray())
+                .andExpect(jsonPath("$.data.content[0].menuId").value(menuId))
+                .andExpect(jsonPath("$.data.content[0].aiStatus").value("SUCCESS"));
     }
 }
