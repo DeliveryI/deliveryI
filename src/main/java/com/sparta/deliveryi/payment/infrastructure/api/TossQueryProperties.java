@@ -1,6 +1,6 @@
 package com.sparta.deliveryi.payment.infrastructure.api;
 
-import com.sparta.deliveryi.payment.application.dto.PaymentResponse;
+import com.sparta.deliveryi.payment.infrastructure.dto.PaymentResponse;
 import com.sparta.deliveryi.payment.application.service.TossQueryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
