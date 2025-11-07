@@ -101,8 +101,8 @@ class MenuQueryApiTest {
     }
 
     @Test
-    @DisplayName("GET /v1/stores/{storeId}/menus/{menuId} - 메뉴 상세 조회")
-    void getMenu_success() throws Exception {
+    @DisplayName("GET /v1/stores/{storeId}/menus/{menuId} - 메뉴 상세 조회 (CUSTOMER 권한, 감사정보 미포함)")
+    void getMenu_customer_noAuditFields() throws Exception {
         UUID storeId = UUID.randomUUID();
         Menu menu = Menu.create(storeId, "냉면", 8000, "여름별미", MenuStatus.FORSALE, "tester");
 
@@ -114,6 +114,28 @@ class MenuQueryApiTest {
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.menuName").value("냉면"))
-                .andExpect(jsonPath("$.data.menuPrice").value(8000));
+                .andExpect(jsonPath("$.data.menuPrice").value(8000))
+                .andExpect(jsonPath("$.data.createdBy").doesNotExist())
+                .andExpect(jsonPath("$.data.updatedAt").doesNotExist())
+                .andExpect(jsonPath("$.data.deletedBy").doesNotExist());
+    }
+
+    @Test
+    @DisplayName("GET /v1/stores/{storeId}/menus/{menuId} - 메뉴 상세 조회 (MANAGER 권한, 감사정보 포함)")
+    void getMenu_manager_withAuditFields() throws Exception {
+        UUID storeId = UUID.randomUUID();
+        Menu menu = Menu.create(storeId, "된장찌개", 7000, "구수한 한식 메뉴", MenuStatus.FORSALE, "managerUser");
+
+        Mockito.when(menuQueryService.getMenu(anyLong(), any(UUID.class), any(UUID.class), anyString()))
+                .thenReturn(menu);
+
+        mockMvc.perform(get("/v1/stores/{storeId}/menus/{menuId}", storeId, 1L)
+                        .with(jwt().jwt(createTestJwt("MANAGER")))
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.menuName").value("된장찌개"))
+                .andExpect(jsonPath("$.data.menuPrice").value(7000))
+                .andExpect(jsonPath("$.data.createdBy").value("managerUser"))
+                .andExpect(jsonPath("$.data.createdAt").exists());
     }
 }
