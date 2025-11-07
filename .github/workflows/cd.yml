@@ -65,7 +65,7 @@ jobs:
             echo "이미지 Pull"
             sudo docker pull ${{ env.IMAGE_URI }}
 
-            sudo docker run -d --name myapp -p 3000:3000 \
+            sudo docker run -d --name myapp --network delivery-network -p 3000:3000 \
             -e MYSQL_URL=${{ secrets.DB_URL }} \
             -e MYSQL_USERNAME=${{ secrets.DB_USERNAME }} \
             -e MYSQL_PASSWORD=${{ secrets.DB_PASSWORD }} \
