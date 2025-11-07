@@ -1,8 +1,10 @@
 package com.sparta.deliveryi.menu.presentation.webapi;
 
+import com.sparta.deliveryi.TestMessageResolverInitializer;
 import com.sparta.deliveryi.menu.application.service.MenuQueryService;
 import com.sparta.deliveryi.menu.domain.Menu;
 import com.sparta.deliveryi.menu.domain.MenuStatus;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -29,13 +31,18 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(MenuQueryApi.class)
-@AutoConfigureMockMvc(addFilters = false)
+@AutoConfigureMockMvc
 @Import(MenuQueryApiTest.TestConfig.class)
 @DisplayName("MenuQueryApi 테스트")
 class MenuQueryApiTest {
 
     @Autowired MockMvc mockMvc;
     @Autowired MenuQueryService menuQueryService;
+
+    @BeforeEach
+    void setUp() throws Exception {
+        TestMessageResolverInitializer.initializeFromResourceBundle();
+    }
 
     @TestConfiguration
     static class TestConfig {
