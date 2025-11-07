@@ -61,13 +61,13 @@ public abstract class AbstractEntity {
     /**
      * 삭제자 계정
      */
-    @Column(name = "deleted_by", nullable = false)
+    @Column(name = "deleted_by")
     private String deletedBy;
 
     /**
      * 삭제 일시
      */
-    @Column(name = "deleted_at", nullable = false)
+    @Column(name = "deleted_at")
     private LocalDateTime deletedAt;
 
     /**
