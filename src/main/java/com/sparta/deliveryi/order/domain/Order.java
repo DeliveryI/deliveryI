@@ -2,6 +2,8 @@ package com.sparta.deliveryi.order.domain;
 
 import com.sparta.deliveryi.global.domain.AbstractEntity;
 import com.sparta.deliveryi.global.infrastructure.event.Events;
+import com.sparta.deliveryi.order.domain.event.OrderCancelEvent;
+import com.sparta.deliveryi.order.domain.event.OrderRejectEvent;
 import io.micrometer.common.util.StringUtils;
 import jakarta.persistence.*;
 import lombok.AccessLevel;

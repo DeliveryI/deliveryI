@@ -138,7 +138,5 @@ public class Store extends AbstractEntity {
     public void remove() {
         super.delete();
         this.status = StoreStatus.REMOVED;
-
-        Events.trigger(new StoreRemoveEvent(owner.getId()));
     }
 }
