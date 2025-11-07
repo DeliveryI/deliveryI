@@ -1,10 +1,8 @@
 package com.sparta.deliveryi.review.domain.service;
 
-import com.sparta.deliveryi.review.domain.Review;
-import com.sparta.deliveryi.review.domain.ReviewId;
-import com.sparta.deliveryi.review.domain.ReviewRepository;
-import com.sparta.deliveryi.review.domain.Reviewer;
+import com.sparta.deliveryi.review.domain.*;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,12 +24,23 @@ public class ReviewQueryService implements ReviewFinder {
 
     @Override
     public List<Review> findAllByStoreId(UUID storeId) {
-        return reviewRepository.findAllByStoreIdAndDeletedAtIsNotNull(storeId);
+        return reviewRepository.findAllByStoreIdAndDeletedAtIsNull(storeId);
     }
 
     @Override
     public List<Review> findAllByReviewer(Reviewer reviewer) {
         return reviewRepository.findAllByReviewer(reviewer);
+    }
+
+    @Override
+    public Page<Review> search(ReviewSearchCondition searchCondition) {
+        return reviewRepository.searchReviews(
+                searchCondition.storeId(),
+                searchCondition.reviewer(),
+                searchCondition.keyword(),
+                searchCondition.includeDeleted(),
+                searchCondition.pageable()
+        );
     }
 
 }

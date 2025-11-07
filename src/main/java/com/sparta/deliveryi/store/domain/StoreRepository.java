@@ -10,5 +10,5 @@ public interface StoreRepository extends Repository<Store, StoreId> {
 
     Optional<Store> findById(StoreId storeId);
 
-    List<Store> findAllByOwnerAndDeletedByIsNotNull(Owner owner);
+    List<Store> findAllByOwnerAndDeletedAtIsNull(Owner owner);
 }
