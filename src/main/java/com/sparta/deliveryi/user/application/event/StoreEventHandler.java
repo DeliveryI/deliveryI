@@ -34,37 +34,45 @@ public class StoreEventHandler {
     @Async
     @TransactionalEventListener(StoreRegisterAcceptEvent.class)
     public void handleStoreRegisterEvent(StoreRegisterAcceptEvent event) {
-        UserRole role = getRoleByUserId(event.userId());
-
-        if (role == UserRole.CUSTOMER) {
-            String updatedBy = event.updatedBy() != null
-                    ? userQuery.getUserById(UserId.of(event.updatedBy())).getUsername()
-                    : "SYSTEM";
-            updateRole(event.userId(), UserRole.OWNER, updatedBy);
-        }
+        changeToOwner(event.userId(), event.updatedBy());
     }
 
     @Async
     @TransactionalEventListener(StoreRemoveEvent.class)
     public void handleStoreRemoveEvent(StoreRemoveEvent event) {
-        // 1. 등록된 가게가 있는지
-        List<Store> stores = storeFinder.findByOwner(Owner.of(event.userId()));
-        if (!stores.isEmpty()) return;
-
-        // 2. 역할이 OWNER 인지
-        UserRole role = getRoleByUserId(event.userId());
-
-        if (role == UserRole.OWNER) {
-            String updatedBy = userQuery.getUserById(UserId.of(event.userId())).getUsername();
-            updateRole(event.userId(), UserRole.CUSTOMER, updatedBy);
-        }
+        changeToCustomer(event.userId());
     }
 
     @Async
     @TransactionalEventListener(StoreTransferEvent.class)
     public void handleStoreTransferEvent(StoreTransferEvent event) {
-        handleStoreRemoveEvent(new StoreRemoveEvent(event.ownerId()));
-        handleStoreRegisterEvent(new StoreRegisterAcceptEvent(event.newOwnerId(), null));
+        changeToCustomer(event.ownerId());
+        changeToOwner(event.newOwnerId(), null);
+    }
+
+    private void changeToOwner(UUID userId, UUID requestId) {
+        UserRole role = getRoleByUserId(userId);
+
+        if (role == UserRole.CUSTOMER) {
+            String updatedBy = requestId != null
+                    ? userQuery.getUserById(UserId.of(requestId)).getUsername()
+                    : "SYSTEM";
+            updateRole(userId, UserRole.OWNER, updatedBy);
+        }
+    }
+
+    private void changeToCustomer(UUID userId) {
+        // 1. 등록된 가게가 있는지
+        List<Store> stores = storeFinder.findByOwner(Owner.of(userId));
+        if (!stores.isEmpty()) return;
+
+        // 2. 역할이 OWNER 인지
+        UserRole role = getRoleByUserId(userId);
+
+        if (role == UserRole.OWNER) {
+            String updatedBy = userQuery.getUserById(UserId.of(userId)).getUsername();
+            updateRole(userId, UserRole.CUSTOMER, updatedBy);
+        }
     }
 
     private UserRole getRoleByUserId(UUID userId) {
