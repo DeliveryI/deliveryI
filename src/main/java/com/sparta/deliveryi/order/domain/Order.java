@@ -121,7 +121,7 @@ public class Order extends AbstractEntity {
         this.status = OrderStatus.ORDER_COMPLETED;
     }
 
-    public Integer calculateTotalPrice() {
+    private Integer calculateTotalPrice() {
         return this.orderDetails.stream()
                 .map(OrderDetail::getOrderItem)
                 .mapToInt(OrderItem::totalPrice)
