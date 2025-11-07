@@ -5,7 +5,7 @@ import com.sparta.deliveryi.store.domain.Store;
 import com.sparta.deliveryi.store.domain.StoreId;
 import com.sparta.deliveryi.store.domain.StoreRegisterRequest;
 import com.sparta.deliveryi.store.domain.StoreRepository;
-import com.sparta.deliveryi.store.domain.event.StoreRegisterAcceptEvent;
+import com.sparta.deliveryi.store.event.StoreRegisterAcceptEvent;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

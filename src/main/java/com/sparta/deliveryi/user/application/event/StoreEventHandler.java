@@ -2,9 +2,9 @@ package com.sparta.deliveryi.user.application.event;
 
 import com.sparta.deliveryi.store.domain.Owner;
 import com.sparta.deliveryi.store.domain.Store;
-import com.sparta.deliveryi.store.domain.event.StoreRegisterAcceptEvent;
-import com.sparta.deliveryi.store.domain.event.StoreRemoveEvent;
-import com.sparta.deliveryi.store.domain.event.StoreTransferEvent;
+import com.sparta.deliveryi.store.event.StoreRegisterAcceptEvent;
+import com.sparta.deliveryi.store.event.StoreRemoveEvent;
+import com.sparta.deliveryi.store.event.StoreTransferEvent;
 import com.sparta.deliveryi.store.domain.service.StoreFinder;
 import com.sparta.deliveryi.user.application.dto.AuthUser;
 import com.sparta.deliveryi.user.application.service.AuthApplication;
