@@ -2,14 +2,15 @@ package com.sparta.deliveryi.payment.application.service;
 
 import com.sparta.deliveryi.global.infrastructure.event.Events;
 import com.sparta.deliveryi.payment.application.dto.PaymentConfirmCommand;
-import com.sparta.deliveryi.payment.application.dto.PaymentConfirmResponse;
-import com.sparta.deliveryi.payment.infrastructure.dto.PaymentResponse;
+import com.sparta.deliveryi.payment.application.dto.PaymentResponse;
 import com.sparta.deliveryi.payment.application.event.PaymentFailEvent;
 import com.sparta.deliveryi.payment.application.event.PaymentSuccessEvent;
 import com.sparta.deliveryi.payment.domain.Payment;
 import com.sparta.deliveryi.payment.domain.service.PaymentQuery;
+import com.sparta.deliveryi.payment.infrastructure.TossException;
 import com.sparta.deliveryi.user.application.service.UserApplication;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,7 +27,7 @@ public class PaymentApplicationService implements PaymentApplication {
     private final PaymentQuery paymentQuery;
 
     @Override
-    public PaymentConfirmResponse confirm(UUID userId, PaymentConfirmCommand command) {
+    public PaymentResponse confirm(UUID userId, PaymentConfirmCommand command) {
         Payment payment = paymentQuery.getPaymentByOrderId(command.orderId());
 
         // 데이터 검증
@@ -45,8 +46,10 @@ public class PaymentApplicationService implements PaymentApplication {
         } else {
             payment.failed();
             Events.trigger(new PaymentFailEvent(command.orderId(), userId));
-        }
 
-        return PaymentConfirmResponse.from(response);
+            HttpStatus httpStatus = HttpStatus.resolve(response.httpStatus());
+            throw new TossException(response.code(), response.message(), httpStatus);
+        }
+        return response;
     }
 }

@@ -3,7 +3,7 @@ package com.sparta.deliveryi.payment.infrastructure.api;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.sparta.deliveryi.payment.infrastructure.dto.PaymentResponse;
+import com.sparta.deliveryi.payment.application.dto.PaymentResponse;
 import com.sparta.deliveryi.payment.infrastructure.TossProperties;
 import com.sparta.deliveryi.payment.infrastructure.dto.PaymentInfo;
 import lombok.RequiredArgsConstructor;

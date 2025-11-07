@@ -1,6 +1,6 @@
-package com.sparta.deliveryi.payment.application.dto;
+package com.sparta.deliveryi.payment.presentation.dto;
 
-import com.sparta.deliveryi.payment.infrastructure.dto.PaymentResponse;
+import com.sparta.deliveryi.payment.application.dto.PaymentResponse;
 
 public record PaymentConfirmResponse(
         String paymentKey,
