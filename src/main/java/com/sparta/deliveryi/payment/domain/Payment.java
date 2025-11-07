@@ -35,9 +35,9 @@ public class Payment extends AbstractEntity {
     @Column(name = "payment_status", nullable = false)
     private PaymentStatus status;
 
-    public static Payment create(UUID orderId, Integer totalPrice, String createdBy){
+    public static Payment create(UUID orderId, Integer totalPrice, String username){
         validateTotalPrice(totalPrice);
-        validateCreatedBy(createdBy);
+        validateCreatedBy(username);
 
         Payment payment = new Payment();
 
@@ -45,7 +45,8 @@ public class Payment extends AbstractEntity {
         payment.totalPrice = totalPrice;
         payment.status = PaymentStatus.PENDING;
 
-        payment.createBy(createdBy);
+        payment.createBy(username);
+        payment.updateBy(username);
 
         return payment;
     }
@@ -60,25 +61,28 @@ public class Payment extends AbstractEntity {
         this.paymentKey = paymentKey;
     }
 
-    public void approve() {
+    public void approve(String username) {
         if (this.status != PaymentStatus.PENDING) {
             throw new PaymentException(PaymentMessageCode.INVALID_STATUS_CHANGE, "결제 대기 상태가 아닙니다.");
         }
         this.status = PaymentStatus.APPROVED;
+        updateBy(username);
     }
 
-    public void failed() {
+    public void failed(String username) {
         if (this.status != PaymentStatus.PENDING) {
             throw new PaymentException(PaymentMessageCode.INVALID_STATUS_CHANGE, "결제 대기 상태가 아닙니다.");
         }
         this.status = PaymentStatus.FAILED;
+        updateBy(username);
     }
 
-    public void refunded() {
+    public void refunded(String username) {
         if (this.status == PaymentStatus.PENDING) {
             throw new PaymentException(PaymentMessageCode.INVALID_STATUS_CHANGE, "결제가 완료된 상태에서만 환불할 수 있습니다.");
         }
         this.status = PaymentStatus.REFUNDED;
+        updateBy(username);
     }
 
     public void verifyAmount(int amount) {

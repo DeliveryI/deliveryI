@@ -13,6 +13,7 @@ import java.util.UUID;
 public interface PaymentApplication {
     PaymentResponse confirm(UUID userId, PaymentConfirmCommand command);
     void fail(UUID userId, PaymentFailCommand command);
+    void refund(UUID orderId, int amount, String reason, UUID userId);
 
     Payment getPaymentByOrderId(UUID userId, UUID orderId);
     Page<Payment> searchPayments(UUID userId, PaymentSearchRequest search, Pageable pageable);

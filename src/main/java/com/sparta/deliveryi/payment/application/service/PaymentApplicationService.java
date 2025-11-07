@@ -1,22 +1,22 @@
 package com.sparta.deliveryi.payment.application.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sparta.deliveryi.global.infrastructure.event.Events;
 import com.sparta.deliveryi.order.domain.Order;
 import com.sparta.deliveryi.order.domain.OrderId;
 import com.sparta.deliveryi.order.domain.service.OrderFinder;
-import com.sparta.deliveryi.payment.application.dto.PaymentConfirmCommand;
-import com.sparta.deliveryi.payment.application.dto.PaymentFailCommand;
-import com.sparta.deliveryi.payment.application.dto.PaymentResponse;
-import com.sparta.deliveryi.payment.application.dto.PaymentSearchRequest;
+import com.sparta.deliveryi.payment.application.dto.*;
 import com.sparta.deliveryi.payment.application.event.PaymentFailEvent;
 import com.sparta.deliveryi.payment.application.event.PaymentSuccessEvent;
 import com.sparta.deliveryi.payment.domain.Payment;
 import com.sparta.deliveryi.payment.domain.PaymentException;
 import com.sparta.deliveryi.payment.domain.PaymentMessageCode;
+import com.sparta.deliveryi.payment.domain.PaymentStatus;
 import com.sparta.deliveryi.payment.domain.service.PaymentQuery;
 import com.sparta.deliveryi.payment.infrastructure.TossException;
 import com.sparta.deliveryi.user.application.service.UserApplication;
 import com.sparta.deliveryi.user.application.service.UserRolePolicy;
+import com.sparta.deliveryi.user.domain.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -41,6 +41,7 @@ public class PaymentApplicationService implements PaymentApplication {
     @Override
     public PaymentResponse confirm(UUID userId, PaymentConfirmCommand command) {
         Payment payment = paymentQuery.getPaymentByOrderId(command.orderId());
+        User user = userApplication.getUserById(userId);
 
         // 데이터 검증
         userApplication.getUserById(userId);
@@ -53,10 +54,10 @@ public class PaymentApplicationService implements PaymentApplication {
         PaymentResponse response = tossService.confirm(command.paymentKey(), command.orderId().toString(), command.amount());
 
         if (response.httpStatus() == 200) {
-            payment.approve();
+            payment.approve(user.getUsername());
             Events.trigger(new PaymentSuccessEvent(command.orderId(), userId));
         } else {
-            payment.failed();
+            payment.failed(user.getUsername());
             Events.trigger(new PaymentFailEvent(command.orderId(), userId));
 
             HttpStatus httpStatus = HttpStatus.resolve(response.httpStatus());
@@ -68,9 +69,35 @@ public class PaymentApplicationService implements PaymentApplication {
     @Override
     public void fail(UUID userId, PaymentFailCommand command) {
         Payment payment = paymentQuery.getPaymentByOrderId(command.orderId());
+        User user = userApplication.getUserById(userId);
 
-        payment.failed();
+        payment.failed(user.getUsername());
         Events.trigger(new PaymentFailEvent(command.orderId(), userId));
+    }
+
+    @Override
+    public void refund(UUID orderId, int amount, String reason, UUID userId) {
+        Payment payment = paymentQuery.getPaymentByOrderId(orderId);
+        Order order = orderFinder.find(OrderId.of(orderId));
+
+        // 결제 상태 검증 (APPROVE)
+        if (payment.getStatus() != PaymentStatus.APPROVED) {
+            throw new PaymentException(PaymentMessageCode.PAYMENT_NOT_APPROVED);
+        }
+
+        // amount = payment의 amount
+        if (payment.getTotalPrice() != amount) {
+            throw new PaymentException(PaymentMessageCode.PAYMENT_AMOUNT_MISMATCH);
+        }
+
+        // 결제자 = 주문자
+        if (!order.getOrderer().getId().equals(userId)) {
+            throw new PaymentException(PaymentMessageCode.PAYMENT_NOT_AUTHORIZED);
+        }
+
+        // 환불 요청
+        PaymentCancelRequest request = new PaymentCancelRequest(reason);
+        tossService.cancel(payment.getPaymentKey(), request);
     }
 
     @Override
