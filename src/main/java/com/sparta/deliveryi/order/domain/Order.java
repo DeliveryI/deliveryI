@@ -22,10 +22,8 @@ import static java.util.Objects.requireNonNull;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Order extends AbstractEntity {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "order_id")
-    private Long id;
+    @EmbeddedId
+    private OrderId id;
 
     @Column(nullable = false)
     private UUID storeId;
@@ -49,6 +47,7 @@ public class Order extends AbstractEntity {
     public static Order create(OrderCreateRequest createRequest) {
         Order order = new Order();
 
+        order.id = OrderId.generateId();
         order.storeId = requireNonNull(createRequest.storeId());
         order.orderer = Orderer.of(createRequest.ordererId());
         order.deliveryAddress = createRequest.deliveryAddress();
@@ -93,7 +92,7 @@ public class Order extends AbstractEntity {
 
         this.status = OrderStatus.ORDER_REJECTED;
 
-        Events.trigger(new OrderRejectEvent(id, totalPrice));
+        Events.trigger(new OrderRejectEvent(id.toUuid(), totalPrice));
     }
 
     public void cancel() {
@@ -101,7 +100,7 @@ public class Order extends AbstractEntity {
 
         this.status = OrderStatus.ORDER_CANCELED;
 
-        Events.trigger(new OrderCancelEvent(getOrderId(), totalPrice));
+        Events.trigger(new OrderCancelEvent(getId(), totalPrice));
     }
 
     public void completeCooking() {
@@ -122,15 +121,11 @@ public class Order extends AbstractEntity {
         this.status = OrderStatus.ORDER_COMPLETED;
     }
 
-    public Integer calculateTotalPrice() {
+    private Integer calculateTotalPrice() {
         return this.orderDetails.stream()
                 .map(OrderDetail::getOrderItem)
                 .mapToInt(OrderItem::totalPrice)
                 .sum();
-    }
-
-    public OrderId getOrderId() {
-        return OrderId.of(id);
     }
 
     private void validateDelivering() {

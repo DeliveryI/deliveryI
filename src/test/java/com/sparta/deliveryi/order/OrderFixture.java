@@ -13,7 +13,13 @@ public class OrderFixture {
 
     public static Order createOrder(OrderCreateRequest request) {
         Order order = Order.create(request);
-        ReflectionTestUtils.setField(order, "id", 1L);
+        ReflectionTestUtils.setField(order, "createdAt", LocalDateTime.now());
+
+        return order;
+    }
+
+    public static Order createOrder() {
+        Order order = Order.create(createOrderCreateRequest());
         ReflectionTestUtils.setField(order, "createdAt", LocalDateTime.now());
 
         return order;
