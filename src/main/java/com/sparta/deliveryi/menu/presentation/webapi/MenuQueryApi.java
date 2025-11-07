@@ -104,13 +104,29 @@ public class MenuQueryApi {
 
     // Keycloak JWT에서 단일 Role 추출
     private String extractRole(Jwt jwt) {
-        Object realmAccessObj = jwt.getClaims().get("realm_access");
-        if (!(realmAccessObj instanceof Map<?, ?> realmAccess)) return "CUSTOMER";
+        Object realmAccessObj = jwt.getClaims().get("realmaccess");
+        if (!(realmAccessObj instanceof Map<?, ?> realmAccess)) {
+            return "CUSTOMER";
+        }
 
         Object rolesObj = realmAccess.get("roles");
-        if (!(rolesObj instanceof List<?> roles) || roles.isEmpty()) return "CUSTOMER";
+        if (!(rolesObj instanceof List<?> roles) || roles.isEmpty()) {
+            return "CUSTOMER";
+        }
 
-        Object firstRole = roles.getFirst();
-        return firstRole instanceof String role ? role : "CUSTOMER";
+        List<String> normalizedRoles = roles.stream()
+                .filter(String.class::isInstance)
+                .map(String.class::cast)
+                .map(role -> role.startsWith("ROLE_") ? role.substring(5) : role) // "ROLE_" 제거
+                .filter(role -> !role.equalsIgnoreCase("default-roles-sparta"))   // 기본 롤 무시
+                .map(String::toUpperCase)
+                .toList();
+
+        if (normalizedRoles.contains("MASTER")) return "MASTER";
+        if (normalizedRoles.contains("MANAGER")) return "MANAGER";
+        if (normalizedRoles.contains("OWNER")) return "OWNER";
+        if (normalizedRoles.contains("CUSTOMER")) return "CUSTOMER";
+
+        return "CUSTOMER"; // 기본값
     }
 }
