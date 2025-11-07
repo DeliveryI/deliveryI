@@ -2,6 +2,7 @@ package com.sparta.deliveryi.payment.application.service;
 
 import com.sparta.deliveryi.global.infrastructure.event.Events;
 import com.sparta.deliveryi.payment.application.dto.PaymentConfirmCommand;
+import com.sparta.deliveryi.payment.application.dto.PaymentFailCommand;
 import com.sparta.deliveryi.payment.application.dto.PaymentResponse;
 import com.sparta.deliveryi.payment.application.event.PaymentFailEvent;
 import com.sparta.deliveryi.payment.application.event.PaymentSuccessEvent;
@@ -10,12 +11,14 @@ import com.sparta.deliveryi.payment.domain.service.PaymentQuery;
 import com.sparta.deliveryi.payment.infrastructure.TossException;
 import com.sparta.deliveryi.user.application.service.UserApplication;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.UUID;
 
+@Log4j2
 @Service
 @Transactional
 @RequiredArgsConstructor
@@ -51,5 +54,13 @@ public class PaymentApplicationService implements PaymentApplication {
             throw new TossException(response.code(), response.message(), httpStatus);
         }
         return response;
+    }
+
+    @Override
+    public void fail(UUID userId, PaymentFailCommand command) {
+        Payment payment = paymentQuery.getPaymentByOrderId(command.orderId());
+
+        payment.failed();
+        Events.trigger(new PaymentFailEvent(command.orderId(), userId));
     }
 }

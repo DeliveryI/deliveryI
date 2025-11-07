@@ -6,7 +6,7 @@ import jakarta.validation.constraints.Positive;
 
 import java.util.UUID;
 
-public record PaymentConfirmRequest (
+public record PaymentSuccessRequest(
         @NotBlank String paymentKey,
         @NotNull UUID orderId,
         @Positive int amount

@@ -7,6 +7,7 @@ import com.sparta.deliveryi.payment.application.dto.PaymentResponse;
 import com.sparta.deliveryi.payment.infrastructure.TossProperties;
 import com.sparta.deliveryi.payment.infrastructure.dto.PaymentInfo;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -17,6 +18,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.Map;
 
+@Log4j2
 @Component
 @RequiredArgsConstructor
 @EnableConfigurationProperties(TossProperties.class)
@@ -46,6 +48,8 @@ class TossProvider {
             Map<String, String> failure = (Map<String, String>) result.get("failure");
             String code = failure.get("code");
             String message = failure.get("message");
+
+            log.info("[TOSS] code: {}, message: {}", code, message);
 
             return new PaymentResponse(httpStatus, code, message, paymentInfo);
         } catch (JsonProcessingException e) {
