@@ -89,7 +89,7 @@ record OrderManagerTest(
         Order order = registerOrder();
         orderManager.successPayment(order.getId());
 
-        orderManager.reject(order.getId());
+        orderManager.reject(order.getId(), UUID.randomUUID());
         entityManager.flush();
         entityManager.clear();
 

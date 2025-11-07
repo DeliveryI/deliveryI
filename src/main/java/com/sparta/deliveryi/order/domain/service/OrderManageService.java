@@ -1,8 +1,11 @@
 package com.sparta.deliveryi.order.domain.service;
 
+import com.sparta.deliveryi.global.infrastructure.event.Events;
 import com.sparta.deliveryi.order.domain.Order;
 import com.sparta.deliveryi.order.domain.OrderId;
 import com.sparta.deliveryi.order.domain.OrderRepository;
+import com.sparta.deliveryi.order.event.OrderCancelEvent;
+import com.sparta.deliveryi.order.event.OrderRejectEvent;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -42,6 +45,8 @@ public class OrderManageService implements OrderManager {
         Order order = orderFinder.find(orderId);
 
         order.failPayment();
+
+        orderRepository.save(order);
     }
 
     @Override
@@ -49,6 +54,8 @@ public class OrderManageService implements OrderManager {
         Order order = orderFinder.find(orderId);
 
         order.successPayment();
+
+        orderRepository.save(order);
     }
 
     @Override
@@ -56,13 +63,19 @@ public class OrderManageService implements OrderManager {
         Order order = orderFinder.find(orderId);
 
         order.accept();
+
+        orderRepository.save(order);
     }
 
     @Override
-    public void reject(OrderId orderId) {
+    public void reject(OrderId orderId, UUID requestId) {
         Order order = orderFinder.find(orderId);
 
         order.reject();
+
+        order = orderRepository.save(order);
+
+        Events.trigger(new OrderRejectEvent(orderId.toUuid(), "가게 주인이 주문 거절하였습니다.", order.getTotalPrice(), requestId));
     }
 
     @Override
@@ -72,6 +85,10 @@ public class OrderManageService implements OrderManager {
         checkOrderer(requestId, order);
 
         order.cancel();
+
+        order = orderRepository.save(order);
+
+        Events.trigger(new OrderCancelEvent(order.getId(), order.getTotalPrice(), requestId));
     }
 
     @Override
@@ -79,6 +96,8 @@ public class OrderManageService implements OrderManager {
         Order order = orderFinder.find(orderId);
 
         order.completeCooking();
+
+        orderRepository.save(order);
     }
 
     @Override
@@ -86,6 +105,8 @@ public class OrderManageService implements OrderManager {
         Order order = orderFinder.find(orderId);
 
         order.delivery();
+
+        orderRepository.save(order);
     }
 
     @Override
@@ -93,5 +114,7 @@ public class OrderManageService implements OrderManager {
         Order order = orderFinder.find(orderId);
 
         order.complete();
+
+        orderRepository.save(order);
     }
 }
