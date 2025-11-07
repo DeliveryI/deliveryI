@@ -55,7 +55,7 @@ public class OrderApplicationService implements OrderApplication {
     public void reject(UUID orderId, UUID requestId) {
         validateCanProcess(orderId, requestId);
 
-        orderManager.reject(OrderId.of(orderId));
+        orderManager.reject(OrderId.of(orderId), requestId);
     }
 
     @Override

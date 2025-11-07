@@ -16,7 +16,7 @@ public interface OrderManager {
 
     void accept(@NotNull OrderId orderId);
 
-    void reject(@NotNull OrderId orderId);
+    void reject(@NotNull OrderId orderId, @NotNull UUID requestId);
 
     void cancel(@NotNull OrderId orderId, @NotNull UUID requestId);
 
