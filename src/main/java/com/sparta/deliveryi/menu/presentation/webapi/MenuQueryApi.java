@@ -3,6 +3,7 @@ package com.sparta.deliveryi.menu.presentation.webapi;
 import com.sparta.deliveryi.global.presentation.dto.ApiResponse;
 import com.sparta.deliveryi.menu.application.service.MenuQueryService;
 import com.sparta.deliveryi.menu.domain.Menu;
+import com.sparta.deliveryi.menu.presentation.dto.MenuDetailResponse;
 import com.sparta.deliveryi.menu.presentation.dto.MenuQueryResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -79,14 +80,14 @@ public class MenuQueryApi {
         - CUSTOMER : HIDING 제외 + 삭제되지 않은 메뉴
         - OWNER : 자신의 가게면 전체, 타 가게면 HIDING 제외
         - MANAGER, MASTER : 모든 메뉴 (삭제 포함)
+        - MANAGER, MASTER만 created/update/delete by·at 정보 포함
         """
     )
     @GetMapping("/{storeId}/menus/{menuId}")
-    public ResponseEntity<ApiResponse<MenuQueryResponse>> getMenu(
+    public ResponseEntity<ApiResponse<MenuDetailResponse>> getMenu(
             @AuthenticationPrincipal Jwt jwt,
             @Parameter(name = "storeId", description = "가게 ID (UUID)", example = "550e8400-e29b-41d4-a716-446655440000")
             @PathVariable UUID storeId,
-
             @Parameter(name = "menuId", description = "메뉴 ID", example = "101")
             @PathVariable Long menuId
     ) {
@@ -94,7 +95,10 @@ public class MenuQueryApi {
         String role = extractRole(jwt);
 
         Menu menu = menuQueryService.getMenu(menuId, storeId, requestId, role);
-        MenuQueryResponse response = MenuQueryResponse.from(menu);
+
+        boolean includeAudit = role.equals("MASTER") || role.equals("MANAGER");
+        MenuDetailResponse response = MenuDetailResponse.from(menu, includeAudit);
+
         return ResponseEntity.ok(ApiResponse.successWithDataOnly(response));
     }
 

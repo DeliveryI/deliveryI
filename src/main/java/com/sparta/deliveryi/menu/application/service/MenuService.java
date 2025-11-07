@@ -112,7 +112,7 @@ public class MenuService {
 
         if (menu.isDeleted()) throw new MenuDeletedException();
 
-        menu.markDeleted(requestId.toString());
+        menu.delete();
     }
 
     public List<Long> changeMenuStatus(List<MenuStatusChangeCommand> commands, UUID storeId, UUID requestId) {
@@ -129,7 +129,7 @@ public class MenuService {
     // OWNER는 자신의 가게만, MANAGER/MASTER는 전체 접근 가능
     private void checkStoreAccess(UUID storeId, UUID requestId) {
         // 관리자는 모든 가게 접근 가능
-        if (userRolePolicy.isAdmin(requestId) || userRolePolicy.isMaster(requestId)) return;
+        if (userRolePolicy.isAdmin(requestId)) return;
 
         // OWNER는 자신의 가게만 접근 가능
         if (userRolePolicy.isOwner(requestId)) {
