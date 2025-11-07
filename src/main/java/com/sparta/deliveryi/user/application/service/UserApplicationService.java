@@ -1,10 +1,10 @@
 package com.sparta.deliveryi.user.application.service;
 
 import com.sparta.deliveryi.user.application.dto.AuthUser;
-import com.sparta.deliveryi.user.application.dto.LoginUserInfoResponse;
-import com.sparta.deliveryi.user.application.dto.UserInfoResponse;
 import com.sparta.deliveryi.user.application.dto.UserRegisterRequest;
-import com.sparta.deliveryi.user.domain.*;
+import com.sparta.deliveryi.user.domain.KeycloakId;
+import com.sparta.deliveryi.user.domain.User;
+import com.sparta.deliveryi.user.domain.UserId;
 import com.sparta.deliveryi.user.domain.dto.UserCreateRequest;
 import com.sparta.deliveryi.user.domain.dto.UserInfoUpdateRequest;
 import com.sparta.deliveryi.user.domain.service.UserQuery;
@@ -42,15 +42,13 @@ public class UserApplicationService implements UserApplication {
     }
 
     @Override
-    public UserInfoResponse getUserById(UUID userId) {
-        User user = userQuery.getUserById(UserId.of(userId));
-        return UserInfoResponse.from(user);
+    public User getUserById(UUID userId) {
+        return userQuery.getUserById(UserId.of(userId));
     }
 
     @Override
-    public LoginUserInfoResponse getMyInfo(UUID keycloakId) {
-        User user = userQuery.getUserByKeycloakId(KeycloakId.of(keycloakId));
-        return LoginUserInfoResponse.from(user);
+    public User getLoginUser(UUID keycloakId) {
+        return userQuery.getUserByKeycloakId(KeycloakId.of(keycloakId));
     }
 
     @Override

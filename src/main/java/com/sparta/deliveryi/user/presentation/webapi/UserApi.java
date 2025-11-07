@@ -3,17 +3,18 @@ package com.sparta.deliveryi.user.presentation.webapi;
 import com.sparta.deliveryi.global.presentation.dto.ApiResponse;
 import com.sparta.deliveryi.user.application.dto.LoginUserInfoResponse;
 import com.sparta.deliveryi.user.application.dto.TokenInfo;
-import com.sparta.deliveryi.user.application.dto.UserRegisterRequest;
 import com.sparta.deliveryi.user.application.dto.UserInfoResponse;
+import com.sparta.deliveryi.user.application.dto.UserRegisterRequest;
 import com.sparta.deliveryi.user.application.service.TokenGenerateService;
 import com.sparta.deliveryi.user.application.service.UserApplication;
+import com.sparta.deliveryi.user.domain.User;
 import com.sparta.deliveryi.user.domain.UserException;
 import com.sparta.deliveryi.user.domain.UserMessageCode;
 import com.sparta.deliveryi.user.domain.dto.UserInfoUpdateRequest;
 import com.sparta.deliveryi.user.presentation.dto.SignupReqeust;
-import com.sparta.deliveryi.user.presentation.dto.UserInfoChangeRequest;
 import com.sparta.deliveryi.user.presentation.dto.TokenRequest;
 import com.sparta.deliveryi.user.presentation.dto.TokenResponse;
+import com.sparta.deliveryi.user.presentation.dto.UserInfoChangeRequest;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -86,17 +87,17 @@ public class UserApi {
     @Operation(summary = "로그인한 회원 정보 조회", description = "로그인한 회원의 정보를 조회합니다.")
     @GetMapping()
     public ResponseEntity<ApiResponse<LoginUserInfoResponse>> getMyInfo(@AuthenticationPrincipal Jwt jwt) {
-        LoginUserInfoResponse response = userApplication.getMyInfo(UUID.fromString(jwt.getSubject()));
+        User response = userApplication.getLoginUser(UUID.fromString(jwt.getSubject()));
 
-        return ok(successWithDataOnly(response));
+        return ok(successWithDataOnly(LoginUserInfoResponse.from(response)));
     }
 
     @Operation(summary = "특정 회원 정보 조회", description = "UserId로 다른 회원의 정보를 조회합니다.")
     @GetMapping("/{userId}")
     public ResponseEntity<ApiResponse<UserInfoResponse>> getUserInfo(@PathVariable UUID userId) {
-        UserInfoResponse response = userApplication.getUserById(userId);
+        User response = userApplication.getUserById(userId);
 
-        return ok(successWithDataOnly(response));
+        return ok(successWithDataOnly(UserInfoResponse.from(response)));
     }
 
     @Operation(summary = "회원 정보 수정", description = "로그인한 회원의 정보를 수정합니다.")
