@@ -2,7 +2,7 @@ package com.sparta.deliveryi.review.application;
 
 import com.sparta.deliveryi.global.domain.Rating;
 import com.sparta.deliveryi.global.infrastructure.event.Events;
-import com.sparta.deliveryi.review.application.event.CalculateAverageRatingEvent;
+import com.sparta.deliveryi.review.application.event.RatineCalculatedEvent;
 import com.sparta.deliveryi.review.domain.Review;
 import com.sparta.deliveryi.review.domain.ReviewId;
 import com.sparta.deliveryi.review.domain.ReviewRegisterRequest;
@@ -75,7 +75,7 @@ public class ReviewApplicationService implements ReviewApplication {
 
         Rating average = Rating.averageOf(ratings);
 
-        Events.trigger(new CalculateAverageRatingEvent(storeId, average.getScore()));
+        Events.trigger(new RatineCalculatedEvent(storeId, average.getScore()));
     }
 
     private void validateRemovePermission(ReviewId id, UUID requestId) {
