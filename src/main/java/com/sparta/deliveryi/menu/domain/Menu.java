@@ -99,14 +99,8 @@ public class Menu extends AbstractEntity {
             throw new MenuDeletedException();
         }
 
-        this.deleteBy(deletedBy);
-        try {
-            var field = AbstractEntity.class.getDeclaredField("deletedAt");
-            field.setAccessible(true);
-            field.set(this, java.time.LocalDateTime.now());
-        } catch (Exception e) {
-            throw new RuntimeException("deletedAt 필드를 설정하는 데 실패했습니다.", e);
-        }
+        super.delete();
+        super.deleteBy(deletedBy);
     }
 
 
