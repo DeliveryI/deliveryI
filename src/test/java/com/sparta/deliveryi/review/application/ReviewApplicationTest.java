@@ -5,6 +5,7 @@ import com.sparta.deliveryi.review.ReviewFixture;
 import com.sparta.deliveryi.review.domain.Review;
 import com.sparta.deliveryi.review.domain.ReviewRegisterRequest;
 import com.sparta.deliveryi.review.domain.ReviewUpdateRequest;
+import com.sparta.deliveryi.review.domain.service.ReviewException;
 import com.sparta.deliveryi.review.domain.service.ReviewFinder;
 import com.sparta.deliveryi.review.domain.service.ReviewRegister;
 import com.sparta.deliveryi.user.application.service.UserRolePolicy;
@@ -21,6 +22,7 @@ import java.util.UUID;
 import static com.sparta.deliveryi.review.ReviewFixture.createReviewRegisterRequest;
 import static com.sparta.deliveryi.review.ReviewFixture.createReviewUpdateRequest;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
@@ -72,19 +74,38 @@ class ReviewApplicationTest {
     }
 
     @Test
+    void updateIfNotReviewer() {
+        UUID requestId = UUID.randomUUID();
+        when(userRolePolicy.isAdmin(eq(requestId))).thenReturn(false);
+        ReviewUpdateRequest request = createReviewUpdateRequest();
+
+        assertThatThrownBy(() -> reviewApplication.update(review.getId().value(), request, requestId))
+            .isInstanceOf(ReviewException.class);
+    }
+
+    @Test
     void updateIfAdmin() {
         UUID requestId = UUID.randomUUID();
         when(userRolePolicy.isAdmin(eq(requestId))).thenReturn(true);
         ReviewUpdateRequest request = createReviewUpdateRequest();
 
-        Review result = reviewApplication.update(review.getId().value(), request, requestId);
-
-        assertThat(result.getContent()).isEqualTo(request.content());
-        assertThat(result.getRating()).isEqualTo(Rating.of(request.rating()));
+        assertThatThrownBy(() -> reviewApplication.update(review.getId().value(), request, requestId))
+                .isInstanceOf(ReviewException.class);
     }
 
     @Test
     void remove() {
+        UUID requestId = review.getReviewer().getId();
+        when(userRolePolicy.isAdmin(eq(requestId))).thenReturn(false);
+
+        Review result = reviewApplication.remove(review.getId().value(), requestId);
+
+        assertThat(result.getDeletedAt()).isNotNull();
+    }
+
+
+    @Test
+    void removeIfNotReviewer() {
         UUID requestId = review.getReviewer().getId();
         when(userRolePolicy.isAdmin(eq(requestId))).thenReturn(false);
 

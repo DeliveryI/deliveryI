@@ -46,7 +46,7 @@ public class ReviewApplicationService implements ReviewApplication {
     public Review update(Long reviewId, ReviewUpdateRequest updateRequest, UUID requestId) {
         ReviewId id = ReviewId.of(reviewId);
 
-        validatePermission(id, requestId);
+        validateUpdatePermission(id, requestId);
 
         Review review = reviewManager.update(id, updateRequest);
         calculateAverageRating(review.getStoreId());
@@ -58,7 +58,7 @@ public class ReviewApplicationService implements ReviewApplication {
     public Review remove(Long reviewId, UUID requestId) {
         ReviewId id = ReviewId.of(reviewId);
 
-        validatePermission(id, requestId);
+        validateRemovePermission(id, requestId);
 
         Review review = reviewManager.remove(id);
         calculateAverageRating(review.getStoreId());
@@ -78,11 +78,15 @@ public class ReviewApplicationService implements ReviewApplication {
         Events.trigger(new CalculateAverageRatingEvent(storeId, average.getScore()));
     }
 
-    private void validatePermission(ReviewId id, UUID requestId) {
+    private void validateRemovePermission(ReviewId id, UUID requestId) {
         if (isAdmin(requestId)) {
             return;
         }
 
+        validateUpdatePermission(id, requestId);
+    }
+
+    private void validateUpdatePermission(ReviewId id, UUID requestId) {
         Review review = reviewFinder.find(id);
 
         if (isNotReviewer(requestId, review)) {
