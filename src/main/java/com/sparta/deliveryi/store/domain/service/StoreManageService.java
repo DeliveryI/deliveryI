@@ -53,7 +53,7 @@ public class StoreManageService implements StoreManager {
 
         store = storeRepository.save(store);
 
-        Events.trigger(new StoreRemoveEvent(store.getOwner().getId(), requestId));
+        Events.trigger(new StoreRemoveEvent(store.getId().toUuid(), requestId));
 
         return store;
     }
