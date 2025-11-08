@@ -6,6 +6,7 @@ import com.sparta.deliveryi.user.application.dto.UserRegisterRequest;
 import com.sparta.deliveryi.user.domain.User;
 import com.sparta.deliveryi.user.domain.dto.UserInfoUpdateRequest;
 
+import java.time.Instant;
 import java.util.UUID;
 
 public interface UserApplication {
@@ -13,6 +14,6 @@ public interface UserApplication {
     UserInfoResponse getUserById(UUID userId);
     LoginUserInfoResponse getMyInfo(UUID keycloakId);
     void updateInfo(UUID keycloakId, UserInfoUpdateRequest request);
-    void logout(UUID keycloakId);
+    void logout(UUID keycloakId, String token, Instant expiry);
     void delete(UUID keycloakId);
 }
