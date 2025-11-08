@@ -27,7 +27,7 @@ public class AiLogQueryService {
 
         Pageable validatedPageable = adjustPageSize(pageable);
 
-        return aiLogFinder.findAllByMenuId(menuId, validatedPageable); // ✅ domain 반환
+        return aiLogFinder.findAllByMenuId(menuId, validatedPageable);
     }
 
     private Pageable adjustPageSize(Pageable pageable) {
