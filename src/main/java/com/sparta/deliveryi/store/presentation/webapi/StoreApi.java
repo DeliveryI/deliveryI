@@ -40,7 +40,7 @@ public class StoreApi {
     }
 
     @PreAuthorize("hasAnyRole('CUSTOMER', 'OWNER', 'MANAGER', 'MASTER')")
-    @GetMapping("/v1/reviews")
+    @GetMapping("/v1/stores")
     public ResponseEntity<ApiResponse<Page<StoreSearchResponse>>> search(
             @AuthenticationPrincipal Jwt jwt,
             @RequestParam UUID ownerId,
