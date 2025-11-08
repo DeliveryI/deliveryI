@@ -73,7 +73,7 @@ class AbstractEntityTest {
 
             entity.delete();
 
-            assertThat(entity.getDeletedBy()).isEqualTo("anonymousUser");
+            assertThat(entity.getDeletedBy()).isEqualTo("SYSTEM");
         }
     }
 

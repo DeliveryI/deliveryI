@@ -1,4 +1,4 @@
-package com.sparta.deliveryi.review.application.event;
+package com.sparta.deliveryi.review.event;
 
 import java.util.UUID;
 

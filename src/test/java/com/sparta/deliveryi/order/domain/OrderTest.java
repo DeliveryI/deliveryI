@@ -16,6 +16,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 class OrderTest {
 
     Order order;
+    String updateBy = "updateId";
 
     @BeforeEach
     void setUp() {
@@ -51,7 +52,7 @@ class OrderTest {
 
     @Test
     void changeDeliveryAddressIfDelivering() {
-        order.successPayment();
+        order.successPayment(updateBy);
         order.accept();
         order.completeCooking();
         order.delivery();
@@ -68,53 +69,55 @@ class OrderTest {
 
     @Test
     void failPayment() {
-        order.failPayment();
+        order.failPayment(updateBy);
 
         assertThat(order.getStatus()).isEqualTo(OrderStatus.PAYMENT_FAILED);
+        assertThat(order.getUpdatedBy()).isEqualTo(updateBy);
     }
 
     @Test
     void failPaymentIfCanceled() {
         order.cancel();
 
-        assertThatThrownBy(() -> order.failPayment())
+        assertThatThrownBy(() -> order.failPayment(updateBy))
                 .isInstanceOf(OrderException.class);
     }
 
     @Test
     void failPaymentIfPaymentCompleted() {
-        order.successPayment();
+        order.successPayment(updateBy);
 
-        assertThatThrownBy(() -> order.failPayment())
+        assertThatThrownBy(() -> order.failPayment(updateBy))
                 .isInstanceOf(OrderException.class);
     }
 
     @Test
     void successPayment() {
-        order.successPayment();
+        order.successPayment(updateBy);
 
         assertThat(order.getStatus()).isEqualTo(OrderStatus.PAYMENT_COMPLETED);
+        assertThat(order.getUpdatedBy()).isEqualTo(updateBy);
     }
 
     @Test
     void successPaymentIfCanceled() {
         order.cancel();
 
-        assertThatThrownBy(() -> order.successPayment())
+        assertThatThrownBy(() -> order.successPayment(updateBy))
                 .isInstanceOf(OrderException.class);
     }
 
     @Test
     void successPaymentIfPaymentCompleted() {
-        order.successPayment();
+        order.successPayment(updateBy);
 
-        assertThatThrownBy(() -> order.successPayment())
+        assertThatThrownBy(() -> order.successPayment(updateBy))
                 .isInstanceOf(OrderException.class);
     }
 
     @Test
     void accept() {
-        order.successPayment();
+        order.successPayment(updateBy);
 
         order.accept();
 
@@ -137,7 +140,7 @@ class OrderTest {
 
     @Test
     void reject() {
-        order.successPayment();
+        order.successPayment(updateBy);
 
         order.reject();
 
@@ -183,7 +186,7 @@ class OrderTest {
 
     @Test
     void cancelIfAccepted() {
-        order.successPayment();
+        order.successPayment(updateBy);
         order.accept();
 
         assertThatThrownBy(() -> order.cancel())
@@ -192,7 +195,7 @@ class OrderTest {
 
     @Test
     void completeCooking() {
-        order.successPayment();
+        order.successPayment(updateBy);
         order.accept();
 
         order.completeCooking();
@@ -208,7 +211,7 @@ class OrderTest {
 
     @Test
     void delivery() {
-        order.successPayment();
+        order.successPayment(updateBy);
         order.accept();
         order.completeCooking();
 
@@ -225,7 +228,7 @@ class OrderTest {
 
     @Test
     void complete() {
-        order.successPayment();
+        order.successPayment(updateBy);
         order.accept();
         order.completeCooking();
         order.delivery();

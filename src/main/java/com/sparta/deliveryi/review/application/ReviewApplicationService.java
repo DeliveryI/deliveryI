@@ -6,7 +6,7 @@ import com.sparta.deliveryi.order.domain.Order;
 import com.sparta.deliveryi.order.domain.OrderId;
 import com.sparta.deliveryi.order.domain.OrderStatus;
 import com.sparta.deliveryi.order.domain.service.OrderFinder;
-import com.sparta.deliveryi.review.application.event.RatingCalculatedEvent;
+import com.sparta.deliveryi.review.event.RatingCalculatedEvent;
 import com.sparta.deliveryi.review.domain.*;
 import com.sparta.deliveryi.review.domain.service.*;
 import com.sparta.deliveryi.user.application.service.UserRolePolicy;
