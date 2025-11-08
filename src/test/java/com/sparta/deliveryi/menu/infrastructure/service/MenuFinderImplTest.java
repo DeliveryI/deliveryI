@@ -40,7 +40,6 @@ class MenuFinderImplTest {
         Menu m2 = Menu.create(storeId, "불고기", 11000, "정통 불고기", MenuStatus.FORSALE, "owner");
         Menu m3 = Menu.create(storeId, "전복죽", 12000, "보양식 메뉴", MenuStatus.HIDING, "owner");
 
-        // ✅ createdAt, updatedAt 하드코딩으로 넣어줌
         LocalDateTime now = LocalDateTime.now();
         setAuditFields(m1, now);
         setAuditFields(m2, now);
