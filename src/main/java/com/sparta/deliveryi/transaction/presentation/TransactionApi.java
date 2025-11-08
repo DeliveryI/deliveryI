@@ -11,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -26,12 +27,24 @@ import static org.springframework.http.ResponseEntity.ok;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/v1/payments/transactions")
-@Tag(name = "결제 트랜잭션 API", description = "")
+@Tag(name = "결제 트랜잭션 API", description = "결제 관련 트랜잭션(승인, 취소, 실패 등) 내역 조회 기능 제공")
 public class TransactionApi {
 
     private final TransactionApplication transactionApplication;
 
-    @Operation(summary = "결제 트랜잭션 목록 조회(관리자용)", description = "모든 결제 트랜잭션 목록을 조회합니다.")
+    @Operation(
+            summary = "결제 트랜잭션 목록 조회(관리자용)",
+            description = """
+                    전체 결제 트랜잭션 목록을 검색 및 페이징 조회합니다.
+                    검색 조건
+                        - 주문 ID (orderId)
+                        - 거래 유형 (type: REQUEST/APPROVE/REFUND)
+                        - 거래 상태 (status: SUCCESS/FAIL/PENDING)
+                        - 사용자 아이디 (username)
+                    MANAGER/MASTER만 접근 가능합니다.
+            """
+    )
+    @PreAuthorize("hasAnyRole('MANAGER', 'MASTER')")
     @GetMapping
     public ResponseEntity<ApiResponse<Page<TransactionInfoResponse>>> getTransactions (
             @AuthenticationPrincipal Jwt jwt,

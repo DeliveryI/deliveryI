@@ -54,7 +54,7 @@ public class StoreApi {
             description = "가게를 검색할 수 있습니다. keyword는 가게명, 가게 분류 또는 설명을 기준으로 검색됩니다."
     )
     @PreAuthorize("hasAnyRole('CUSTOMER', 'OWNER', 'MANAGER', 'MASTER')")
-    @GetMapping("/v1/reviews")
+    @GetMapping("/v1/stores")
     public ResponseEntity<ApiResponse<Page<StoreSearchResponse>>> search(
             @AuthenticationPrincipal Jwt jwt,
             @Parameter(name = "ownerId", description = "가게 주인 ID (UUID)", in = ParameterIn.QUERY, example = "550e8400-e29b-41d4-a716-446655440000")
