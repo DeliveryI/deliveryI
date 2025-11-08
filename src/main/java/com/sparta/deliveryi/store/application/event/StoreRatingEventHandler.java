@@ -21,7 +21,7 @@ public class StoreRatingEventHandler {
 
     @Async
     @TransactionalEventListener(RatingCalculatedEvent.class)
-    public void handle(RatingCalculatedEvent event){
+    public void handle(RatingCalculatedEvent event) {
         StoreId storeId = StoreId.of(event.storeId());
 
         Store store = storeFinder.find(storeId);
