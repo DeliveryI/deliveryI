@@ -4,7 +4,6 @@ import com.sparta.deliveryi.ai.domain.AiLog;
 import com.sparta.deliveryi.ai.domain.exception.AiMenuNotFoundException;
 import com.sparta.deliveryi.ai.domain.service.AiLogFinder;
 import com.sparta.deliveryi.ai.domain.service.MenuLookupClient;
-import com.sparta.deliveryi.ai.presentation.dto.AiLogQueryResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
