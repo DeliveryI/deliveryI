@@ -1,5 +1,7 @@
 package com.sparta.deliveryi.user.security.filter;
 
+import com.sparta.deliveryi.global.exception.GlobalMessageCode;
+import com.sparta.deliveryi.global.presentation.dto.ApiResponse;
 import com.sparta.deliveryi.user.security.TokenBlacklist;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -28,8 +30,16 @@ public class KeycloakTokenBlacklistFilter extends OncePerRequestFilter {
             String token = jwt.getTokenValue();
 
             if (tokenBlacklist.isBlacklisted(token)) {
-                response.setStatus(HttpServletResponse.SC_FORBIDDEN);
-                response.getWriter().write("Accesss token has been revoked.");
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                response.setContentType("application/json;charset=UTF-8");
+
+                // ApiResponse 생성
+                ApiResponse<Void> apiResponse = ApiResponse.failure(GlobalMessageCode.ACCESS_TOKEN_EXPIRED.getCode());
+
+                // ObjectMapper로 JSON 직렬화
+                String json = new com.fasterxml.jackson.databind.ObjectMapper().writeValueAsString(apiResponse);
+                response.getWriter().write(json);
+
                 return;
             }
         }
