@@ -26,6 +26,7 @@ public class AiLogQueryService {
         }
 
         Pageable validatedPageable = adjustPageSize(pageable);
+
         return aiLogFinder.findAllByMenuId(menuId, validatedPageable);
     }
 

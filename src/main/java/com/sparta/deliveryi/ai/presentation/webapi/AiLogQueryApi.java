@@ -2,6 +2,7 @@ package com.sparta.deliveryi.ai.presentation.webapi;
 
 import com.sparta.deliveryi.ai.application.service.AiLogQueryService;
 import com.sparta.deliveryi.ai.domain.AiLog;
+import com.sparta.deliveryi.ai.presentation.dto.AiLogQueryResponse;
 import com.sparta.deliveryi.global.presentation.dto.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -9,6 +10,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -29,15 +31,16 @@ public class AiLogQueryApi {
                     - AI 생성 결과, 프롬프트, 상태 등 AI 로그 정보를 반환합니다.
                     """
     )
-    @PreAuthorize("hasAnyRole('MANAGER','MASTER')")
     @GetMapping("/{menuId}")
-    public ApiResponse<Page<AiLog>> getAiLogsByMenu(
-            @Parameter(name = "menuId", description = "대상 메뉴의 ID", example = "101", required = true)
+    @PreAuthorize("hasAnyRole('MANAGER','MASTER')")
+    public ApiResponse<Page<AiLogQueryResponse>> getAiLogsByMenu(
+            @Parameter(name = "menuId", description = "메뉴 ID", example = "1")
             @PathVariable Long menuId,
-            @Parameter(hidden = true)
-            @PageableDefault(sort = "createdAt", direction = org.springframework.data.domain.Sort.Direction.DESC)
+            @PageableDefault(sort = "createdAt", direction = Sort.Direction.DESC)
             Pageable pageable
     ) {
-        return ApiResponse.successWithDataOnly(aiLogQueryService.getAiLogsByMenu(menuId, pageable));
+        Page<AiLog> aiLogs = aiLogQueryService.getAiLogsByMenu(menuId, pageable);
+        Page<AiLogQueryResponse> response = aiLogs.map(AiLogQueryResponse::from);
+        return ApiResponse.successWithDataOnly(response);
     }
 }

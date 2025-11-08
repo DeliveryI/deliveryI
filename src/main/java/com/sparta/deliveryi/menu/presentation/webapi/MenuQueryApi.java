@@ -104,7 +104,7 @@ public class MenuQueryApi {
 
     // Keycloak JWT에서 단일 Role 추출
     private String extractRole(Jwt jwt) {
-        Object realmAccessObj = jwt.getClaims().get("realmaccess");
+        Object realmAccessObj = jwt.getClaims().get("realm_access");
         if (!(realmAccessObj instanceof Map<?, ?> realmAccess)) {
             return "CUSTOMER";
         }
