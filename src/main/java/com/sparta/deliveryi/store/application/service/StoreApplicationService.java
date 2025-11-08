@@ -1,14 +1,14 @@
 package com.sparta.deliveryi.store.application.service;
 
-import com.sparta.deliveryi.store.domain.Store;
-import com.sparta.deliveryi.store.domain.StoreId;
-import com.sparta.deliveryi.store.domain.StoreInfoUpdateRequest;
+import com.sparta.deliveryi.store.domain.*;
 import com.sparta.deliveryi.store.domain.service.StoreFinder;
 import com.sparta.deliveryi.store.domain.service.StoreManager;
 import com.sparta.deliveryi.store.domain.service.StoreRegister;
 import com.sparta.deliveryi.user.application.service.UserRolePolicy;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.UUID;
@@ -25,6 +25,18 @@ public class StoreApplicationService implements StoreApplication {
     private final StoreFinder storeFinder;
 
     private final UserRolePolicy userRolePolicy;
+
+    @Override
+    public Page<Store> search(UUID ownerId, String keyword, UUID requestId, Pageable pageable) {
+        StoreSearchCondition condition = StoreSearchCondition.of(
+                Owner.of(ownerId),
+                keyword,
+                isAdmin(requestId),
+                pageable
+        );
+
+        return storeFinder.search(condition);
+    }
 
     @Override
     public Store updateInfo(UUID storeId, StoreInfoUpdateRequest updateRequest, UUID requestId) {
