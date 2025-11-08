@@ -1,7 +1,7 @@
 package com.sparta.deliveryi.store.application.event;
 
 import com.sparta.deliveryi.global.domain.Rating;
-import com.sparta.deliveryi.review.application.event.RatineCalculatedEvent;
+import com.sparta.deliveryi.review.application.event.RatingCalculatedEvent;
 import com.sparta.deliveryi.store.domain.Store;
 import com.sparta.deliveryi.store.domain.StoreId;
 import com.sparta.deliveryi.store.domain.StoreRepository;
@@ -20,8 +20,8 @@ public class StoreRatingEventHandler {
     private final StoreRepository storeRepository;
 
     @Async
-    @TransactionalEventListener(RatineCalculatedEvent.class)
-    public void handle(RatineCalculatedEvent event){
+    @TransactionalEventListener(RatingCalculatedEvent.class)
+    public void handle(RatingCalculatedEvent event){
         StoreId storeId = StoreId.of(event.storeId());
 
         Store store = storeFinder.find(storeId);

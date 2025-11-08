@@ -1,5 +1,5 @@
 package com.sparta.deliveryi.payment.application.dto;
 
-public record CancelRequest (
+public record PaymentCancelRequest(
         String cancelReason
 ) {}

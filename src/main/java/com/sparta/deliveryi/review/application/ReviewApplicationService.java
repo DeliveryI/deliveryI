@@ -2,19 +2,24 @@ package com.sparta.deliveryi.review.application;
 
 import com.sparta.deliveryi.global.domain.Rating;
 import com.sparta.deliveryi.global.infrastructure.event.Events;
-import com.sparta.deliveryi.review.application.event.RatineCalculatedEvent;
-import com.sparta.deliveryi.review.domain.Review;
-import com.sparta.deliveryi.review.domain.ReviewId;
-import com.sparta.deliveryi.review.domain.ReviewRegisterRequest;
-import com.sparta.deliveryi.review.domain.ReviewUpdateRequest;
+import com.sparta.deliveryi.order.domain.Order;
+import com.sparta.deliveryi.order.domain.OrderId;
+import com.sparta.deliveryi.order.domain.OrderStatus;
+import com.sparta.deliveryi.order.domain.service.OrderFinder;
+import com.sparta.deliveryi.review.application.event.RatingCalculatedEvent;
+import com.sparta.deliveryi.review.domain.*;
 import com.sparta.deliveryi.review.domain.service.*;
 import com.sparta.deliveryi.user.application.service.UserRolePolicy;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.UUID;
+
+import static org.springframework.util.Assert.state;
 
 @Service
 @Transactional
@@ -25,9 +30,11 @@ public class ReviewApplicationService implements ReviewApplication {
 
     private final ReviewFinder reviewFinder;
 
-    private final UserRolePolicy userRolePolicy;
-
     private final ReviewRegister reviewRegister;
+
+    private final OrderFinder orderFinder;
+
+    private final UserRolePolicy userRolePolicy;
 
     private static boolean isNotReviewer(UUID requestId, Review review) {
         return !review.getReviewer().getId().equals(requestId);
@@ -35,11 +42,29 @@ public class ReviewApplicationService implements ReviewApplication {
 
     @Override
     public Review register(ReviewRegisterRequest registerRequest, UUID requestId) {
+        OrderId orderId = OrderId.of(registerRequest.orderId());
+        Order order = orderFinder.find(orderId);
+
+        state(order.getStatus() == OrderStatus.ORDER_COMPLETED, "주문 완료된 경우에만 리뷰를 작성할 수 있습니다.");
+
         Review review = reviewRegister.register(registerRequest);
 
         calculateAverageRating(review.getStoreId());
 
         return review;
+    }
+
+    @Override
+    public Page<Review> search(UUID storeId, UUID reviewerId, String keyword, Pageable pageable, UUID requestId) {
+        ReviewSearchCondition searchCondition = ReviewSearchCondition.of(
+                storeId,
+                Reviewer.of(reviewerId),
+                keyword,
+                isAdmin(requestId),
+                pageable
+        );
+
+        return reviewFinder.search(searchCondition);
     }
 
     @Override
@@ -75,7 +100,7 @@ public class ReviewApplicationService implements ReviewApplication {
 
         Rating average = Rating.averageOf(ratings);
 
-        Events.trigger(new RatineCalculatedEvent(storeId, average.getScore()));
+        Events.trigger(new RatingCalculatedEvent(storeId, average.getScore()));
     }
 
     private void validateRemovePermission(ReviewId id, UUID requestId) {

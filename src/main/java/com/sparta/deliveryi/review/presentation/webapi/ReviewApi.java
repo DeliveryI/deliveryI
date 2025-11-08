@@ -7,6 +7,10 @@ import com.sparta.deliveryi.review.domain.ReviewRegisterRequest;
 import com.sparta.deliveryi.review.domain.ReviewUpdateRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -35,6 +39,24 @@ public class ReviewApi {
         Review review = reviewApplication.register(registerRequest, requestId);
 
         return ok(successWithDataOnly(ReviewRegisterResponse.from(review)));
+    }
+
+    @PreAuthorize("hasAnyRole('CUSTOMER', 'OWNER', 'MANAGER', 'MASTER')")
+    @GetMapping("/v1/reviews")
+    public ResponseEntity<ApiResponse<Page<ReviewSearchResponse>>> search(
+            @AuthenticationPrincipal Jwt jwt,
+            @RequestParam UUID storeId,
+            @RequestParam UUID reviewerId,
+            @RequestParam String keyword,
+            @PageableDefault(sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
+    ) {
+        UUID requestId = UUID.fromString(jwt.getSubject());
+
+        Page<Review> reviews = reviewApplication.search(storeId, reviewerId, keyword, pageable, requestId);
+
+        Page<ReviewSearchResponse> responses = reviews.map(ReviewSearchResponse::from);
+
+        return ok(successWithDataOnly(responses));
     }
 
     @PreAuthorize("hasAnyRole('CUSTOMER', 'OWNER', 'MANAGER', 'MASTER')")

@@ -59,7 +59,11 @@ public class KeycloakProvider {
             throw new KeycloakException(KeycloakMessageCode.INTERNAL_FAILED, "");
         }
 
-        String name = roles.getFirst().getName();
+        String name = roles.stream()
+                .filter(r -> r.getName().startsWith("ROLE_"))
+                .toList()
+                .getFirst()
+                .getName();
         try {
             return UserRole.valueOf(name.replace("ROLE_", ""));
         } catch (IllegalArgumentException e) {

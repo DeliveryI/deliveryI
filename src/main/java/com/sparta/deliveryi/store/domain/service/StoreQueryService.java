@@ -25,7 +25,7 @@ public class StoreQueryService implements StoreFinder {
 
     @Override
     public List<Store> findByOwner(Owner owner) {
-        return storeRepository.findAllByOwnerAndDeletedByIsNotNull(owner);
+        return storeRepository.findAllByOwnerAndDeletedAtIsNull(owner);
     }
 
 }
