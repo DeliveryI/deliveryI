@@ -10,9 +10,9 @@ import java.util.UUID;
 public interface OrderManager {
     Order changeDeliveryAddress(@NotNull OrderId orderId, @Valid String deliveryAddress, @NotNull UUID requestId);
 
-    void failPayment(@NotNull OrderId orderId);
+    void failPayment(@NotNull OrderId orderId, @NotNull String requestId);
 
-    void successPayment(@NotNull OrderId orderId);
+    void successPayment(@NotNull OrderId orderId, @NotNull String requestId);
 
     void accept(@NotNull OrderId orderId);
 

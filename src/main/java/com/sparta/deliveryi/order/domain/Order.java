@@ -68,16 +68,18 @@ public class Order extends AbstractEntity {
         this.deliveryAddress = address;
     }
 
-    public void failPayment() {
+    public void failPayment(String updateBy) {
         validatePaymentAvailable();
 
         this.status = OrderStatus.PAYMENT_FAILED;
+        this.updateBy(updateBy);
     }
 
-    public void successPayment() {
+    public void successPayment(String updateBy) {
         validatePaymentAvailable();
 
         this.status = OrderStatus.PAYMENT_COMPLETED;
+        this.updateBy(updateBy);
     }
 
     public void accept() {

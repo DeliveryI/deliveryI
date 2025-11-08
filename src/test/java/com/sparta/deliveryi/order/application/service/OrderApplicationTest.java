@@ -284,7 +284,7 @@ class OrderApplicationTest {
         entityManager.flush();
         entityManager.clear();
 
-        orderManager.successPayment(order.getId());
+        orderManager.successPayment(order.getId(), "updateId");
 
         return order;
     }

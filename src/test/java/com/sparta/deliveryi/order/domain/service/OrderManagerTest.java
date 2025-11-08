@@ -47,8 +47,9 @@ record OrderManagerTest(
     @Test
     void failPayment() {
         Order order = registerOrder();
+        String updateBy = "updateId";
 
-        orderManager.failPayment(order.getId());
+        orderManager.failPayment(order.getId(), updateBy);
         entityManager.flush();
         entityManager.clear();
 
@@ -60,8 +61,9 @@ record OrderManagerTest(
     @Test
     void successPayment() {
         Order order = registerOrder();
+        String updateBy = "updateId";
 
-        orderManager.successPayment(order.getId());
+        orderManager.successPayment(order.getId(), updateBy);
         entityManager.flush();
         entityManager.clear();
 
@@ -73,7 +75,8 @@ record OrderManagerTest(
     @Test
     void accept() {
         Order order = registerOrder();
-        orderManager.successPayment(order.getId());
+        String updateBy = "updateId";
+        orderManager.successPayment(order.getId(), updateBy);
 
         orderManager.accept(order.getId());
         entityManager.flush();
@@ -87,7 +90,8 @@ record OrderManagerTest(
     @Test
     void reject() {
         Order order = registerOrder();
-        orderManager.successPayment(order.getId());
+        String updateBy = "updateId";
+        orderManager.successPayment(order.getId(), updateBy);
 
         orderManager.reject(order.getId(), UUID.randomUUID());
         entityManager.flush();
@@ -122,7 +126,8 @@ record OrderManagerTest(
     @Test
     void completeCooking() {
         Order order = registerOrder();
-        orderManager.successPayment(order.getId());
+        String updateBy = "updateId";
+        orderManager.successPayment(order.getId(), updateBy);
         orderManager.accept(order.getId());
 
         orderManager.completeCooking(order.getId());
@@ -137,7 +142,8 @@ record OrderManagerTest(
     @Test
     void delivery() {
         Order order = registerOrder();
-        orderManager.successPayment(order.getId());
+        String updateBy = "updateId";
+        orderManager.successPayment(order.getId(), updateBy);
         orderManager.accept(order.getId());
         orderManager.completeCooking(order.getId());
 
@@ -153,7 +159,8 @@ record OrderManagerTest(
     @Test
     void complete() {
         Order order = registerOrder();
-        orderManager.successPayment(order.getId());
+        String updateBy = "updateId";
+        orderManager.successPayment(order.getId(), updateBy);
         orderManager.accept(order.getId());
         orderManager.completeCooking(order.getId());
         orderManager.delivery(order.getId());

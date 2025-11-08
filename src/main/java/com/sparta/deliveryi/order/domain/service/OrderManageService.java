@@ -41,19 +41,19 @@ public class OrderManageService implements OrderManager {
     }
 
     @Override
-    public void failPayment(OrderId orderId) {
+    public void failPayment(OrderId orderId, String requestId) {
         Order order = orderFinder.find(orderId);
 
-        order.failPayment();
+        order.failPayment(requestId);
 
         orderRepository.save(order);
     }
 
     @Override
-    public void successPayment(OrderId orderId) {
+    public void successPayment(OrderId orderId, String requestId) {
         Order order = orderFinder.find(orderId);
 
-        order.successPayment();
+        order.successPayment(requestId);
 
         orderRepository.save(order);
     }

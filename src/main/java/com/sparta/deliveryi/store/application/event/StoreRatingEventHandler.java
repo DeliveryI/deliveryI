@@ -1,7 +1,7 @@
 package com.sparta.deliveryi.store.application.event;
 
 import com.sparta.deliveryi.global.domain.Rating;
-import com.sparta.deliveryi.review.application.event.RatingCalculatedEvent;
+import com.sparta.deliveryi.review.event.RatingCalculatedEvent;
 import com.sparta.deliveryi.store.domain.Store;
 import com.sparta.deliveryi.store.domain.StoreId;
 import com.sparta.deliveryi.store.domain.StoreRepository;
