@@ -67,7 +67,7 @@ springdoc:
     tags-sorter: alpha
     path: /api-docs.html
     disable-swagger-default-url: true
-    doc-expansion: full
+    doc-expansion: list
   paths-to-match:
     - /v1/**
 
