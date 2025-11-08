@@ -46,6 +46,7 @@ public class AdminApplicationService implements AdminApplication {
         authApplication.updateRole(user.getKeycloakId().toUuid(), role);
         userUpdate.updateRole(UserId.of(userId), role, loginUser.getUpdatedBy());
 
+        authApplication.logout(loginUser.getKeycloakId().toUuid());
     }
 
     @Override
