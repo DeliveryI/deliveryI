@@ -2,13 +2,16 @@ package com.sparta.deliveryi.order.presentation.webapi;
 
 import com.sparta.deliveryi.global.presentation.dto.ApiResponse;
 import com.sparta.deliveryi.order.application.service.OrderApplication;
-import com.sparta.deliveryi.order.domain.Order;
-import com.sparta.deliveryi.order.domain.OrderCreateRequest;
-import com.sparta.deliveryi.order.domain.OrderId;
+import com.sparta.deliveryi.order.domain.*;
 import com.sparta.deliveryi.order.domain.service.OrderCreator;
+import com.sparta.deliveryi.order.domain.service.OrderFinder;
 import com.sparta.deliveryi.order.domain.service.OrderManager;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -18,11 +21,14 @@ import org.springframework.web.bind.annotation.*;
 import java.util.UUID;
 
 import static com.sparta.deliveryi.global.presentation.dto.ApiResponse.success;
+import static com.sparta.deliveryi.global.presentation.dto.ApiResponse.successWithDataOnly;
 import static org.springframework.http.ResponseEntity.ok;
 
 @RestController
 @RequiredArgsConstructor
 public class OrderApi {
+
+    private final OrderFinder orderFinder;
 
     private final OrderCreator orderCreator;
 
@@ -36,6 +42,21 @@ public class OrderApi {
         Order order = orderCreator.create(createRequest);
 
         return ok(ApiResponse.successWithDataOnly(OrderCreateResponse.from(order)));
+    }
+
+    @PreAuthorize("hasAnyRole('CUSTOMER', 'OWNER', 'MANAGER', 'MASTER')")
+    @GetMapping("/v1/orders")
+    public ResponseEntity<ApiResponse<Page<OrderSearchResponse>>> search(
+            @RequestParam UUID storeId,
+            @RequestParam UUID ordererId,
+            @PageableDefault(sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
+    ) {
+        OrderSearchCondition condition = OrderSearchCondition.of(storeId, Orderer.of(ordererId), pageable);
+        Page<Order> orders = orderFinder.search(condition);
+
+        Page<OrderSearchResponse> responses = orders.map(OrderSearchResponse::from);
+
+        return ok(successWithDataOnly(responses));
     }
 
     @PreAuthorize("hasAnyRole('CUSTOMER', 'OWNER', 'MANAGER', 'MASTER')")
