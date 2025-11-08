@@ -26,7 +26,7 @@ public class PaymentQueryService implements PaymentQuery {
     }
 
     @Override
-    public Page<Payment> getPayments(PaymentSearchRequest search, Pageable pageable) {
+    public Page<Payment> searchPayments(PaymentSearchRequest search, Pageable pageable) {
         return repository.search(search, pageable);
     }
 }

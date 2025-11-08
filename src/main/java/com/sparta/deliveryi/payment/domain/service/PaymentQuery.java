@@ -9,5 +9,5 @@ import java.util.UUID;
 
 public interface PaymentQuery {
     Payment getPaymentByOrderId(UUID orderId);
-    Page<Payment> getPayments(PaymentSearchRequest search, Pageable pageable);
+    Page<Payment> searchPayments(PaymentSearchRequest search, Pageable pageable);
 }

@@ -102,13 +102,13 @@ public abstract class AbstractEntity {
      * <ul>
      *     <li>isDeleted를 true로 설정</li>
      *     <li>deletedAt을 현재 시각으로 설정</li>
-     *     <li>deleteId를 현재 인증된 회원 이름 또는 "anonymousUser"로 설정</li>
+     *     <li>deleteId를 현재 인증된 회원 이름 또는 "SYSTEM"로 설정</li>
      * </ul>
      */
     public void delete() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         this.deletedAt = LocalDateTime.now();
-        deleteBy(Objects.isNull(authentication) ? "anonymousUser" : authentication.getName());
+        deleteBy(Objects.isNull(authentication) ? "SYSTEM" : authentication.getName());
     }
 
     @Override
