@@ -33,28 +33,28 @@ public abstract class AbstractEntity {
     /**
      * 등록자 계정
      */
-    @Column(name = "created_by")
+    @Column(name = "created_by", nullable = false)
     @CreatedBy
     private String createdBy;
 
     /**
      * 등록 일시
      */
-    @Column(name = "created_at")
+    @Column(name = "created_at", nullable = false)
     @CreatedDate
     private LocalDateTime createdAt;
 
     /**
      * 수정자 계정
      */
-    @Column(name = "updated_by")
+    @Column(name = "updated_by", nullable = false)
     @LastModifiedBy
     private String updatedBy;
 
     /**
      * 수정 일시
      */
-    @Column(name = "updated_at")
+    @Column(name = "updated_at", nullable = false)
     @LastModifiedDate
     private LocalDateTime updatedAt;
 
@@ -102,13 +102,13 @@ public abstract class AbstractEntity {
      * <ul>
      *     <li>isDeleted를 true로 설정</li>
      *     <li>deletedAt을 현재 시각으로 설정</li>
-     *     <li>deleteId를 현재 인증된 회원 이름 또는 "anonymousUser"로 설정</li>
+     *     <li>deleteId를 현재 인증된 회원 이름 또는 "SYSTEM"로 설정</li>
      * </ul>
      */
     public void delete() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         this.deletedAt = LocalDateTime.now();
-        deleteBy(Objects.isNull(authentication) ? "anonymousUser" : authentication.getName());
+        deleteBy(Objects.isNull(authentication) ? "SYSTEM" : authentication.getName());
     }
 
     @Override

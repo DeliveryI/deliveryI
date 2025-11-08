@@ -1,25 +1,29 @@
 package com.sparta.deliveryi.user.application.service;
 
 import com.sparta.deliveryi.user.application.dto.AuthUser;
-import com.sparta.deliveryi.user.application.dto.LoginUserInfoResponse;
-import com.sparta.deliveryi.user.application.dto.UserInfoResponse;
 import com.sparta.deliveryi.user.application.dto.UserRegisterRequest;
-import com.sparta.deliveryi.user.domain.*;
+import com.sparta.deliveryi.user.domain.KeycloakId;
+import com.sparta.deliveryi.user.domain.User;
+import com.sparta.deliveryi.user.domain.UserId;
 import com.sparta.deliveryi.user.domain.dto.UserCreateRequest;
 import com.sparta.deliveryi.user.domain.dto.UserInfoUpdateRequest;
 import com.sparta.deliveryi.user.domain.service.UserQuery;
 import com.sparta.deliveryi.user.domain.service.UserRegister;
 import com.sparta.deliveryi.user.domain.service.UserUpdate;
+import com.sparta.deliveryi.user.security.TokenBlacklist;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
 import java.util.UUID;
 
 @Service
 @Transactional
 @RequiredArgsConstructor
 public class UserApplicationService implements UserApplication {
+
+    private final TokenBlacklist tokenBlacklist;
 
     private final AuthApplication authApplication;
     private final AuthRegister authRegister;
@@ -42,15 +46,13 @@ public class UserApplicationService implements UserApplication {
     }
 
     @Override
-    public UserInfoResponse getUserById(UUID userId) {
-        User user = userQuery.getUserById(UserId.of(userId));
-        return UserInfoResponse.from(user);
+    public User getUserById(UUID userId) {
+        return userQuery.getUserById(UserId.of(userId));
     }
 
     @Override
-    public LoginUserInfoResponse getMyInfo(UUID keycloakId) {
-        User user = userQuery.getUserByKeycloakId(KeycloakId.of(keycloakId));
-        return LoginUserInfoResponse.from(user);
+    public User getLoginUser(UUID keycloakId) {
+        return userQuery.getUserByKeycloakId(KeycloakId.of(keycloakId));
     }
 
     @Override
@@ -60,8 +62,12 @@ public class UserApplicationService implements UserApplication {
     }
 
     @Override
-    public void logout(UUID keycloakId) {
+    public void logout(UUID keycloakId, String token, Instant expiry) {
+        // Keycloak Refresh Token revoke
         authApplication.logout(keycloakId);
+
+        // Add Blacklist
+        tokenBlacklist.add(token, expiry);
     }
 
     @Override

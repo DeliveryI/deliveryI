@@ -1,6 +1,6 @@
 package com.sparta.deliveryi.user.application.service;
 
-import com.sparta.deliveryi.user.application.dto.AdminUserResponse;
+import com.sparta.deliveryi.user.presentation.dto.AdminUserResponse;
 import com.sparta.deliveryi.user.application.dto.UserSearchRequest;
 import com.sparta.deliveryi.user.domain.*;
 import com.sparta.deliveryi.user.domain.service.UserQuery;
@@ -32,7 +32,7 @@ public class AdminApplicationService implements AdminApplication {
     }
 
     @Override
-    public Page<AdminUserResponse> searchUsers(UUID keycloakId, UserSearchRequest search, Pageable pageable) {
+    public Page<AdminUserResponse> search(UUID keycloakId, UserSearchRequest search, Pageable pageable) {
         isLoginAdmin(keycloakId);
 
         return userQuery.search(search, pageable).map(AdminUserResponse::from);
@@ -46,6 +46,7 @@ public class AdminApplicationService implements AdminApplication {
         authApplication.updateRole(user.getKeycloakId().toUuid(), role);
         userUpdate.updateRole(UserId.of(userId), role, loginUser.getUpdatedBy());
 
+        authApplication.logout(user.getKeycloakId().toUuid());
     }
 
     @Override

@@ -9,6 +9,10 @@ import java.util.UUID;
 
 public class ReviewFixture {
 
+    public static Review createReview() {
+        return createReview(createReviewRegisterRequest());
+    }
+
     public static Review createReview(ReviewRegisterRequest request) {
         Review review = Review.register(request);
         ReflectionTestUtils.setField(review, "id", 1L);

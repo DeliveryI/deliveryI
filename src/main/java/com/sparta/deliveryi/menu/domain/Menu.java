@@ -1,16 +1,15 @@
 package com.sparta.deliveryi.menu.domain;
 
+import com.sparta.deliveryi.global.domain.AbstractEntity;
 import com.sparta.deliveryi.menu.domain.exception.MenuCreatedByEmptyException;
+import com.sparta.deliveryi.menu.domain.exception.MenuDeletedException;
 import com.sparta.deliveryi.menu.domain.exception.MenuPriceInvalidException;
 import com.sparta.deliveryi.menu.domain.exception.MenuUpdatedByEmptyException;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import com.sparta.deliveryi.global.domain.AbstractEntity;
-import com.sparta.deliveryi.menu.domain.exception.*;
 
-import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
@@ -41,8 +40,7 @@ public class Menu extends AbstractEntity {
     private MenuStatus menuStatus;
 
     // 생성 메서드
-    public static Menu create(UUID storeId, String menuName, Integer menuPrice,
-                              String menuDescription, MenuStatus menuStatus, String createdBy) {
+    public static Menu create(UUID storeId, String menuName, Integer menuPrice, String menuDescription, MenuStatus menuStatus, String createdBy) {
 
         validatePrice(menuPrice);
         validateCreatedBy(createdBy);
@@ -86,18 +84,25 @@ public class Menu extends AbstractEntity {
         updateBy(updatedBy);
     }
 
-    public void markDeleted(String deletedBy) {
-        if (isDeleted()) {
-            throw new MenuDeletedException();
-        }
-
-        this.deleteBy(deletedBy);
-        this.setDeletedAt(LocalDateTime.now());
+    @Override
+    public void delete() {
+        if (isDeleted()) throw new MenuDeletedException();
+        super.delete();
     }
 
     public boolean isDeleted() {
         return this.getDeletedAt() != null;
     }
+
+    public void markDeleted(String deletedBy) {
+        if (isDeleted()) {
+            throw new MenuDeletedException();
+        }
+
+        super.delete();
+        super.deleteBy(deletedBy);
+    }
+
 
     // 비즈니스 규칙
     private static void validatePrice(Integer price) {
@@ -121,15 +126,5 @@ public class Menu extends AbstractEntity {
     // 상태 확인
     public boolean isVisibleToCustomer() {
         return this.menuStatus != MenuStatus.HIDING;
-    }
-
-    private void setDeletedAt(LocalDateTime deletedAt) {
-        try {
-            var field = AbstractEntity.class.getDeclaredField("deletedAt");
-            field.setAccessible(true);
-            field.set(this, deletedAt);
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to set deletedAt field", e);
-        }
     }
 }

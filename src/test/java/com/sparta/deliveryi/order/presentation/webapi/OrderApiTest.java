@@ -33,24 +33,6 @@ import static org.mockito.Mockito.doNothing;
 @SpringBootTest
 @AutoConfigureMockMvc
 class OrderApiTest {
-    @Autowired
-    MockMvcTester mvcTester;
-
-    @Autowired
-    ObjectMapper objectMapper;
-
-    @MockitoBean
-    OrderCreator creator;
-
-    @MockitoBean
-    OrderManager manager;
-
-    @MockitoBean
-    OrderApplication application;
-    @Autowired
-    private OrderApplication orderApplication;
-    @Autowired
-    private OrderManager orderManager;
 
     @Test
     @WithMockUser(roles = "CUSTOMER")
@@ -271,4 +253,25 @@ class OrderApiTest {
                 .bodyJson()
                 .hasPathSatisfying("$.success", isFalse());
     }
+
+    @Autowired
+    MockMvcTester mvcTester;
+
+    @Autowired
+    ObjectMapper objectMapper;
+
+    @MockitoBean
+    OrderCreator creator;
+
+    @MockitoBean
+    OrderManager manager;
+
+    @MockitoBean
+    OrderApplication application;
+
+    @Autowired
+    private OrderApplication orderApplication;
+
+    @Autowired
+    private OrderManager orderManager;
 }

@@ -36,12 +36,12 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: create
-      properties:
-        hibernate:
-          format_sql: true
-          show_sql: true
-          dialect: org.hibernate.dialect.MySQLDialect
+      ddl-auto: none
+    properties:
+      hibernate:
+        format_sql: true
+        show_sql: true
+        dialect: org.hibernate.dialect.MySQLDialect
 
 google:
   ai:
@@ -67,7 +67,7 @@ springdoc:
     tags-sorter: alpha
     path: /api-docs.html
     disable-swagger-default-url: true
-    doc-expansion: full
+    doc-expansion: list
   paths-to-match:
     - /v1/**
 

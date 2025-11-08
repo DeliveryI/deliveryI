@@ -1,7 +1,7 @@
 package com.sparta.deliveryi.user.presentation.webapi;
 
 import com.sparta.deliveryi.global.presentation.dto.ApiResponse;
-import com.sparta.deliveryi.user.application.dto.AdminUserResponse;
+import com.sparta.deliveryi.user.presentation.dto.AdminUserResponse;
 import com.sparta.deliveryi.user.application.dto.UserSearchRequest;
 import com.sparta.deliveryi.user.application.service.AdminApplication;
 import com.sparta.deliveryi.user.presentation.dto.UserRoleChangeRequest;
@@ -40,7 +40,7 @@ public class AdminUserApi {
             UserSearchRequest searchRequest,
             @PageableDefault Pageable pageable
     ) {
-        Page<AdminUserResponse> response =  adminApplication.searchUsers(UUID.fromString(jwt.getSubject()), searchRequest, pageable);
+        Page<AdminUserResponse> response =  adminApplication.search(UUID.fromString(jwt.getSubject()), searchRequest, pageable);
 
         return ok(successWithDataOnly(response));
     }

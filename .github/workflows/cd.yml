@@ -65,12 +65,12 @@ jobs:
             echo "이미지 Pull"
             sudo docker pull ${{ env.IMAGE_URI }}
 
-            sudo docker run -d --name myapp -p 3000:3000 \
-            -e SPRING_DATASOURCE_URL=${{ secrets.DB_URL }} \
-            -e SPRING_DATASOURCE_USERNAME=${{ secrets.DB_USERNAME }} \
-            -e SPRING_DATASOURCE_PASSWORD=${{ secrets.DB_PASSWORD }} \
-            -e GOOGLE_AI_API_KEY=${{ secrets.AI_API_KEY }} \
-            -e GOOGLE_AI_API_ENDPOINT=${{ secrets.AI_ENDPOINT }} \
+            sudo docker run -d --name myapp --network delivery-network -p 3000:3000 \
+            -e MYSQL_URL=${{ secrets.DB_URL }} \
+            -e MYSQL_USERNAME=${{ secrets.DB_USERNAME }} \
+            -e MYSQL_PASSWORD=${{ secrets.DB_PASSWORD }} \
+            -e GOOGLE_API_KEY=${{ secrets.AI_API_KEY }} \
+            -e GOOGLE_API_URL=${{ secrets.AI_ENDPOINT }} \
             -e KEYCLOAK_CLIENT_ID=${{ secrets.KC_CLIENT_ID }} \
             -e KEYCLOAK_CLIENT_SECRET=${{ secrets.KC_CLIENT_SECRET }} \
             -e KEYCLOAK_ADMIN_USERNAME=${{ secrets.KC_ADMIN_USERNAME }} \

@@ -1,19 +1,20 @@
 package com.sparta.deliveryi.user.presentation.webapi;
 
 import com.sparta.deliveryi.global.presentation.dto.ApiResponse;
-import com.sparta.deliveryi.user.application.dto.LoginUserInfoResponse;
+import com.sparta.deliveryi.user.presentation.dto.LoginUserInfoResponse;
 import com.sparta.deliveryi.user.application.dto.TokenInfo;
+import com.sparta.deliveryi.user.presentation.dto.UserInfoResponse;
 import com.sparta.deliveryi.user.application.dto.UserRegisterRequest;
-import com.sparta.deliveryi.user.application.dto.UserInfoResponse;
 import com.sparta.deliveryi.user.application.service.TokenGenerateService;
 import com.sparta.deliveryi.user.application.service.UserApplication;
+import com.sparta.deliveryi.user.domain.User;
 import com.sparta.deliveryi.user.domain.UserException;
 import com.sparta.deliveryi.user.domain.UserMessageCode;
 import com.sparta.deliveryi.user.domain.dto.UserInfoUpdateRequest;
 import com.sparta.deliveryi.user.presentation.dto.SignupReqeust;
-import com.sparta.deliveryi.user.presentation.dto.UserInfoChangeRequest;
 import com.sparta.deliveryi.user.presentation.dto.TokenRequest;
 import com.sparta.deliveryi.user.presentation.dto.TokenResponse;
+import com.sparta.deliveryi.user.presentation.dto.UserInfoChangeRequest;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -41,7 +42,7 @@ public class UserApi {
 
     @Operation(summary = "회원가입", description = "신규 회원을 등록합니다. 가입 시 기본 권한은 'CUSTOMER' 입니다.")
     @ResponseStatus(HttpStatus.CREATED)
-    @PostMapping("signup")
+    @PostMapping("/signup")
     public ResponseEntity<ApiResponse<Void>> signup(@Valid @RequestBody SignupReqeust request) {
         if (!request.password().equals(request.confirmPassword())) {
             throw new UserException(UserMessageCode.CONFIRM_PASSWORD_MISMATCH);
@@ -61,7 +62,7 @@ public class UserApi {
     }
 
     @Operation(summary = "인증 토큰 발급", description = "username, password 인증을 통해서 승인된 회원이 접근할 수 있는 토큰을 발급합니다.")
-    @PostMapping("login")
+    @PostMapping("/login")
     public ResponseEntity<ApiResponse<TokenResponse>> generateToken(@Valid @RequestBody TokenRequest request) {
         TokenInfo token = tokenService.generate(request.username(), request.password());
         TokenResponse response = TokenResponse.builder()
@@ -76,9 +77,9 @@ public class UserApi {
     }
 
     @Operation(summary = "로그아웃", description = "발급된 토큰을 무효화. 즉, 로그아웃합니다.")
-    @PostMapping("logout")
+    @PostMapping("/logout")
     public ResponseEntity<ApiResponse<Void>> logout(@AuthenticationPrincipal Jwt jwt) {
-        userApplication.logout(UUID.fromString(jwt.getSubject()));
+        userApplication.logout(UUID.fromString(jwt.getSubject()), jwt.getTokenValue(), jwt.getExpiresAt());
 
         return ok(success());
     }
@@ -86,17 +87,17 @@ public class UserApi {
     @Operation(summary = "로그인한 회원 정보 조회", description = "로그인한 회원의 정보를 조회합니다.")
     @GetMapping()
     public ResponseEntity<ApiResponse<LoginUserInfoResponse>> getMyInfo(@AuthenticationPrincipal Jwt jwt) {
-        LoginUserInfoResponse response = userApplication.getMyInfo(UUID.fromString(jwt.getSubject()));
+        User response = userApplication.getLoginUser(UUID.fromString(jwt.getSubject()));
 
-        return ok(successWithDataOnly(response));
+        return ok(successWithDataOnly(LoginUserInfoResponse.from(response)));
     }
 
     @Operation(summary = "특정 회원 정보 조회", description = "UserId로 다른 회원의 정보를 조회합니다.")
     @GetMapping("/{userId}")
     public ResponseEntity<ApiResponse<UserInfoResponse>> getUserInfo(@PathVariable UUID userId) {
-        UserInfoResponse response = userApplication.getUserById(userId);
+        User response = userApplication.getUserById(userId);
 
-        return ok(successWithDataOnly(response));
+        return ok(successWithDataOnly(UserInfoResponse.from(response)));
     }
 
     @Operation(summary = "회원 정보 수정", description = "로그인한 회원의 정보를 수정합니다.")
