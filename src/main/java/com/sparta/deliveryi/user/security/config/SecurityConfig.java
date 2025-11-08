@@ -23,7 +23,7 @@ public class SecurityConfig {
     private final TokenBlacklist tokenBlacklist;
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http, SecurityFilterChain oauth2SecurityFilterChain) throws Exception {
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
         JwtAuthenticationConverter conv = new JwtAuthenticationConverter();
         conv.setJwtGrantedAuthoritiesConverter(new KeycloakClientRoleConverter());
