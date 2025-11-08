@@ -6,6 +6,8 @@ import com.sparta.deliveryi.user.application.dto.UserSearchRequest;
 import com.sparta.deliveryi.user.application.service.AdminApplication;
 import com.sparta.deliveryi.user.presentation.dto.UserRoleChangeRequest;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -27,17 +29,25 @@ import static org.springframework.http.ResponseEntity.ok;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/v1/admin/users")
-@Tag(name = "회원 API(관리자용)", description = "관리자용 API로, 회원 정보 조회 시 모든 항목을 확인할 수 있습니다.")
+@Tag(name = "회원 API(관리자용)", description = "관리자용 회원 정보 조회, 역할 수정, 탈퇴 기능 제공")
 public class AdminUserApi {
 
     private final AdminApplication adminApplication;
 
+    @Operation(
+            summary = "회원 목록 조회",
+            description = """
+                등록된 모든 회원 정보를 조회합니다.
+                검색 조건과 페이징을 사용할 수 있습니다.
+            """
+    )
     @PreAuthorize("hasAnyRole('MANAGER', 'MASTER')")
-    @Operation(summary = "회원 목록 조회", description = "등록된 모든 회원 정보를 조회합니다.")
     @GetMapping("/all")
     public ResponseEntity<ApiResponse<Page<AdminUserResponse>>> search(
             @AuthenticationPrincipal Jwt jwt,
+            @Parameter(description = "회원 검색 조건 (username, nickname, role)")
             UserSearchRequest searchRequest,
+            @Parameter(description = "페이지네이션 정보 (page, size, sort)")
             @PageableDefault Pageable pageable
     ) {
         Page<AdminUserResponse> response =  adminApplication.search(UUID.fromString(jwt.getSubject()), searchRequest, pageable);
@@ -45,11 +55,20 @@ public class AdminUserApi {
         return ok(successWithDataOnly(response));
     }
 
+    @Operation(
+            summary = "특정 회원 정보 조회",
+            description = "userId로 등록된 회원의 모든 정보를 조회합니다."
+    )
     @PreAuthorize("hasAnyRole('MANAGER', 'MASTER')")
-    @Operation(summary = "특정 회원 정보 조회", description = "userId로 등록된 회원의 모든 정보를 조회합니다.")
     @GetMapping("/{userId}")
     public ResponseEntity<ApiResponse<AdminUserResponse>> getMyInfo(
             @AuthenticationPrincipal Jwt jwt,
+            @Parameter(
+                    name = "userId",
+                    description = "회원 ID (UUID)",
+                    in = ParameterIn.PATH,
+                    required = true
+            )
             @PathVariable UUID userId
     ) {
         AdminUserResponse response = adminApplication.getUserById(UUID.fromString(jwt.getSubject()), userId);
@@ -57,11 +76,23 @@ public class AdminUserApi {
         return ok(successWithDataOnly(response));
     }
 
+    @Operation(
+            summary = "특정 회원 역할 수정",
+            description = """
+                    UserId로 특정 회원의 역할을 수정합니다.
+                    MASTER만 접근할 수 있습니다.
+            """
+    )
     @PreAuthorize("hasRole('MASTER')")
-    @Operation(summary = "특정 회원 역할 수정", description = "userId로 등록된 회원의 역할을 수정합니다.")
     @PutMapping("/{userId}/role")
     public ResponseEntity<ApiResponse<Void>> changeUserRole(
             @AuthenticationPrincipal Jwt jwt,
+            @Parameter(
+                    name = "userId",
+                    description = "회원 ID (UUID)",
+                    in = ParameterIn.PATH,
+                    required = true
+            )
             @PathVariable UUID userId,
             @Valid @RequestBody UserRoleChangeRequest request
     ) {
@@ -70,11 +101,23 @@ public class AdminUserApi {
         return ok(success());
     }
 
+    @Operation(
+            summary = "회원 강제 탈퇴",
+            description = """
+                등록된 회원을 관리자가 강제로 삭제합니다.
+                MANAGER/MASTER만 접근 가능합니다.
+            """
+    )
     @PreAuthorize("hasAnyRole('MANAGER', 'MASTER')")
-    @Operation(summary = "회원탈퇴", description = "등록된 회원을 강제로 삭제합니다.")
     @DeleteMapping("/{userId}")
     public ResponseEntity<ApiResponse<Void>> unsubscribe(
             @AuthenticationPrincipal Jwt jwt,
+            @Parameter(
+                    name = "userId",
+                    description = "회원 ID (UUID)",
+                    in = ParameterIn.PATH,
+                    required = true
+            )
             @PathVariable UUID userId
     ) {
         adminApplication.delete(UUID.fromString(jwt.getSubject()), userId);
