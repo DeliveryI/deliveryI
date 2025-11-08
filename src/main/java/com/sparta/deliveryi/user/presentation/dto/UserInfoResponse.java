@@ -1,29 +1,27 @@
-package com.sparta.deliveryi.user.application.dto;
+package com.sparta.deliveryi.user.presentation.dto;
 
 import com.sparta.deliveryi.user.domain.User;
 import com.sparta.deliveryi.user.domain.UserRole;
+import lombok.Builder;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-public record LoginUserInfoResponse(
+@Builder
+public record UserInfoResponse(
         UUID userId,
         String username,
         String nickname,
         UserRole role,
-        String userPhone,
-        String currentAddress,
         LocalDateTime createdAt,
         String createdBy
 ) {
-    public static LoginUserInfoResponse from(User user) {
-        return new LoginUserInfoResponse(
+    public static UserInfoResponse from(User user) {
+        return new UserInfoResponse(
                 user.getId().toUuid(),
                 user.getUsername(),
                 user.getNickname(),
                 user.getRole(),
-                user.getUserPhone().formatted(),
-                user.getCurrentAddress(),
                 user.getCreatedAt(),
                 user.getCreatedBy()
         );

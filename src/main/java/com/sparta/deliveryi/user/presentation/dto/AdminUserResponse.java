@@ -1,4 +1,4 @@
-package com.sparta.deliveryi.user.application.dto;
+package com.sparta.deliveryi.user.presentation.dto;
 
 import com.sparta.deliveryi.user.domain.User;
 import com.sparta.deliveryi.user.domain.UserRole;

@@ -32,7 +32,7 @@ import static org.springframework.http.ResponseEntity.ok;
 @Log4j2
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/v1/payment")
+@RequestMapping("/v1/payments")
 @Tag(name = "결제 API", description = "")
 public class PaymentApi {
 
@@ -73,7 +73,7 @@ public class PaymentApi {
     }
 
     @Operation(summary = "결제 목록 조회(관리자용)", description = "모든 결제 내역을 조회합니다.")
-    @GetMapping()
+    @GetMapping
     public ResponseEntity<ApiResponse<Page<PaymentInfoResponse>>> getPaymentByOrderId(
             @AuthenticationPrincipal Jwt jwt,
             @RequestParam PaymentSearchRequest search,

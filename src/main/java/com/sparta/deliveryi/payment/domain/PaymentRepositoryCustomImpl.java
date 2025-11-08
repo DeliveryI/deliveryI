@@ -1,13 +1,10 @@
-package com.sparta.deliveryi.payment.domain.service;
+package com.sparta.deliveryi.payment.domain;
 
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.sparta.deliveryi.global.infrastructure.QuerydslSortUtils;
 import com.sparta.deliveryi.payment.application.dto.PaymentSearchRequest;
-import com.sparta.deliveryi.payment.domain.Payment;
-import com.sparta.deliveryi.payment.domain.PaymentRepositoryCustom;
-import com.sparta.deliveryi.payment.domain.QPayment;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -25,6 +22,7 @@ public class PaymentRepositoryCustomImpl implements PaymentRepositoryCustom {
     public Page<Payment> search(PaymentSearchRequest search, Pageable pageable) {
         QPayment payment = QPayment.payment;
 
+        // 검색조건
         BooleanBuilder condition = new BooleanBuilder();
         if (search.status() != null) {
             condition.and(payment.status.eq(search.status()));
