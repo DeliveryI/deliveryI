@@ -34,10 +34,13 @@ public class AiLogQueryApi {
     @GetMapping("/{menuId}")
     @PreAuthorize("hasAnyRole('MANAGER','MASTER')")
     public ApiResponse<Page<AiLogQueryResponse>> getAiLogsByMenu(
+            @Parameter(name = "menuId", description = "메뉴 ID", example = "1")
             @PathVariable Long menuId,
             @PageableDefault(sort = "createdAt", direction = Sort.Direction.DESC)
             Pageable pageable
     ) {
-        return ApiResponse.successWithDataOnly(aiLogQueryService.getAiLogsByMenu(menuId, pageable));
+        Page<AiLog> aiLogs = aiLogQueryService.getAiLogsByMenu(menuId, pageable);
+        Page<AiLogQueryResponse> response = aiLogs.map(AiLogQueryResponse::from);
+        return ApiResponse.successWithDataOnly(response);
     }
 }

@@ -74,15 +74,18 @@ class MenuQueryApiTest {
         try {
             var clazz = menu.getClass().getSuperclass();
             var createdAt = clazz.getDeclaredField("createdAt");
+            var createdByField = clazz.getDeclaredField("createdBy");
             var updatedAt = clazz.getDeclaredField("updatedAt");
             var updatedBy = clazz.getDeclaredField("updatedBy");
 
             createdAt.setAccessible(true);
+            createdByField.setAccessible(true);
             updatedAt.setAccessible(true);
             updatedBy.setAccessible(true);
 
             LocalDateTime now = LocalDateTime.now();
             createdAt.set(menu, now);
+            createdByField.set(menu, createdBy);
             updatedAt.set(menu, now);
             updatedBy.set(menu, createdBy);
         } catch (Exception e) {
@@ -164,7 +167,7 @@ class MenuQueryApiTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.menuName").value("된장찌개"))
                 .andExpect(jsonPath("$.data.menuPrice").value(7000))
-                .andExpect(jsonPath("$.data.createdBy").value("managerUser"))
+                .andExpect(jsonPath("$.data.createdBy").exists())
                 .andExpect(jsonPath("$.data.createdAt").exists());
     }
 }

@@ -2,10 +2,10 @@ package com.sparta.deliveryi.ai.application.service;
 
 import com.sparta.deliveryi.TestMessageResolverInitializer;
 import com.sparta.deliveryi.ai.domain.AiLog;
+import com.sparta.deliveryi.ai.domain.AiStatus;
 import com.sparta.deliveryi.ai.domain.exception.AiMenuNotFoundException;
 import com.sparta.deliveryi.ai.domain.service.AiLogFinder;
 import com.sparta.deliveryi.ai.domain.service.MenuLookupClient;
-import com.sparta.deliveryi.ai.presentation.dto.AiLogQueryResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -36,29 +36,40 @@ class AiLogQueryServiceTest {
     }
 
     @Test
-    @DisplayName("✅ 존재하는 메뉴 ID로 AI 로그 조회 성공")
+    @DisplayName("존재하는 메뉴 ID로 AI 로그 조회 성공")
     void getAiLogsByMenu_success() {
         // given
         Long menuId = 1L;
         Pageable pageable = PageRequest.of(0, 10, Sort.by("createdAt").descending());
+
         AiLog mockLog = mock(AiLog.class);
+        when(mockLog.getAiId()).thenReturn(1L);
+        when(mockLog.getMenuId()).thenReturn(menuId);
+        when(mockLog.getPrompt()).thenReturn("테스트 프롬프트");
+        when(mockLog.getFullPrompt()).thenReturn("테스트 풀프롬프트");
+        when(mockLog.getResponse()).thenReturn("테스트 응답");
+        when(mockLog.getAiStatus()).thenReturn(AiStatus.SUCCESS);
+        when(mockLog.getCreatedBy()).thenReturn("tester");
+        when(mockLog.getCreatedAt()).thenReturn(java.time.LocalDateTime.now());
+
         Page<AiLog> mockPage = new PageImpl<>(List.of(mockLog));
 
         given(menuLookupClient.existsMenuById(menuId)).willReturn(true);
-        given(aiLogFinder.findAllByMenuId(menuId, pageable)).willReturn(mockPage);
+        given(aiLogFinder.findAllByMenuId(eq(menuId), any(Pageable.class))).willReturn(mockPage);
 
         // when
-        Page<AiLogQueryResponse> result = aiLogQueryService.getAiLogsByMenu(menuId, pageable);
+        Page<AiLog> result = aiLogQueryService.getAiLogsByMenu(menuId, pageable);
 
         // then
         assertThat(result).isNotNull();
         assertThat(result.getContent()).hasSize(1);
+        assertThat(result.getContent().getFirst().getAiStatus()).isEqualTo(AiStatus.SUCCESS);
         verify(menuLookupClient).existsMenuById(menuId);
-        verify(aiLogFinder).findAllByMenuId(menuId, pageable);
+        verify(aiLogFinder).findAllByMenuId(eq(menuId), any(Pageable.class));
     }
 
     @Test
-    @DisplayName("❌ 존재하지 않는 메뉴 ID로 조회 시 AiMenuNotFoundException 발생")
+    @DisplayName("존재하지 않는 메뉴 ID로 조회 시 AiMenuNotFoundException 발생")
     void getAiLogsByMenu_notFound() {
         // given
         Long menuId = 999L;
@@ -74,7 +85,7 @@ class AiLogQueryServiceTest {
     }
 
     @Test
-    @DisplayName("⚙️ 허용되지 않은 페이지 크기일 경우 기본값(10)으로 조정")
+    @DisplayName("허용되지 않은 페이지 크기일 경우 기본값(10)으로 조정")
     void adjustPageSize_invalidSize_defaultsTo10() {
         // given
         Long menuId = 1L;
@@ -84,10 +95,9 @@ class AiLogQueryServiceTest {
         given(aiLogFinder.findAllByMenuId(eq(menuId), any())).willReturn(mockPage);
 
         // when
-        Page<AiLogQueryResponse> result = aiLogQueryService.getAiLogsByMenu(menuId, pageable);
+        aiLogQueryService.getAiLogsByMenu(menuId, pageable);
 
         // then
-        assertThat(result).isNotNull();
         ArgumentCaptor<Pageable> pageableCaptor = ArgumentCaptor.forClass(Pageable.class);
         verify(aiLogFinder).findAllByMenuId(eq(menuId), pageableCaptor.capture());
 
@@ -96,7 +106,7 @@ class AiLogQueryServiceTest {
     }
 
     @Test
-    @DisplayName("⚙️ 허용된 페이지 크기(10, 30, 50)는 그대로 유지됨")
+    @DisplayName("허용된 페이지 크기(10, 30, 50)는 그대로 유지됨")
     void adjustPageSize_validSizes_staysSame() {
         // given
         Long menuId = 1L;

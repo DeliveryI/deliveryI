@@ -21,16 +21,14 @@ public class AiLogQueryService {
     private static final List<Integer> ALLOWED_PAGE_SIZES = List.of(10, 30, 50);
     private static final int DEFAULT_PAGE_SIZE = 10;
 
-    public Page<AiLogQueryResponse> getAiLogsByMenu(Long menuId, Pageable pageable) {
+    public Page<AiLog> getAiLogsByMenu(Long menuId, Pageable pageable) {
         if (!menuLookupClient.existsMenuById(menuId)) {
             throw new AiMenuNotFoundException();
         }
 
         Pageable validatedPageable = adjustPageSize(pageable);
 
-        Page<com.sparta.deliveryi.ai.domain.AiLog> aiLogs = aiLogFinder.findAllByMenuId(menuId, validatedPageable);
-
-        return aiLogs.map(AiLogQueryResponse::from);
+        return aiLogFinder.findAllByMenuId(menuId, validatedPageable); // ✅ domain 반환
     }
 
     private Pageable adjustPageSize(Pageable pageable) {
