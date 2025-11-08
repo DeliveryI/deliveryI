@@ -9,7 +9,8 @@ import org.springframework.http.HttpStatus;
 @RequiredArgsConstructor
 public enum TransactionMessageCode implements MessageCode {
     UPDATE_NOT_ALLOWED("TRANSACTION.UPDATE_NOT_ALLOWED", HttpStatus.METHOD_NOT_ALLOWED),
-    DELETE_NOT_ALLOWED("TRANSACTION.DELETE_NOT_ALLOWED", HttpStatus.METHOD_NOT_ALLOWED);
+    DELETE_NOT_ALLOWED("TRANSACTION.DELETE_NOT_ALLOWED", HttpStatus.METHOD_NOT_ALLOWED),
+    ACCESS_FORBIDDEN("TRANSACTION.ACCESS_FORBIDDEN", HttpStatus.FORBIDDEN);
 
     private final String code;
     private final HttpStatus status;

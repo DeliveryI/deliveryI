@@ -219,6 +219,6 @@ public class PaymentApplicationService implements PaymentApplication {
             throw new PaymentException(PaymentMessageCode.PAYMENT_NOT_AUTHORIZED);
         }
 
-        return paymentQuery.getPayments(search, pageable);
+        return paymentQuery.searchPayments(search, pageable);
     }
 }

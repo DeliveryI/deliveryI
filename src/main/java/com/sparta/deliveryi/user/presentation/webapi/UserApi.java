@@ -1,9 +1,9 @@
 package com.sparta.deliveryi.user.presentation.webapi;
 
 import com.sparta.deliveryi.global.presentation.dto.ApiResponse;
-import com.sparta.deliveryi.user.application.dto.LoginUserInfoResponse;
+import com.sparta.deliveryi.user.presentation.dto.LoginUserInfoResponse;
 import com.sparta.deliveryi.user.application.dto.TokenInfo;
-import com.sparta.deliveryi.user.application.dto.UserInfoResponse;
+import com.sparta.deliveryi.user.presentation.dto.UserInfoResponse;
 import com.sparta.deliveryi.user.application.dto.UserRegisterRequest;
 import com.sparta.deliveryi.user.application.service.TokenGenerateService;
 import com.sparta.deliveryi.user.application.service.UserApplication;
