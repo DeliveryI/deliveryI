@@ -10,16 +10,20 @@ import com.sparta.deliveryi.user.domain.dto.UserInfoUpdateRequest;
 import com.sparta.deliveryi.user.domain.service.UserQuery;
 import com.sparta.deliveryi.user.domain.service.UserRegister;
 import com.sparta.deliveryi.user.domain.service.UserUpdate;
+import com.sparta.deliveryi.user.security.TokenBlacklist;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
 import java.util.UUID;
 
 @Service
 @Transactional
 @RequiredArgsConstructor
 public class UserApplicationService implements UserApplication {
+
+    private final TokenBlacklist tokenBlacklist;
 
     private final AuthApplication authApplication;
     private final AuthRegister authRegister;
@@ -58,8 +62,12 @@ public class UserApplicationService implements UserApplication {
     }
 
     @Override
-    public void logout(UUID keycloakId) {
+    public void logout(UUID keycloakId, String token, Instant expiry) {
+        // Keycloak Refresh Token revoke
         authApplication.logout(keycloakId);
+
+        // Add Blacklist
+        tokenBlacklist.add(token, expiry);
     }
 
     @Override

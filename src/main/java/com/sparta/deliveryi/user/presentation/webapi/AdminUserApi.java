@@ -40,7 +40,7 @@ public class AdminUserApi {
             UserSearchRequest searchRequest,
             @PageableDefault Pageable pageable
     ) {
-        Page<AdminUserResponse> response =  adminApplication.searchUsers(UUID.fromString(jwt.getSubject()), searchRequest, pageable);
+        Page<AdminUserResponse> response =  adminApplication.search(UUID.fromString(jwt.getSubject()), searchRequest, pageable);
 
         return ok(successWithDataOnly(response));
     }

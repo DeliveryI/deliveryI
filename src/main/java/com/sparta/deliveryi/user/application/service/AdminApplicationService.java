@@ -32,7 +32,7 @@ public class AdminApplicationService implements AdminApplication {
     }
 
     @Override
-    public Page<AdminUserResponse> searchUsers(UUID keycloakId, UserSearchRequest search, Pageable pageable) {
+    public Page<AdminUserResponse> search(UUID keycloakId, UserSearchRequest search, Pageable pageable) {
         isLoginAdmin(keycloakId);
 
         return userQuery.search(search, pageable).map(AdminUserResponse::from);
@@ -46,7 +46,7 @@ public class AdminApplicationService implements AdminApplication {
         authApplication.updateRole(user.getKeycloakId().toUuid(), role);
         userUpdate.updateRole(UserId.of(userId), role, loginUser.getUpdatedBy());
 
-        authApplication.logout(loginUser.getKeycloakId().toUuid());
+        authApplication.logout(user.getKeycloakId().toUuid());
     }
 
     @Override

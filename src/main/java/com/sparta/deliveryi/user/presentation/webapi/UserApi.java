@@ -79,7 +79,7 @@ public class UserApi {
     @Operation(summary = "로그아웃", description = "발급된 토큰을 무효화. 즉, 로그아웃합니다.")
     @PostMapping("/logout")
     public ResponseEntity<ApiResponse<Void>> logout(@AuthenticationPrincipal Jwt jwt) {
-        userApplication.logout(UUID.fromString(jwt.getSubject()));
+        userApplication.logout(UUID.fromString(jwt.getSubject()), jwt.getTokenValue(), jwt.getExpiresAt());
 
         return ok(success());
     }

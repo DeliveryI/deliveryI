@@ -1,16 +1,19 @@
 package com.sparta.deliveryi.user.infrastructure.keycloak.service;
 
+import com.sparta.deliveryi.user.application.dto.AuthUser;
 import com.sparta.deliveryi.user.application.service.AuthApplication;
 import com.sparta.deliveryi.user.domain.UserRole;
-import com.sparta.deliveryi.user.application.dto.AuthUser;
 import jakarta.ws.rs.core.Response;
 import lombok.RequiredArgsConstructor;
 import org.keycloak.admin.client.resource.RoleScopeResource;
+import org.keycloak.common.VerificationException;
+import org.keycloak.representations.AccessToken;
 import org.keycloak.representations.idm.RoleRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -75,6 +78,16 @@ public class KeycloakService implements AuthApplication {
             provider.checkResponse(response, Response.Status.NO_CONTENT.getStatusCode(), "회원 삭제에 실패하였습니다.");
         }
 
+    }
+
+    // AccessToken의 만료일 추출
+    private Instant extractExpiry(String accessToken) {
+        try {
+            AccessToken token = org.keycloak.TokenVerifier.create(accessToken, AccessToken.class).getToken();
+            return Instant.ofEpochSecond(token.getExp());
+        } catch (VerificationException e) {
+            throw new RuntimeException(e);
+        }
     }
 }
 

@@ -10,7 +10,7 @@ import java.util.UUID;
 
 public interface AdminApplication {
     AdminUserResponse getUserById(UUID keycloakId, UUID userId);
-    Page<AdminUserResponse> searchUsers(UUID keycloakId, UserSearchRequest search, Pageable pageable);
+    Page<AdminUserResponse> search(UUID keycloakId, UserSearchRequest search, Pageable pageable);
     void updateRole(UUID keycloakId, UUID userId, UserRole role);
     void delete(UUID keycloakId, UUID userId);
 }
