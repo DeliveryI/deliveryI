@@ -27,7 +27,7 @@ import static com.sparta.deliveryi.global.presentation.dto.ApiResponse.successWi
 @Slf4j
 @Tag(name = "메뉴 Command API", description = "메뉴 등록, 수정, 삭제, 상태 변경 기능 제공")
 @RestController
-@RequestMapping("/v1/menus")
+@RequestMapping("/v1/stores/{storeId}/menus")
 @RequiredArgsConstructor
 public class MenuApi {
 
@@ -44,11 +44,11 @@ public class MenuApi {
             @Parameter(
                     name = "storeId",
                     description = "상점 ID (UUID)",
-                    in = ParameterIn.QUERY,
+                    in = ParameterIn.PATH,
                     required = true,
                     example = "550e8400-e29b-41d4-a716-446655440000"
             )
-            @RequestParam UUID storeId,
+            @PathVariable UUID storeId,
             @RequestBody @Valid MenuRequest request
     ) {
         log.info("storeId = {}", storeId.toString());
@@ -77,15 +77,15 @@ public class MenuApi {
     @PutMapping("/{menuId}")
     public ResponseEntity<ApiResponse<MenuResponse>> updateMenu(
             @AuthenticationPrincipal Jwt jwt,
-            @Parameter(name = "menuId", description = "메뉴 ID", in = ParameterIn.PATH, required = true)
-            @PathVariable Long menuId,
             @Parameter(
                     name = "storeId",
                     description = "상점 ID (UUID)",
-                    in = ParameterIn.QUERY,
+                    in = ParameterIn.PATH,
                     required = true
             )
-            @RequestParam UUID storeId,
+            @PathVariable UUID storeId,
+            @Parameter(name = "menuId", description = "메뉴 ID", in = ParameterIn.PATH, required = true)
+            @PathVariable Long menuId,
             @RequestBody @Valid MenuRequest request
     ) {
         UUID requestId = UUID.fromString(jwt.getSubject());
@@ -111,15 +111,15 @@ public class MenuApi {
     @DeleteMapping("/{menuId}")
     public ResponseEntity<ApiResponse<Void>> deleteMenu(
             @AuthenticationPrincipal Jwt jwt,
-            @Parameter(name = "menuId", description = "메뉴 ID", in = ParameterIn.PATH, required = true)
-            @PathVariable Long menuId,
             @Parameter(
                     name = "storeId",
                     description = "상점 ID (UUID)",
-                    in = ParameterIn.QUERY,
+                    in = ParameterIn.PATH,
                     required = true
             )
-            @RequestParam UUID storeId
+            @PathVariable UUID storeId,
+            @Parameter(name = "menuId", description = "메뉴 ID", in = ParameterIn.PATH, required = true)
+            @PathVariable Long menuId
     ) {
         UUID requestId = UUID.fromString(jwt.getSubject());
         menuService.deleteMenu(menuId, storeId, requestId);
@@ -137,10 +137,10 @@ public class MenuApi {
             @Parameter(
                     name = "storeId",
                     description = "상점 ID (UUID)",
-                    in = ParameterIn.QUERY,
+                    in = ParameterIn.PATH,
                     required = true
             )
-            @RequestParam UUID storeId,
+            @PathVariable UUID storeId,
             @RequestBody @Valid MenuStatusRequest request
     ) {
         UUID requestId = UUID.fromString(jwt.getSubject());
