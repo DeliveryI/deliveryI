@@ -58,6 +58,17 @@ java -jar build/libs/deliveryI-0.0.1-SNAPSHOT.jar
 
 ```
 
+---
+
+## 배포 정보
+
+> 배포 URL: https://api11.sparta-project.xyz  
+> 테스트 계정: `user011`  
+> 테스트 계정 패스워드: `qwer1234!`
+
+---
+
+
 ## ERD 구조
 
 > ERD 파일은 프로젝트 루트의 `/docs/erd.png` 에 위치합니다.
