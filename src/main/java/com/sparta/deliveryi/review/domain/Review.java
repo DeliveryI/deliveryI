@@ -12,7 +12,7 @@ import java.util.UUID;
 
 import static java.util.Objects.requireNonNull;
 
-@Table(name = "p_revie")
+@Table(name = "p_review")
 @Entity
 @Getter
 @ToString
