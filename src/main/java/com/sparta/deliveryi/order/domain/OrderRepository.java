@@ -16,7 +16,7 @@ public interface OrderRepository extends Repository<Order, OrderId> {
 
     @Query("SELECT o FROM Order o " +
             "WHERE (:storeId IS NULL OR o.storeId = :storeId) " +
-            "AND (:orderer IS NULL OR o.storeId = :orderer)" +
+            "AND (:orderer IS NULL OR o.orderer = :orderer)" +
             "AND o.deletedAt IS NULL")
     Page<Order> search(@Param("storeId") UUID storeId,
                        @Param("orderer") Orderer orderer,
