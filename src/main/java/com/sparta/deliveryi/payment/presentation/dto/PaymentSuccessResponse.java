@@ -5,7 +5,7 @@ import com.sparta.deliveryi.payment.application.dto.PaymentResponse;
 public record PaymentSuccessResponse(
         String paymentKey,
         String orderId,
-        int totalAmount,
+        Integer totalAmount,
         String requestedAt,
         String approvedAt
 ) {

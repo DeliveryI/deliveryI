@@ -14,18 +14,17 @@ import com.sparta.deliveryi.payment.presentation.dto.PaymentSuccessResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
-import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
-import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
@@ -58,6 +57,7 @@ public class PaymentApi {
             @AuthenticationPrincipal Jwt jwt,
             @Valid @RequestBody PaymentSuccessRequest request
     ) {
+        log.info("[**] request: {}", request.toString());
         PaymentConfirmCommand command = new PaymentConfirmCommand(request.paymentKey(), request.orderId(), request.amount());
         PaymentResponse response = paymentApplication.confirm(UUID.fromString(jwt.getSubject()), command);
         return ok(successWithDataOnly(PaymentSuccessResponse.from(response)));
@@ -114,8 +114,8 @@ public class PaymentApi {
     @GetMapping
     public ResponseEntity<ApiResponse<Page<PaymentInfoResponse>>> getPaymentByOrderId(
             @AuthenticationPrincipal Jwt jwt,
-            @RequestParam PaymentSearchRequest search,
-            @RequestParam Pageable pageable
+            @ParameterObject PaymentSearchRequest search,
+            @ParameterObject Pageable pageable
     ) {
         Page<Payment> payments = paymentApplication.searchPayments(UUID.fromString(jwt.getSubject()), search, pageable);
         Page<PaymentInfoResponse> response = payments.map(PaymentInfoResponse::from);
