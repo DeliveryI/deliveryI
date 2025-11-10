@@ -1,9 +1,9 @@
 package com.sparta.deliveryi.user.presentation.webapi;
 
 import com.sparta.deliveryi.global.presentation.dto.ApiResponse;
-import com.sparta.deliveryi.user.presentation.dto.AdminUserResponse;
 import com.sparta.deliveryi.user.application.dto.UserSearchRequest;
 import com.sparta.deliveryi.user.application.service.AdminApplication;
+import com.sparta.deliveryi.user.presentation.dto.AdminUserResponse;
 import com.sparta.deliveryi.user.presentation.dto.UserRoleChangeRequest;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -11,9 +11,9 @@ import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -45,10 +45,8 @@ public class AdminUserApi {
     @GetMapping("/all")
     public ResponseEntity<ApiResponse<Page<AdminUserResponse>>> search(
             @AuthenticationPrincipal Jwt jwt,
-            @Parameter(description = "회원 검색 조건 (username, nickname, role)")
-            UserSearchRequest searchRequest,
-            @Parameter(description = "페이지네이션 정보 (page, size, sort)")
-            @PageableDefault Pageable pageable
+            @ParameterObject UserSearchRequest searchRequest,
+            @ParameterObject Pageable pageable
     ) {
         Page<AdminUserResponse> response =  adminApplication.search(UUID.fromString(jwt.getSubject()), searchRequest, pageable);
 
